@@ -3,8 +3,8 @@ package server
 import (
 	"crypto/md5"
 	"encoding/hex"
-	"github.com/cpssd/paranoid/discovery-server/dnetserver"
-	pb "github.com/cpssd/paranoid/proto/fileserver"
+	"github.com/pp2p/paranoid/discovery-server/dnetserver"
+	pb "github.com/pp2p/paranoid/proto/fileserver"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"

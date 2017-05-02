@@ -3,8 +3,8 @@ package commands
 import (
 	"errors"
 	"fmt"
-	"github.com/cpssd/paranoid/libpfs/encryption"
-	"github.com/cpssd/paranoid/libpfs/returncodes"
+	"github.com/pp2p/paranoid/libpfs/encryption"
+	"github.com/pp2p/paranoid/libpfs/returncodes"
 	"io"
 	"os"
 	"path"

@@ -4,8 +4,8 @@ package dnetserver
 
 import (
 	"encoding/json"
-	"github.com/cpssd/paranoid/logger"
-	pb "github.com/cpssd/paranoid/proto/discoverynetwork"
+	"github.com/pp2p/paranoid/logger"
+	pb "github.com/pp2p/paranoid/proto/discoverynetwork"
 	"io/ioutil"
 	"os"
 	"path"
