@@ -2,8 +2,8 @@ package dnetclient
 
 import (
 	"fmt"
-	"github.com/cpssd/paranoid/pfsd/globals"
-	pb "github.com/cpssd/paranoid/proto/discoverynetwork"
+	"github.com/pp2p/paranoid/pfsd/globals"
+	pb "github.com/pp2p/paranoid/proto/discoverynetwork"
 	"golang.org/x/net/context"
 	"strconv"
 	"time"

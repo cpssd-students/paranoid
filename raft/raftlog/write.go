@@ -3,8 +3,8 @@ package raftlog
 import (
 	"errors"
 	"fmt"
-	"github.com/cpssd/paranoid/libpfs/encryption"
-	pb "github.com/cpssd/paranoid/proto/raft"
+	"github.com/pp2p/paranoid/libpfs/encryption"
+	pb "github.com/pp2p/paranoid/proto/raft"
 	"github.com/golang/protobuf/proto"
 	"os"
 	"path"
