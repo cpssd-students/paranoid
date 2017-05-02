@@ -2,11 +2,11 @@ package main
 
 import (
 	"flag"
-	"github.com/cpssd/paranoid/discovery-server/dnetserver"
-	"github.com/cpssd/paranoid/discovery-server/server"
-	"github.com/cpssd/paranoid/logger"
-	pb "github.com/cpssd/paranoid/proto/discoverynetwork"
-	fileServe "github.com/cpssd/paranoid/proto/fileserver"
+	"github.com/pp2p/paranoid/discovery-server/dnetserver"
+	"github.com/pp2p/paranoid/discovery-server/server"
+	"github.com/pp2p/paranoid/logger"
+	pb "github.com/pp2p/paranoid/proto/discoverynetwork"
+	fileServe "github.com/pp2p/paranoid/proto/fileserver"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"net"

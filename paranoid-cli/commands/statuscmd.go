@@ -3,7 +3,7 @@ package commands
 import (
 	"fmt"
 	"github.com/codegangsta/cli"
-	"github.com/cpssd/paranoid/pfsd/intercom"
+	"github.com/pp2p/paranoid/pfsd/intercom"
 	"io/ioutil"
 	"net/rpc"
 	"os"

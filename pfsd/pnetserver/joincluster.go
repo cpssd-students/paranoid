@@ -3,9 +3,9 @@ package pnetserver
 import (
 	"errors"
 	"fmt"
-	"github.com/cpssd/paranoid/pfsd/globals"
-	pb "github.com/cpssd/paranoid/proto/paranoidnetwork"
-	"github.com/cpssd/paranoid/raft"
+	"github.com/pp2p/paranoid/pfsd/globals"
+	pb "github.com/pp2p/paranoid/proto/paranoidnetwork"
+	"github.com/pp2p/paranoid/raft"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/net/context"
 )

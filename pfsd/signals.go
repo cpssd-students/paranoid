@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/cpssd/paranoid/pfsd/globals"
-	"github.com/cpssd/paranoid/pfsd/upnp"
+	"github.com/pp2p/paranoid/pfsd/globals"
+	"github.com/pp2p/paranoid/pfsd/upnp"
 	"github.com/kardianos/osext"
 	"os"
 	"os/signal"

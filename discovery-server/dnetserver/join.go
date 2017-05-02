@@ -2,7 +2,7 @@ package dnetserver
 
 import (
 	"crypto/rand"
-	pb "github.com/cpssd/paranoid/proto/discoverynetwork"
+	pb "github.com/pp2p/paranoid/proto/discoverynetwork"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
