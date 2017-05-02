@@ -2,7 +2,7 @@ package commands
 
 import (
 	"fmt"
-	"github.com/codegangsta/cli"
+	"github.com/urfave/cli"
 	pb "github.com/pp2p/paranoid/proto/raft"
 	"github.com/pp2p/paranoid/raft"
 	"io/ioutil"

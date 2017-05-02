@@ -3,7 +3,7 @@ package commands
 import (
 	"fmt"
 	progress "github.com/cheggaaa/pb"
-	"github.com/codegangsta/cli"
+	"github.com/urfave/cli"
 	"github.com/pp2p/paranoid/libpfs/returncodes"
 	pb "github.com/pp2p/paranoid/proto/raft"
 	"github.com/pp2p/paranoid/raft"
