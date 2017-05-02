@@ -3,7 +3,7 @@ package raftlog
 import (
 	"encoding/json"
 	"errors"
-	"github.com/cpssd/paranoid/logger"
+	"github.com/pp2p/paranoid/logger"
 	"io/ioutil"
 	"os"
 	"path"

@@ -3,13 +3,13 @@
 package keystatetest
 
 import (
-	"github.com/cpssd/paranoid/libpfs/commands"
-	"github.com/cpssd/paranoid/logger"
-	"github.com/cpssd/paranoid/pfsd/keyman"
-	pb "github.com/cpssd/paranoid/proto/raft"
-	"github.com/cpssd/paranoid/raft"
-	"github.com/cpssd/paranoid/raft/raftlog"
-	"github.com/cpssd/paranoid/raft/rafttestutil"
+	"github.com/pp2p/paranoid/libpfs/commands"
+	"github.com/pp2p/paranoid/logger"
+	"github.com/pp2p/paranoid/pfsd/keyman"
+	pb "github.com/pp2p/paranoid/proto/raft"
+	"github.com/pp2p/paranoid/raft"
+	"github.com/pp2p/paranoid/raft/raftlog"
+	"github.com/pp2p/paranoid/raft/rafttestutil"
 	"os"
 	"path"
 	"reflect"

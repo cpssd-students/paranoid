@@ -3,7 +3,7 @@ package commands
 import (
 	"fmt"
 	"github.com/codegangsta/cli"
-	pb "github.com/cpssd/paranoid/proto/fileserver"
+	pb "github.com/pp2p/paranoid/proto/fileserver"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"io/ioutil"

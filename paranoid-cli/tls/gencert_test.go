@@ -5,7 +5,7 @@ package tls
 import (
 	"crypto/x509"
 	"encoding/pem"
-	"github.com/cpssd/paranoid/logger"
+	"github.com/pp2p/paranoid/logger"
 	"io/ioutil"
 	"os"
 	"path"

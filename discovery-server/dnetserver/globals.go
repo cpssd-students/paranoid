@@ -3,8 +3,8 @@
 package dnetserver
 
 import (
-	"github.com/cpssd/paranoid/logger"
-	pb "github.com/cpssd/paranoid/proto/discoverynetwork"
+	"github.com/pp2p/paranoid/logger"
+	pb "github.com/pp2p/paranoid/proto/discoverynetwork"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"

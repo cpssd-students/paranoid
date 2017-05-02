@@ -3,9 +3,9 @@
 package commands
 
 import (
-	"github.com/cpssd/paranoid/libpfs/encryption"
-	"github.com/cpssd/paranoid/libpfs/returncodes"
-	"github.com/cpssd/paranoid/logger"
+	"github.com/pp2p/paranoid/libpfs/encryption"
+	"github.com/pp2p/paranoid/libpfs/returncodes"
+	"github.com/pp2p/paranoid/logger"
 	"math/rand"
 	"os"
 	"path"

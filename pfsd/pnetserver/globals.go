@@ -3,7 +3,7 @@
 package pnetserver
 
 import (
-	"github.com/cpssd/paranoid/logger"
+	"github.com/pp2p/paranoid/logger"
 )
 
 type ParanoidServer struct{}

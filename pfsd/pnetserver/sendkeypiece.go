@@ -1,10 +1,10 @@
 package pnetserver
 
 import (
-	"github.com/cpssd/paranoid/pfsd/globals"
-	"github.com/cpssd/paranoid/pfsd/keyman"
-	pb "github.com/cpssd/paranoid/proto/paranoidnetwork"
-	raftpb "github.com/cpssd/paranoid/proto/raft"
+	"github.com/pp2p/paranoid/pfsd/globals"
+	"github.com/pp2p/paranoid/pfsd/keyman"
+	pb "github.com/pp2p/paranoid/proto/paranoidnetwork"
+	raftpb "github.com/pp2p/paranoid/proto/raft"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"

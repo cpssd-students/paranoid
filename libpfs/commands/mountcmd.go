@@ -2,7 +2,7 @@ package commands
 
 import (
 	"fmt"
-	"github.com/cpssd/paranoid/libpfs/returncodes"
+	"github.com/pp2p/paranoid/libpfs/returncodes"
 	"io/ioutil"
 	"path"
 	"path/filepath"

@@ -2,8 +2,8 @@ package intercom
 
 import (
 	"fmt"
-	"github.com/cpssd/paranoid/pfsd/globals"
-	"github.com/cpssd/paranoid/raft"
+	"github.com/pp2p/paranoid/pfsd/globals"
+	"github.com/pp2p/paranoid/raft"
 	"net"
 	"net/rpc"
 	"os"

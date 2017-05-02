@@ -1,9 +1,9 @@
 package pfi
 
 import (
-	"github.com/cpssd/paranoid/libpfs/commands"
-	"github.com/cpssd/paranoid/libpfs/returncodes"
-	"github.com/cpssd/paranoid/pfsd/globals"
+	"github.com/pp2p/paranoid/libpfs/commands"
+	"github.com/pp2p/paranoid/libpfs/returncodes"
+	"github.com/pp2p/paranoid/pfsd/globals"
 	"os"
 	"time"
 

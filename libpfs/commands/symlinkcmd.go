@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/cpssd/paranoid/libpfs/returncodes"
+	"github.com/pp2p/paranoid/libpfs/returncodes"
 	"io/ioutil"
 	"os"
 	"path"

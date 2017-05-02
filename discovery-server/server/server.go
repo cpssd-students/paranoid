@@ -2,7 +2,7 @@ package server
 
 import (
 	"fmt"
-	"github.com/cpssd/paranoid/logger"
+	"github.com/pp2p/paranoid/logger"
 	"log"
 	"net/http"
 	"path/filepath"

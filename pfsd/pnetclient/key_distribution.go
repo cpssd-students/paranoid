@@ -2,8 +2,8 @@ package pnetclient
 
 import (
 	"fmt"
-	"github.com/cpssd/paranoid/pfsd/globals"
-	"github.com/cpssd/paranoid/pfsd/keyman"
+	"github.com/pp2p/paranoid/pfsd/globals"
+	"github.com/pp2p/paranoid/pfsd/keyman"
 )
 
 // Chunks key and sends the pieces to other nodes on the network.

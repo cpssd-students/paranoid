@@ -2,11 +2,11 @@ package main
 
 import (
 	"flag"
-	"github.com/cpssd/paranoid/logger"
-	pb "github.com/cpssd/paranoid/proto/raft"
-	"github.com/cpssd/paranoid/raft"
-	"github.com/cpssd/paranoid/raft/raftlog"
-	"github.com/cpssd/paranoid/raft/rafttestutil"
+	"github.com/pp2p/paranoid/logger"
+	pb "github.com/pp2p/paranoid/proto/raft"
+	"github.com/pp2p/paranoid/raft"
+	"github.com/pp2p/paranoid/raft/raftlog"
+	"github.com/pp2p/paranoid/raft/rafttestutil"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/grpclog"
 	"io"

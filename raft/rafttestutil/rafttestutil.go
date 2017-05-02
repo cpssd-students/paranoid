@@ -1,7 +1,7 @@
 package rafttestutil
 
 import (
-	"github.com/cpssd/paranoid/raft"
+	"github.com/pp2p/paranoid/raft"
 	"io/ioutil"
 	"log"
 	"net"

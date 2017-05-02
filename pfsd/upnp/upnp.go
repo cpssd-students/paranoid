@@ -3,8 +3,8 @@ package upnp
 import (
 	"errors"
 	"flag"
-	"github.com/cpssd/paranoid/logger"
-	"github.com/cpssd/paranoid/pfsd/globals"
+	"github.com/pp2p/paranoid/logger"
+	"github.com/pp2p/paranoid/pfsd/globals"
 	"github.com/huin/goupnp/dcps/internetgateway1"
 	"math/rand"
 	"net"

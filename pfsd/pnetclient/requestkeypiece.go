@@ -3,9 +3,9 @@ package pnetclient
 import (
 	"errors"
 	"fmt"
-	"github.com/cpssd/paranoid/pfsd/globals"
-	"github.com/cpssd/paranoid/pfsd/keyman"
-	pb "github.com/cpssd/paranoid/proto/paranoidnetwork"
+	"github.com/pp2p/paranoid/pfsd/globals"
+	"github.com/pp2p/paranoid/pfsd/keyman"
+	pb "github.com/pp2p/paranoid/proto/paranoidnetwork"
 	"golang.org/x/net/context"
 	"math/big"
 )

@@ -2,8 +2,8 @@ package pnetclient
 
 import (
 	"crypto/tls"
-	"github.com/cpssd/paranoid/logger"
-	"github.com/cpssd/paranoid/pfsd/globals"
+	"github.com/pp2p/paranoid/logger"
+	"github.com/pp2p/paranoid/pfsd/globals"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"time"

@@ -4,9 +4,9 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/cpssd/paranoid/libpfs/commands"
-	"github.com/cpssd/paranoid/logger"
-	"github.com/cpssd/paranoid/pfsd/globals"
+	"github.com/pp2p/paranoid/libpfs/commands"
+	"github.com/pp2p/paranoid/logger"
+	"github.com/pp2p/paranoid/pfsd/globals"
 	"io/ioutil"
 	"os"
 	"os/exec"
