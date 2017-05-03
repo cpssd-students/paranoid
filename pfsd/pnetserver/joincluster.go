@@ -10,7 +10,7 @@ import (
 	"golang.org/x/net/context"
 )
 
-//JoinCluster recieves requests from nodes asking to join raft cluster
+//JoinCluster receives requests from nodes asking to join raft cluster
 func (s *ParanoidServer) JoinCluster(ctx context.Context, req *pb.JoinClusterRequest) (*pb.EmptyMessage, error) {
 	if req.PoolPassword == "" {
 		if len(globals.PoolPasswordHash) != 0 {

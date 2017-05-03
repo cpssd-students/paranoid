@@ -78,7 +78,7 @@ func TestSnapshoting(t *testing.T) {
 		if err == nil {
 			break
 		}
-		//Sleep to give time for the snapshot managment goroutine to update the current snapshot
+		//Sleep to give time for the snapshot management goroutine to update the current snapshot
 		time.Sleep(1)
 	}
 
@@ -119,7 +119,7 @@ func TestSnapshoting(t *testing.T) {
 		if err == nil {
 			break
 		}
-		//Sleep to give time for the snapshot managment goroutine to update the current snapshot
+		//Sleep to give time for the snapshot management goroutine to update the current snapshot
 		time.Sleep(1)
 	}
 
