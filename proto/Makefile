@@ -1,4 +1,4 @@
-all: pnetwork dnetwork raftnetwork
+all: pnetwork dnetwork raftnetwork fileserver
 
 pnetwork:
 	protoc --go_out=plugins=grpc:. paranoidnetwork/paranoid.proto
