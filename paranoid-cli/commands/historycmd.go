@@ -2,9 +2,9 @@ package commands
 
 import (
 	"fmt"
-	"github.com/urfave/cli"
 	pb "github.com/pp2p/paranoid/proto/raft"
 	"github.com/pp2p/paranoid/raft"
+	"github.com/urfave/cli"
 	"io/ioutil"
 	"log"
 	"os"
