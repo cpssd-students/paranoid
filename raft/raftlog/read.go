@@ -3,6 +3,12 @@ package raftlog
 import (
 	"errors"
 	"fmt"
+<<<<<<< HEAD
+=======
+	"github.com/golang/protobuf/proto"
+	"github.com/pp2p/paranoid/libpfs/encryption"
+	pb "github.com/pp2p/paranoid/proto/raft"
+>>>>>>> master
 	"io/ioutil"
 	"math"
 	"path"
