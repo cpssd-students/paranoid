@@ -3,10 +3,11 @@ package commands
 import (
 	"errors"
 	"fmt"
-	"github.com/pp2p/paranoid/libpfs/returncodes"
 	"io/ioutil"
 	"path"
 	"strings"
+
+	"github.com/pp2p/paranoid/libpfs/returncodes"
 )
 
 //ReadDirCommand returns a list of all the files in the given paranoidDirectory

@@ -5,12 +5,13 @@ package tls
 import (
 	"crypto/x509"
 	"encoding/pem"
-	"github.com/pp2p/paranoid/logger"
 	"io/ioutil"
 	"os"
 	"path"
 	"testing"
 	"time"
+
+	"github.com/pp2p/paranoid/logger"
 )
 
 func TestGenerateCert(t *testing.T) {

@@ -2,14 +2,15 @@ package commands
 
 import (
 	"fmt"
-	"github.com/urfave/cli"
-	pb "github.com/pp2p/paranoid/proto/fileserver"
-	"golang.org/x/net/context"
-	"google.golang.org/grpc"
 	"os"
 	"os/user"
 	"strconv"
 	"time"
+
+	pb "github.com/pp2p/paranoid/proto/fileserver"
+	"github.com/urfave/cli"
+	"golang.org/x/net/context"
+	"google.golang.org/grpc"
 )
 
 //Adds files from Paranoid File Server

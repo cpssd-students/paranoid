@@ -2,11 +2,12 @@ package dnetclient
 
 import (
 	"fmt"
+	"strconv"
+	"time"
+
 	"github.com/pp2p/paranoid/pfsd/globals"
 	pb "github.com/pp2p/paranoid/proto/discoverynetwork"
 	"golang.org/x/net/context"
-	"strconv"
-	"time"
 )
 
 // Join function to call in order to join the server

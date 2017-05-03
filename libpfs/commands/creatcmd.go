@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/pp2p/paranoid/libpfs/encryption"
-	"github.com/pp2p/paranoid/libpfs/returncodes"
 	"io/ioutil"
 	"os"
 	"path"
+
+	"github.com/pp2p/paranoid/libpfs/encryption"
+	"github.com/pp2p/paranoid/libpfs/returncodes"
 )
 
 //CreatCommand creates a new file with the name filePath in the pfs paranoidDirectory

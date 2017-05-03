@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/pp2p/paranoid/libpfs/returncodes"
 	"io/ioutil"
 	"os"
 	"path"
+
+	"github.com/pp2p/paranoid/libpfs/returncodes"
 )
 
 // UnlinkCommand removes a filename link from an inode.

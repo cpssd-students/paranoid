@@ -2,12 +2,13 @@ package dnetserver
 
 import (
 	"crypto/rand"
+	"io"
+
 	pb "github.com/pp2p/paranoid/proto/discoverynetwork"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
-	"io"
 )
 
 const (

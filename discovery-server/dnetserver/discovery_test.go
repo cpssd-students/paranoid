@@ -4,12 +4,13 @@ package dnetserver
 
 import (
 	"encoding/json"
-	"github.com/pp2p/paranoid/logger"
-	pb "github.com/pp2p/paranoid/proto/discoverynetwork"
 	"io/ioutil"
 	"os"
 	"path"
 	"testing"
+
+	"github.com/pp2p/paranoid/logger"
+	pb "github.com/pp2p/paranoid/proto/discoverynetwork"
 )
 
 func TestMain(m *testing.M) {

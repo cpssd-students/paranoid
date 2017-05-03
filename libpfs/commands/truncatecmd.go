@@ -3,10 +3,11 @@ package commands
 import (
 	"errors"
 	"fmt"
-	"github.com/pp2p/paranoid/libpfs/encryption"
-	"github.com/pp2p/paranoid/libpfs/returncodes"
 	"os"
 	"path"
+
+	"github.com/pp2p/paranoid/libpfs/encryption"
+	"github.com/pp2p/paranoid/libpfs/returncodes"
 )
 
 //TruncateCommand reduces the file given to the new length

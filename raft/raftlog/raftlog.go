@@ -3,11 +3,12 @@ package raftlog
 import (
 	"encoding/json"
 	"errors"
-	"github.com/pp2p/paranoid/logger"
 	"io/ioutil"
 	"os"
 	"path"
 	"sync"
+
+	"github.com/pp2p/paranoid/logger"
 )
 
 const (

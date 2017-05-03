@@ -2,11 +2,12 @@ package logger
 
 import (
 	"bytes"
-	. "github.com/pp2p/paranoid/logger"
 	syslog "log"
 	"os"
 	"strconv"
 	"testing"
+
+	. "github.com/pp2p/paranoid/logger"
 )
 
 func BenchmarkLoging(b *testing.B) {

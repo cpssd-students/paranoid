@@ -3,11 +3,12 @@ package commands
 import (
 	"errors"
 	"fmt"
-	"github.com/pp2p/paranoid/libpfs/returncodes"
 	"os"
 	"path"
 	"syscall"
 	"time"
+
+	"github.com/pp2p/paranoid/libpfs/returncodes"
 )
 
 //UtimesCommand updates the acess time and modified time of a file

@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/pp2p/paranoid/libpfs/returncodes"
 	"io/ioutil"
 	"os"
 	"path"
 	"syscall"
+
+	"github.com/pp2p/paranoid/libpfs/returncodes"
 )
 
 const PERM_MASK = 0777

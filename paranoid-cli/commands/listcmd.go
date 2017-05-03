@@ -2,10 +2,11 @@ package commands
 
 import (
 	"fmt"
-	"github.com/urfave/cli"
 	"io/ioutil"
 	"os/user"
 	"path"
+
+	"github.com/urfave/cli"
 )
 
 //List lists all paranoid file systems

@@ -3,15 +3,16 @@
 package test
 
 import (
+	"os"
+	"path"
+	"testing"
+	"time"
+
 	"github.com/pp2p/paranoid/libpfs/commands"
 	"github.com/pp2p/paranoid/libpfs/returncodes"
 	"github.com/pp2p/paranoid/pfsd/keyman"
 	"github.com/pp2p/paranoid/raft"
 	"github.com/pp2p/paranoid/raft/rafttestutil"
-	"os"
-	"path"
-	"testing"
-	"time"
 )
 
 func TestSnapshoting(t *testing.T) {

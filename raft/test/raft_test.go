@@ -4,16 +4,17 @@ package test
 
 import (
 	"fmt"
+	"os"
+	"path"
+	"testing"
+	"time"
+
 	"github.com/pp2p/paranoid/libpfs/commands"
 	"github.com/pp2p/paranoid/logger"
 	pb "github.com/pp2p/paranoid/proto/raft"
 	"github.com/pp2p/paranoid/raft"
 	"github.com/pp2p/paranoid/raft/raftlog"
 	"github.com/pp2p/paranoid/raft/rafttestutil"
-	"os"
-	"path"
-	"testing"
-	"time"
 )
 
 func TestMain(m *testing.M) {

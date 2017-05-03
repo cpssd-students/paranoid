@@ -3,14 +3,15 @@ package raft
 
 import (
 	"errors"
+	"net"
+	"os"
+	"time"
+
 	"github.com/pp2p/paranoid/libpfs/commands"
 	"github.com/pp2p/paranoid/libpfs/returncodes"
 	"github.com/pp2p/paranoid/pfsd/keyman"
 	pb "github.com/pp2p/paranoid/proto/raft"
 	"google.golang.org/grpc"
-	"net"
-	"os"
-	"time"
 )
 
 const (

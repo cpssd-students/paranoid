@@ -2,11 +2,12 @@ package commands
 
 import (
 	"fmt"
-	"github.com/urfave/cli"
 	"io/ioutil"
 	"os"
 	"os/user"
 	"path"
+
+	"github.com/urfave/cli"
 )
 
 //AutoMount mounts a file system with the last used settings.

@@ -2,13 +2,14 @@ package commands
 
 import (
 	"fmt"
-	"github.com/urfave/cli"
 	"io/ioutil"
 	"os"
 	"os/user"
 	"path"
 	"strconv"
 	"syscall"
+
+	"github.com/urfave/cli"
 )
 
 func Restart(c *cli.Context) {

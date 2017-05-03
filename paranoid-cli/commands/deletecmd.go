@@ -2,11 +2,12 @@ package commands
 
 import (
 	"fmt"
-	"github.com/urfave/cli"
 	"os"
 	"os/user"
 	"path"
 	"path/filepath"
+
+	"github.com/urfave/cli"
 )
 
 //Delete deletes a paranoid file system

@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/pp2p/paranoid/libpfs/returncodes"
 	"io/ioutil"
 	"path"
+
+	"github.com/pp2p/paranoid/libpfs/returncodes"
 )
 
 // ReadlinkCommand reads the value of the symbolic link

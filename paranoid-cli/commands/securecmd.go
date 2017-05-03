@@ -2,12 +2,13 @@ package commands
 
 import (
 	"fmt"
-	"github.com/urfave/cli"
-	"github.com/pp2p/paranoid/paranoid-cli/tls"
 	"os"
 	"os/user"
 	"path"
 	"path/filepath"
+
+	"github.com/pp2p/paranoid/paranoid-cli/tls"
+	"github.com/urfave/cli"
 )
 
 func Secure(c *cli.Context) {

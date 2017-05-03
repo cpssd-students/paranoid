@@ -3,11 +3,12 @@ package commands
 import (
 	"errors"
 	"fmt"
-	"github.com/pp2p/paranoid/libpfs/returncodes"
 	"io/ioutil"
 	"os"
 	"path"
 	"syscall"
+
+	"github.com/pp2p/paranoid/libpfs/returncodes"
 )
 
 // RmdirCommand removes a paranoidDirectory
