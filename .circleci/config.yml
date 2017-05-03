@@ -7,7 +7,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install fuse
+          name: Install FUSE
           command: apt update && apt install -y fuse
       - run:
           name: Get dependencies
@@ -22,7 +22,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install fuse
+          name: Install FUSE
           command: apt update && apt install -y fuse
       - run:
           name: Get dependencies
