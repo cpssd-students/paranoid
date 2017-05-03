@@ -2,8 +2,8 @@ package commands
 
 import (
 	"fmt"
-	"github.com/urfave/cli"
 	pb "github.com/pp2p/paranoid/proto/fileserver"
+	"github.com/urfave/cli"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"io/ioutil"
