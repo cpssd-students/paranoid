@@ -2,7 +2,7 @@ package commands
 
 import (
 	"fmt"
-	"github.com/codegangsta/cli"
+	"github.com/urfave/cli"
 	"io/ioutil"
 	"os/user"
 	"path"

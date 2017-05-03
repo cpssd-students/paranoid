@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"github.com/codegangsta/cli"
+	"github.com/urfave/cli"
 	"github.com/pp2p/paranoid/libpfs/commands"
 	"github.com/pp2p/paranoid/libpfs/returncodes"
 	"github.com/pp2p/paranoid/pfsd/intercom"

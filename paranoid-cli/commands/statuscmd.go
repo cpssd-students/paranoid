@@ -2,7 +2,7 @@ package commands
 
 import (
 	"fmt"
-	"github.com/codegangsta/cli"
+	"github.com/urfave/cli"
 	"github.com/pp2p/paranoid/pfsd/intercom"
 	"io/ioutil"
 	"net/rpc"
