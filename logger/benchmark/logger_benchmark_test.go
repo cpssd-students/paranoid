@@ -2,7 +2,7 @@ package logger
 
 import (
 	"bytes"
-	. "github.com/cpssd/paranoid/logger"
+	. "github.com/pp2p/paranoid/logger"
 	syslog "log"
 	"os"
 	"strconv"

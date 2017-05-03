@@ -3,8 +3,8 @@
 package raftlog
 
 import (
-	"github.com/cpssd/paranoid/logger"
-	pb "github.com/cpssd/paranoid/proto/raft"
+	"github.com/pp2p/paranoid/logger"
+	pb "github.com/pp2p/paranoid/proto/raft"
 	"io/ioutil"
 	"os"
 	"path"

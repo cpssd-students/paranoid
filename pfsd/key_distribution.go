@@ -2,10 +2,10 @@ package main
 
 import (
 	"encoding/gob"
-	"github.com/cpssd/paranoid/libpfs/encryption"
-	"github.com/cpssd/paranoid/pfsd/globals"
-	"github.com/cpssd/paranoid/pfsd/keyman"
-	"github.com/cpssd/paranoid/pfsd/pnetclient"
+	"github.com/pp2p/paranoid/libpfs/encryption"
+	"github.com/pp2p/paranoid/pfsd/globals"
+	"github.com/pp2p/paranoid/pfsd/keyman"
+	"github.com/pp2p/paranoid/pfsd/pnetclient"
 	"os"
 	"path"
 	"sync"

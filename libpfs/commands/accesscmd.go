@@ -3,7 +3,7 @@ package commands
 import (
 	"errors"
 	"fmt"
-	"github.com/cpssd/paranoid/libpfs/returncodes"
+	"github.com/pp2p/paranoid/libpfs/returncodes"
 )
 
 //AccessCommand is used by fuse to check if it has access to a given file.

@@ -3,11 +3,11 @@
 package test
 
 import (
-	"github.com/cpssd/paranoid/libpfs/commands"
-	"github.com/cpssd/paranoid/libpfs/returncodes"
-	"github.com/cpssd/paranoid/pfsd/keyman"
-	"github.com/cpssd/paranoid/raft"
-	"github.com/cpssd/paranoid/raft/rafttestutil"
+	"github.com/pp2p/paranoid/libpfs/commands"
+	"github.com/pp2p/paranoid/libpfs/returncodes"
+	"github.com/pp2p/paranoid/pfsd/keyman"
+	"github.com/pp2p/paranoid/raft"
+	"github.com/pp2p/paranoid/raft/rafttestutil"
 	"os"
 	"path"
 	"testing"

@@ -1,5 +1,6 @@
 Paranoid
 ========
+[![GoDoc](https://godoc.org/github.com/pp2p/paranoid?status.svg)](https://godoc.org/github.com/pp2p/paranoid)
 
 ## Build Instructions ##
 

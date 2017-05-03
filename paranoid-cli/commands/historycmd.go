@@ -2,9 +2,9 @@ package commands
 
 import (
 	"fmt"
-	"github.com/codegangsta/cli"
-	pb "github.com/cpssd/paranoid/proto/raft"
-	"github.com/cpssd/paranoid/raft"
+	"github.com/urfave/cli"
+	pb "github.com/pp2p/paranoid/proto/raft"
+	"github.com/pp2p/paranoid/raft"
 	"io/ioutil"
 	"log"
 	"os"

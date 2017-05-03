@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/codegangsta/cli"
-	pfscommands "github.com/cpssd/paranoid/libpfs/commands"
-	"github.com/cpssd/paranoid/logger"
-	"github.com/cpssd/paranoid/paranoid-cli/commands"
-	"github.com/cpssd/paranoid/paranoid-cli/tls"
+	"github.com/urfave/cli"
+	pfscommands "github.com/pp2p/paranoid/libpfs/commands"
+	"github.com/pp2p/paranoid/logger"
+	"github.com/pp2p/paranoid/paranoid-cli/commands"
+	"github.com/pp2p/paranoid/paranoid-cli/tls"
 	"os"
 	"os/user"
 	"path"

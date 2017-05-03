@@ -3,9 +3,9 @@ package raft
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/cpssd/paranoid/pfsd/keyman"
-	pb "github.com/cpssd/paranoid/proto/raft"
-	"github.com/cpssd/paranoid/raft/raftlog"
+	"github.com/pp2p/paranoid/pfsd/keyman"
+	pb "github.com/pp2p/paranoid/proto/raft"
+	"github.com/pp2p/paranoid/raft/raftlog"
 	"io/ioutil"
 	"os"
 	"path"
