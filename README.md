@@ -1,6 +1,7 @@
 Paranoid
 ========
 [![GoDoc](https://godoc.org/github.com/pp2p/paranoid?status.svg)](https://godoc.org/github.com/pp2p/paranoid)
+[![CircleCI](https://circleci.com/gh/pp2p/paranoid/tree/master.svg?style=svg)](https://circleci.com/gh/pp2p/paranoid/tree/master)
 
 ## Build Instructions ##
 
