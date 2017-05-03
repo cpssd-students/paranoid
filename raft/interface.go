@@ -65,7 +65,7 @@ func StartRaft(lis *net.Listener, nodeDetails Node, pfsDirectory, raftInfoDirect
 }
 
 //A request to add a Log entry from a client. If the node is not the leader, it must forward the request to the leader.
-//Only returns once the request has been commited to the State machine
+//Only returns once the request has been committed to the State machine
 func (s *RaftNetworkServer) RequestAddLogEntry(entry *pb.Entry) (*StateMachineResult, error) {
 	s.addEntryLock.Lock()
 	defer s.addEntryLock.Unlock()

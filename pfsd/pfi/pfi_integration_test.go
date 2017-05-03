@@ -60,7 +60,7 @@ func TestFuseFilePerms(t *testing.T) {
 		t.Error("Error calling GetAttr")
 	}
 	if os.FileMode(attr.Mode).Perm() != 0777 {
-		t.Error("Recieved incorrect permisions", os.FileMode(attr.Mode))
+		t.Error("Received incorrect permissions", os.FileMode(attr.Mode))
 	}
 
 	canAccess := pfs.Access("helloworld.txt", 4, nil)
@@ -152,7 +152,7 @@ func TestFuseFileSystemOperations(t *testing.T) {
 		t.Error("Incorrect number of files in directory : ", dirEntries)
 	}
 	if dirEntries[0].Name != "file1" {
-		t.Error("Incorrect file name recieved : ", dirEntries[0].Name)
+		t.Error("Incorrect file name received : ", dirEntries[0].Name)
 	}
 
 	code = pfs.Rename("file1", "file2", nil)
@@ -168,7 +168,7 @@ func TestFuseFileSystemOperations(t *testing.T) {
 		t.Error("Incorrect number of files in directory : ", len(dirEntries))
 	}
 	if dirEntries[0].Name != "file2" {
-		t.Error("Incorrect file name recieved : ", dirEntries[0].Name)
+		t.Error("Incorrect file name received : ", dirEntries[0].Name)
 	}
 
 	code = pfs.Unlink("file2", nil)
@@ -258,6 +258,6 @@ func TestFuseUtimes(t *testing.T) {
 		t.Error("Incorrect mtime received : ", attr.ModTime().Round(roundFactor))
 	}
 	if attr.AccessTime().Round(roundFactor) != atime.Round(roundFactor) {
-		t.Error("Incorrect atime recieved : ", attr.AccessTime().Round(roundFactor))
+		t.Error("Incorrect atime received : ", attr.AccessTime().Round(roundFactor))
 	}
 }

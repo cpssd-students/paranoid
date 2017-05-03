@@ -9,7 +9,7 @@ import (
 	"google.golang.org/grpc/codes"
 )
 
-// NewGeneration recieves requests from nodes asking to create a new KeyPiece
+// NewGeneration receives requests from nodes asking to create a new KeyPiece
 // generation in preparation for joining the cluster.
 func (s *ParanoidServer) NewGeneration(ctx context.Context, req *pb.NewGenerationRequest) (*pb.NewGenerationResponse, error) {
 	if req.PoolPassword == "" {

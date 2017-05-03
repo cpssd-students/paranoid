@@ -53,7 +53,7 @@ func StartPfi(logVerbose bool) {
 				if err != nil {
 					Log.Fatal("Error unmounting : ", err)
 				}
-				Log.Info("pfi unmounted sucessfully")
+				Log.Info("pfi unmounted successfully")
 				return
 			}
 		}

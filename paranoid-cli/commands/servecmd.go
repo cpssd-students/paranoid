@@ -59,5 +59,5 @@ func Serve(c *cli.Context) {
 		fmt.Println("Unable to send File to Discovery Share Server")
 		Log.Fatal("Couldn't message Discovery Share Server", err)
 	}
-	fmt.Println("File now avaliable at:", "http://"+ip+response.ServerPort+"/"+response.ServeResponse)
+	fmt.Println("File now available at:", "http://"+ip+response.ServerPort+"/"+response.ServeResponse)
 }

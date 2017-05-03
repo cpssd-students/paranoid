@@ -79,7 +79,7 @@ func manageNode(raftServer *raft.RaftNetworkServer) {
 				Demo: &pb.DemoCommand{uint64(randomNumber)},
 			})
 			if err == nil {
-				log.Println(raftServer.State.NodeId, "successfullly added", randomNumber, "to the log")
+				log.Println(raftServer.State.NodeId, "successfully added", randomNumber, "to the log")
 			} else {
 				log.Println(raftServer.State.NodeId, "could not add", randomNumber, "to the log:", err)
 			}

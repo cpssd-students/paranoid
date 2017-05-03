@@ -459,7 +459,7 @@ func (s *RaftNetworkServer) manageElections() {
 		case _, ok := <-s.Quit:
 			if !ok {
 				s.QuitChannelClosed = true
-				Log.Info("Exiting elction managment loop")
+				Log.Info("Exiting election management loop")
 				return
 			}
 		case <-s.State.StartElection:
@@ -576,7 +576,7 @@ func (s *RaftNetworkServer) manageLeading() {
 			if !ok {
 				s.QuitChannelClosed = true
 				s.State.SetCurrentState(INACTIVE)
-				Log.Info("Exiting leading managment loop")
+				Log.Info("Exiting leading management loop")
 				return
 			}
 		case <-s.State.StartLeading:
@@ -631,7 +631,7 @@ func (s *RaftNetworkServer) manageConfigurationChanges() {
 		case _, ok := <-s.Quit:
 			if !ok {
 				s.QuitChannelClosed = true
-				Log.Info("Exiting configuration managment loop")
+				Log.Info("Exiting configuration management loop")
 				return
 			}
 		case config := <-s.State.ConfigurationApplied:
@@ -673,7 +673,7 @@ func (s *RaftNetworkServer) manageEntryApplication() {
 		case _, ok := <-s.Quit:
 			if !ok {
 				s.QuitChannelClosed = true
-				Log.Info("Exiting entry application managment loop")
+				Log.Info("Exiting entry application management loop")
 				return
 			}
 		case <-s.State.ApplyEntries:

@@ -124,14 +124,14 @@ func startRPCServer(lis *net.Listener, password string) {
 		for {
 			select {
 			case <-timeout:
-				log.Fatal("Unable to create inital generation")
+				log.Fatal("Unable to create initial generation")
 			default:
 				_, _, err := globals.RaftNetworkServer.RequestNewGeneration(globals.ThisNode.UUID)
 				if err == nil {
-					log.Info("Successfuly created inital generation")
+					log.Info("Successfully created initial generation")
 					break initalGenerationLoop
 				}
-				log.Error("Unable to create inital generation:", err)
+				log.Error("Unable to create initial generation:", err)
 			}
 		}
 		if globals.Encrypted {
@@ -224,7 +224,7 @@ func startRPCServer(lis *net.Listener, password string) {
 						}
 						sendKeysTimer.Reset(JoinSendKeysInterval)
 					case keySendInfo := <-sendKeysResponse:
-						log.Info("Recieved key piece response")
+						log.Info("Received key piece response")
 						if keySendInfo.err != nil {
 							if keySendInfo.err == keyman.ErrGenerationDeprecated {
 								log.Error("Attempting to replicate keys for deprecated generation")
@@ -250,7 +250,7 @@ func startRPCServer(lis *net.Listener, password string) {
 						if err != nil {
 							log.Error("Unable to join a raft cluster:", err)
 						} else {
-							log.Info("Sucessfully joined raft cluster")
+							log.Info("Successfully joined raft cluster")
 							globals.Wait.Add(1)
 							go func() {
 								defer globals.Wait.Done()

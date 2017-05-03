@@ -34,7 +34,7 @@ func Distribute(key *keyman.Key, peers []globals.Node, generation int) error {
 		if err != nil {
 			Log.Error("Error marking generation complete:", err)
 		} else {
-			Log.Info("Succesfully completed generation", generation)
+			Log.Info("Successfully completed generation", generation)
 		}
 	}
 	return nil

@@ -154,7 +154,7 @@ func main() {
 				},
 				cli.IntFlag{
 					Name:  "a, access",
-					Usage: "give an acces ammount",
+					Usage: "give an access amount",
 				},
 			},
 		},
