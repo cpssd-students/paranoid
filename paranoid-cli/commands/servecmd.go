@@ -2,8 +2,8 @@ package commands
 
 import (
 	"fmt"
-	"github.com/urfave/cli"
 	pb "github.com/pp2p/paranoid/proto/fileserver"
+	"github.com/urfave/cli"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"io/ioutil"
@@ -59,5 +59,5 @@ func Serve(c *cli.Context) {
 		fmt.Println("Unable to send File to Discovery Share Server")
 		Log.Fatal("Couldn't message Discovery Share Server", err)
 	}
-	fmt.Println("File now avaliable at:", "http://"+ip+response.ServerPort+"/"+response.ServeResponse)
+	fmt.Println("File now available at:", "http://"+ip+response.ServerPort+"/"+response.ServeResponse)
 }

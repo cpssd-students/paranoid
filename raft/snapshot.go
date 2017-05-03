@@ -297,27 +297,27 @@ func (s *RaftNetworkServer) applyLogUpdates(snapshotDirectory string, startIndex
 func performCleanup(snapshotPath string) error {
 	err := os.RemoveAll(path.Join(snapshotPath, "contents-tar"))
 	if err != nil {
-		return fmt.Errorf("error cleaning up temporay files: %s", err)
+		return fmt.Errorf("error cleaning up temporary files: %s", err)
 	}
 
 	err = os.RemoveAll(path.Join(snapshotPath, "inodes-tar"))
 	if err != nil {
-		return fmt.Errorf("error cleaning up temporay files: %s", err)
+		return fmt.Errorf("error cleaning up temporary files: %s", err)
 	}
 
 	err = os.RemoveAll(path.Join(snapshotPath, "names-tar"))
 	if err != nil {
-		return fmt.Errorf("error cleaning up temporay files: %s", err)
+		return fmt.Errorf("error cleaning up temporary files: %s", err)
 	}
 
 	err = os.RemoveAll(path.Join(snapshotPath, "meta"))
 	if err != nil {
-		return fmt.Errorf("error cleaning up temporay files: %s", err)
+		return fmt.Errorf("error cleaning up temporary files: %s", err)
 	}
 
 	err = os.Remove(path.Join(snapshotPath, PersistentConfigurationFileName))
 	if err != nil {
-		return fmt.Errorf("error cleaning up temporay files: %s", err)
+		return fmt.Errorf("error cleaning up temporary files: %s", err)
 	}
 	return nil
 }
@@ -470,19 +470,19 @@ func (s *RaftNetworkServer) InstallSnapshot(ctx context.Context, req *pb.Snapsho
 	if req.Offset == 0 {
 		err := os.RemoveAll(snapshotPath)
 		if err != nil {
-			Log.Error("Error recieving snapshot:", err)
+			Log.Error("Error receiving snapshot:", err)
 			return &pb.SnapshotResponse{s.State.GetCurrentTerm()}, err
 		}
 
 		err = os.Mkdir(snapshotPath, 0700)
 		if err != nil {
-			Log.Error("Error recieving snapshot:", err)
+			Log.Error("Error receiving snapshot:", err)
 			return &pb.SnapshotResponse{s.State.GetCurrentTerm()}, err
 		}
 
 		snapshotFile, err := os.Create(path.Join(snapshotPath, TarFileName))
 		if err != nil {
-			Log.Error("Error recieving snapshot:", err)
+			Log.Error("Error receiving snapshot:", err)
 			return &pb.SnapshotResponse{s.State.GetCurrentTerm()}, err
 		}
 		snapshotFile.Close()
@@ -490,18 +490,18 @@ func (s *RaftNetworkServer) InstallSnapshot(ctx context.Context, req *pb.Snapsho
 
 	snapshotFile, err := os.OpenFile(path.Join(snapshotPath, TarFileName), os.O_WRONLY, 0600)
 	if err != nil {
-		Log.Error("Error recieving snapshot:", err)
+		Log.Error("Error receiving snapshot:", err)
 		return &pb.SnapshotResponse{s.State.GetCurrentTerm()}, err
 	}
 	defer snapshotFile.Close()
 
 	bytesWritten, err := snapshotFile.WriteAt(req.Data, int64(req.Offset))
 	if err != nil {
-		Log.Error("Error recieving snapshot:", err)
+		Log.Error("Error receiving snapshot:", err)
 		return &pb.SnapshotResponse{s.State.GetCurrentTerm()}, err
 	}
 	if bytesWritten != len(req.Data) {
-		Log.Error("Error recieving snapshot: incorrect number of bytes written to snapshot file")
+		Log.Error("Error receiving snapshot: incorrect number of bytes written to snapshot file")
 		return &pb.SnapshotResponse{s.State.GetCurrentTerm()}, errors.New("incorrect number of bytes written to snapshot file")
 	}
 
@@ -586,7 +586,7 @@ func (s *RaftNetworkServer) sendSnapshot(node *Node) {
 					return
 				}
 				if done {
-					Log.Info("Sucessfully send complete snapshot to:", node.String())
+					Log.Info("Successfully send complete snapshot to:", node.String())
 					s.State.Configuration.SetNextIndex(node.NodeID, snapshotMeta.LastIncludedIndex+1)
 					return
 				}
@@ -677,7 +677,7 @@ func (s *RaftNetworkServer) manageSnapshoting() {
 		case _, ok := <-s.Quit:
 			if !ok {
 				s.QuitChannelClosed = true
-				Log.Info("Exiting snapshot managment loop")
+				Log.Info("Exiting snapshot management loop")
 				return
 			}
 		case <-snapshotTimer.C:

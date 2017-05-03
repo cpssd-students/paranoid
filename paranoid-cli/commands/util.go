@@ -3,9 +3,9 @@ package commands
 import (
 	"errors"
 	"fmt"
+	"github.com/golang/protobuf/proto"
 	"github.com/pp2p/paranoid/logger"
 	pb "github.com/pp2p/paranoid/proto/raft"
-	"github.com/golang/protobuf/proto"
 	"io/ioutil"
 	"math/rand"
 	"os"

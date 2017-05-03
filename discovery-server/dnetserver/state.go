@@ -32,7 +32,7 @@ func LoadState() {
 	_, err := os.Stat(StateDirectoryPath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			Log.Info("Tried loading state from state directory but it's non-existant")
+			Log.Info("Tried loading state from state directory but it's non-existent")
 			return
 		} else {
 			Log.Fatal("Couldn't stat state directory:", err)

@@ -213,7 +213,7 @@ func TestDiscoveryPasswords(t *testing.T) {
 	}
 	_, err = discovery.Join(nil, &joinRequest)
 	if err == nil {
-		t.Error("Node2 sucessfully joined password protected pool without password")
+		t.Error("Node2 successfully joined password protected pool without password")
 	}
 
 	//Join node3 with incorrect password
@@ -224,7 +224,7 @@ func TestDiscoveryPasswords(t *testing.T) {
 	}
 	_, err = discovery.Join(nil, &joinRequest)
 	if err == nil {
-		t.Error("Node3 sucessfully joined password protected pool with incorrect password")
+		t.Error("Node3 successfully joined password protected pool with incorrect password")
 	}
 
 	//Join node4 with correct password

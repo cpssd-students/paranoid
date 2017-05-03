@@ -2,8 +2,8 @@ package commands
 
 import (
 	"fmt"
-	"github.com/urfave/cli"
 	"github.com/pp2p/paranoid/pfsd/intercom"
+	"github.com/urfave/cli"
 	"io/ioutil"
 	"net/rpc"
 	"os"
