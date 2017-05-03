@@ -10,7 +10,7 @@ jobs:
           name: Install FUSE
           command: apt update && apt install -y fuse
       - run:
-          name: Get dependencies
+          name: Get Go dependencies
           command: go get -v ./...
       - run:
           name: Test
