@@ -2,8 +2,8 @@ package commands
 
 import (
 	"fmt"
-	"github.com/codegangsta/cli"
-	"github.com/cpssd/paranoid/paranoid-cli/tls"
+	"github.com/pp2p/paranoid/paranoid-cli/tls"
+	"github.com/urfave/cli"
 	"os"
 	"os/user"
 	"path"

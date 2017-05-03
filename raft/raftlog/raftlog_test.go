@@ -3,8 +3,8 @@
 package raftlog
 
 import (
-	"github.com/cpssd/paranoid/logger"
-	pb "github.com/cpssd/paranoid/proto/raft"
+	"github.com/pp2p/paranoid/logger"
+	pb "github.com/pp2p/paranoid/proto/raft"
 	"io/ioutil"
 	"os"
 	"path"
@@ -82,7 +82,7 @@ func TestWriteReadDelete(t *testing.T) {
 	}
 
 	if len(files) != 2 {
-		t.Error("number of files in directory is not what it shoudl be, writing error.")
+		t.Error("number of files in directory is not what it should be, writing error.")
 	}
 	if files[0].Name() != "1000001" || files[1].Name() != "1000002" {
 		t.Error("Files not named what they should be, file1: ", files[0].Name(), "file2: ", files[1].Name())

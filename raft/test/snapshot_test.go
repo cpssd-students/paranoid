@@ -3,11 +3,11 @@
 package test
 
 import (
-	"github.com/cpssd/paranoid/libpfs/commands"
-	"github.com/cpssd/paranoid/libpfs/returncodes"
-	"github.com/cpssd/paranoid/pfsd/keyman"
-	"github.com/cpssd/paranoid/raft"
-	"github.com/cpssd/paranoid/raft/rafttestutil"
+	"github.com/pp2p/paranoid/libpfs/commands"
+	"github.com/pp2p/paranoid/libpfs/returncodes"
+	"github.com/pp2p/paranoid/pfsd/keyman"
+	"github.com/pp2p/paranoid/raft"
+	"github.com/pp2p/paranoid/raft/rafttestutil"
 	"os"
 	"path"
 	"testing"
@@ -78,7 +78,7 @@ func TestSnapshoting(t *testing.T) {
 		if err == nil {
 			break
 		}
-		//Sleep to give time for the snapshot managment goroutine to update the current snapshot
+		//Sleep to give time for the snapshot management goroutine to update the current snapshot
 		time.Sleep(1)
 	}
 
@@ -119,7 +119,7 @@ func TestSnapshoting(t *testing.T) {
 		if err == nil {
 			break
 		}
-		//Sleep to give time for the snapshot managment goroutine to update the current snapshot
+		//Sleep to give time for the snapshot management goroutine to update the current snapshot
 		time.Sleep(1)
 	}
 

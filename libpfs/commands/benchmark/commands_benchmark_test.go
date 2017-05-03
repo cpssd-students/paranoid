@@ -1,9 +1,9 @@
 package libpfsbenchmark
 
 import (
-	. "github.com/cpssd/paranoid/libpfs/commands"
-	"github.com/cpssd/paranoid/libpfs/returncodes"
-	"github.com/cpssd/paranoid/logger"
+	. "github.com/pp2p/paranoid/libpfs/commands"
+	"github.com/pp2p/paranoid/libpfs/returncodes"
+	"github.com/pp2p/paranoid/logger"
 	"log"
 	"os"
 	"path"

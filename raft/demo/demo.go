@@ -2,11 +2,11 @@ package main
 
 import (
 	"flag"
-	"github.com/cpssd/paranoid/logger"
-	pb "github.com/cpssd/paranoid/proto/raft"
-	"github.com/cpssd/paranoid/raft"
-	"github.com/cpssd/paranoid/raft/raftlog"
-	"github.com/cpssd/paranoid/raft/rafttestutil"
+	"github.com/pp2p/paranoid/logger"
+	pb "github.com/pp2p/paranoid/proto/raft"
+	"github.com/pp2p/paranoid/raft"
+	"github.com/pp2p/paranoid/raft/raftlog"
+	"github.com/pp2p/paranoid/raft/rafttestutil"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/grpclog"
 	"io"
@@ -79,7 +79,7 @@ func manageNode(raftServer *raft.RaftNetworkServer) {
 				Demo: &pb.DemoCommand{uint64(randomNumber)},
 			})
 			if err == nil {
-				log.Println(raftServer.State.NodeId, "successfullly added", randomNumber, "to the log")
+				log.Println(raftServer.State.NodeId, "successfully added", randomNumber, "to the log")
 			} else {
 				log.Println(raftServer.State.NodeId, "could not add", randomNumber, "to the log:", err)
 			}

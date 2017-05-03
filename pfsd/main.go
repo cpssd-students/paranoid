@@ -4,21 +4,21 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/cpssd/paranoid/libpfs/commands"
-	"github.com/cpssd/paranoid/libpfs/encryption"
-	"github.com/cpssd/paranoid/logger"
-	"github.com/cpssd/paranoid/pfsd/dnetclient"
-	"github.com/cpssd/paranoid/pfsd/globals"
-	"github.com/cpssd/paranoid/pfsd/intercom"
-	"github.com/cpssd/paranoid/pfsd/keyman"
-	"github.com/cpssd/paranoid/pfsd/pfi"
-	"github.com/cpssd/paranoid/pfsd/pnetclient"
-	"github.com/cpssd/paranoid/pfsd/pnetserver"
-	"github.com/cpssd/paranoid/pfsd/upnp"
-	pb "github.com/cpssd/paranoid/proto/paranoidnetwork"
-	rpb "github.com/cpssd/paranoid/proto/raft"
-	"github.com/cpssd/paranoid/raft"
-	"github.com/cpssd/paranoid/raft/raftlog"
+	"github.com/pp2p/paranoid/libpfs/commands"
+	"github.com/pp2p/paranoid/libpfs/encryption"
+	"github.com/pp2p/paranoid/logger"
+	"github.com/pp2p/paranoid/pfsd/dnetclient"
+	"github.com/pp2p/paranoid/pfsd/globals"
+	"github.com/pp2p/paranoid/pfsd/intercom"
+	"github.com/pp2p/paranoid/pfsd/keyman"
+	"github.com/pp2p/paranoid/pfsd/pfi"
+	"github.com/pp2p/paranoid/pfsd/pnetclient"
+	"github.com/pp2p/paranoid/pfsd/pnetserver"
+	"github.com/pp2p/paranoid/pfsd/upnp"
+	pb "github.com/pp2p/paranoid/proto/paranoidnetwork"
+	rpb "github.com/pp2p/paranoid/proto/raft"
+	"github.com/pp2p/paranoid/raft"
+	"github.com/pp2p/paranoid/raft/raftlog"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"io/ioutil"
@@ -124,14 +124,14 @@ func startRPCServer(lis *net.Listener, password string) {
 		for {
 			select {
 			case <-timeout:
-				log.Fatal("Unable to create inital generation")
+				log.Fatal("Unable to create initial generation")
 			default:
 				_, _, err := globals.RaftNetworkServer.RequestNewGeneration(globals.ThisNode.UUID)
 				if err == nil {
-					log.Info("Successfuly created inital generation")
+					log.Info("Successfully created initial generation")
 					break initalGenerationLoop
 				}
-				log.Error("Unable to create inital generation:", err)
+				log.Error("Unable to create initial generation:", err)
 			}
 		}
 		if globals.Encrypted {
@@ -224,7 +224,7 @@ func startRPCServer(lis *net.Listener, password string) {
 						}
 						sendKeysTimer.Reset(JoinSendKeysInterval)
 					case keySendInfo := <-sendKeysResponse:
-						log.Info("Recieved key piece response")
+						log.Info("Received key piece response")
 						if keySendInfo.err != nil {
 							if keySendInfo.err == keyman.ErrGenerationDeprecated {
 								log.Error("Attempting to replicate keys for deprecated generation")
@@ -250,7 +250,7 @@ func startRPCServer(lis *net.Listener, password string) {
 						if err != nil {
 							log.Error("Unable to join a raft cluster:", err)
 						} else {
-							log.Info("Sucessfully joined raft cluster")
+							log.Info("Successfully joined raft cluster")
 							globals.Wait.Add(1)
 							go func() {
 								defer globals.Wait.Done()

@@ -3,10 +3,10 @@ package raft
 
 import (
 	"errors"
-	"github.com/cpssd/paranoid/libpfs/commands"
-	"github.com/cpssd/paranoid/libpfs/returncodes"
-	"github.com/cpssd/paranoid/pfsd/keyman"
-	pb "github.com/cpssd/paranoid/proto/raft"
+	"github.com/pp2p/paranoid/libpfs/commands"
+	"github.com/pp2p/paranoid/libpfs/returncodes"
+	"github.com/pp2p/paranoid/pfsd/keyman"
+	pb "github.com/pp2p/paranoid/proto/raft"
 	"google.golang.org/grpc"
 	"net"
 	"os"
@@ -65,7 +65,7 @@ func StartRaft(lis *net.Listener, nodeDetails Node, pfsDirectory, raftInfoDirect
 }
 
 //A request to add a Log entry from a client. If the node is not the leader, it must forward the request to the leader.
-//Only returns once the request has been commited to the State machine
+//Only returns once the request has been committed to the State machine
 func (s *RaftNetworkServer) RequestAddLogEntry(entry *pb.Entry) (*StateMachineResult, error) {
 	s.addEntryLock.Lock()
 	defer s.addEntryLock.Unlock()

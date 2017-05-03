@@ -2,8 +2,8 @@ package dnetclient
 
 import (
 	"errors"
-	"github.com/cpssd/paranoid/pfsd/globals"
-	"github.com/cpssd/paranoid/pfsd/pnetclient"
+	"github.com/pp2p/paranoid/pfsd/globals"
+	"github.com/pp2p/paranoid/pfsd/pnetclient"
 	"net"
 	"time"
 )

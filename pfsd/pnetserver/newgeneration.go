@@ -1,15 +1,15 @@
 package pnetserver
 
 import (
-	"github.com/cpssd/paranoid/pfsd/globals"
-	pb "github.com/cpssd/paranoid/proto/paranoidnetwork"
+	"github.com/pp2p/paranoid/pfsd/globals"
+	pb "github.com/pp2p/paranoid/proto/paranoidnetwork"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 )
 
-// NewGeneration recieves requests from nodes asking to create a new KeyPiece
+// NewGeneration receives requests from nodes asking to create a new KeyPiece
 // generation in preparation for joining the cluster.
 func (s *ParanoidServer) NewGeneration(ctx context.Context, req *pb.NewGenerationRequest) (*pb.NewGenerationResponse, error) {
 	if req.PoolPassword == "" {

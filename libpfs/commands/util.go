@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/cpssd/paranoid/libpfs/encryption"
-	"github.com/cpssd/paranoid/libpfs/returncodes"
-	"github.com/cpssd/paranoid/logger"
+	"github.com/pp2p/paranoid/libpfs/encryption"
+	"github.com/pp2p/paranoid/libpfs/returncodes"
+	"github.com/pp2p/paranoid/logger"
 	"io/ioutil"
 	"os"
 	"path"
@@ -249,7 +249,7 @@ func getFileType(directory, filePath string) (returncodes.Code, error) {
 
 	f, err = os.Lstat(path.Join(directory, "contents", string(inode)))
 	if err != nil {
-		return 0, fmt.Errorf("error getting file type of %s, symlink check error occured: %s", filePath, err)
+		return 0, fmt.Errorf("error getting file type of %s, symlink check error occurred: %s", filePath, err)
 	}
 
 	if f.Mode()&os.ModeSymlink > 0 {

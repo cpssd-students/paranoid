@@ -8,7 +8,7 @@ import (
 	"crypto/x509/pkix"
 	"encoding/pem"
 	"fmt"
-	"github.com/cpssd/paranoid/logger"
+	"github.com/pp2p/paranoid/logger"
 	"math/big"
 	"net"
 	"os"

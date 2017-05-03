@@ -1,7 +1,7 @@
 package dnetserver
 
 import (
-	pb "github.com/cpssd/paranoid/proto/discoverynetwork"
+	pb "github.com/pp2p/paranoid/proto/discoverynetwork"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"

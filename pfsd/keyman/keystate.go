@@ -4,7 +4,7 @@ import (
 	"encoding/gob"
 	"errors"
 	"fmt"
-	pb "github.com/cpssd/paranoid/proto/raft"
+	pb "github.com/pp2p/paranoid/proto/raft"
 	"io"
 	"os"
 	"path"

@@ -3,7 +3,7 @@ package raft
 import (
 	"encoding/json"
 	"errors"
-	"github.com/cpssd/paranoid/raft/raftlog"
+	"github.com/pp2p/paranoid/raft/raftlog"
 	"io/ioutil"
 	"os"
 	"path"
@@ -105,7 +105,7 @@ func (c *Configuration) NewFutureConfiguration(nodes []Node, lastLogIndex uint64
 	}
 }
 
-//UpdateCurrentConfiguration updates the current configuraiton given a set of nodes.
+//UpdateCurrentConfiguration updates the current configuration given a set of nodes.
 //If all the nodes are in the future configuration, the future configuration is changed to the current configuration.
 func (c *Configuration) UpdateCurrentConfiguration(nodes []Node, lastLogIndex uint64) {
 	c.configLock.Lock()

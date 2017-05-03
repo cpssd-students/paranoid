@@ -17,17 +17,26 @@ to writing Go.
 
 ## Commenting ##
 
-Commenting will be done in accordance with the standard Go style used for generating Godocs. 
+Commenting will be done in accordance with the standard Go style used for generating Godocs.
 You should write comments to explain any code you write that does something in a way that may not be obvious.
 An explaination of standard Go commenting practice and Godoc can be found [here](https://blog.golang.org/godoc-documenting-go-code).
 
 ## Automated Testing ##
 
-Automated Testing will be done using the [testing](https://golang.org/pkg/testing/) Go package. 
+Automated Testing will be done using the [testing](https://golang.org/pkg/testing/) Go package.
 Unit tests and integration tests should be kept in separate files that are run in separate Jenkins projects.
 Files containing integration tests should be marked by starting with the comment `// +build integration`
 Files containing unit tests should be marked by starting with the comment `// +build !integration`
 Tests will be automatically ran for each pull request and pull requests will failling tests will not be merged.
+
+## Forking ##
+
+In order to contribute to the project you must create a fork. The easiest way
+is to do the following:
+
+1. Fork the project using Github's web UI.
+2. Clone your fork into `$GOPATH/src/github.com/pp2p/paranoid`
+3. Add `upstream` remote (`git remote add upstream git@github.com:pp2p/paranoid`)
 
 ## Branching ##
 
@@ -38,7 +47,8 @@ These prefixes should be one of the following:
 * **doc/** -- for changes to the documentation.
 * **hotfix/** -- for quick bugfixes.
 
-Branches must also contain the name of the contributor, i.e. `doc/terry/...`.
+Make sure to `git fetch` and merge into `master` often to prevent unnecessary
+commits.
 
 ## Version Numbering ##
 

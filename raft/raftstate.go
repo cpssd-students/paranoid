@@ -3,9 +3,9 @@ package raft
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/cpssd/paranoid/pfsd/keyman"
-	pb "github.com/cpssd/paranoid/proto/raft"
-	"github.com/cpssd/paranoid/raft/raftlog"
+	"github.com/pp2p/paranoid/pfsd/keyman"
+	pb "github.com/pp2p/paranoid/proto/raft"
+	"github.com/pp2p/paranoid/raft/raftlog"
 	"io/ioutil"
 	"os"
 	"path"
@@ -282,7 +282,7 @@ func (s *RaftState) applyLogEntry(logEntry *pb.LogEntry) *StateMachineResult {
 	return nil
 }
 
-//ApplyLogEntries applys all log entries that have been commited but not yet applied
+//ApplyLogEntries applys all log entries that have been committed but not yet applied
 func (s *RaftState) ApplyLogEntries() {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()

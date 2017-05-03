@@ -1,8 +1,8 @@
 package pfi
 
 import (
-	"github.com/cpssd/paranoid/logger"
-	"github.com/cpssd/paranoid/pfsd/globals"
+	"github.com/pp2p/paranoid/logger"
+	"github.com/pp2p/paranoid/pfsd/globals"
 	"path"
 
 	"github.com/hanwen/go-fuse/fuse/nodefs"
@@ -53,7 +53,7 @@ func StartPfi(logVerbose bool) {
 				if err != nil {
 					Log.Fatal("Error unmounting : ", err)
 				}
-				Log.Info("pfi unmounted sucessfully")
+				Log.Info("pfi unmounted successfully")
 				return
 			}
 		}
