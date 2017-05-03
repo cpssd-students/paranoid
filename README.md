@@ -2,6 +2,10 @@ Paranoid
 ========
 [![GoDoc](https://godoc.org/github.com/pp2p/paranoid?status.svg)](https://godoc.org/github.com/pp2p/paranoid)
 
+Distributed Secure Peer-to-Peer filesystem
+
+---
+
 ## Build Instructions ##
 
 To run the unit tests recursively for the entire project, run `go test ./...` from this directory.
