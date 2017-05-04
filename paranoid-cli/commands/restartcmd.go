@@ -12,6 +12,7 @@ import (
 	"github.com/urfave/cli"
 )
 
+// Restart subcommand
 func Restart(c *cli.Context) {
 	args := c.Args()
 	if len(args) < 1 {

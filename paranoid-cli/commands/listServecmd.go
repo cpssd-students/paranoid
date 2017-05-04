@@ -13,7 +13,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-//Adds files from Paranoid File Server
+// ListServe subcommand
 func ListServe(c *cli.Context) {
 	args := c.Args()
 
