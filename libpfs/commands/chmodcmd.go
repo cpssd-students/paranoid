@@ -12,7 +12,8 @@ import (
 	"github.com/pp2p/paranoid/libpfs/returncodes"
 )
 
-const PERM_MASK = 0777
+// PermMask is the default mask used for permissions
+const PermMask = 0777
 
 //ChmodCommand is used to change the permissions of a file.
 func ChmodCommand(paranoidDirectory, filePath string, perms os.FileMode) (returnCode returncodes.Code, returnError error) {
@@ -72,7 +73,7 @@ func ChmodCommand(paranoidDirectory, filePath string, perms os.FileMode) (return
 		return returncodes.EUNEXPECTED, fmt.Errorf("error unmarshaling inode data: %s", err)
 	}
 
-	nodeData.Mode = (nodeData.Mode &^ PERM_MASK) | perms
+	nodeData.Mode = (nodeData.Mode &^ PermMask) | perms
 
 	jsonData, err := json.Marshal(nodeData)
 	if err != nil {

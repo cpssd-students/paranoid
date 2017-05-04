@@ -27,7 +27,7 @@ func (rl *RaftLog) AppendEntry(en *pb.LogEntry) (index uint64, err error) {
 	}
 
 	if encryption.Encrypted {
-		blockSize := encryption.GetCipherSize()
+		blockSize := encryption.CipherSize()
 		extraBytes := make([]byte, blockSize-len(protoData)%blockSize)
 		protoData = append(protoData, extraBytes...)
 		err = encryption.Encrypt(protoData)

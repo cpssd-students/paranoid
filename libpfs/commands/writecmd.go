@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -12,13 +11,13 @@ import (
 )
 
 //WriteCommand writes data to the given file
-func WriteCommand(paranoidDirectory, filePath string, offset, length int64, data []byte) (returnCode returncodes.Code, returnError error, bytesWrote int) {
+func WriteCommand(paranoidDirectory, filePath string, offset, length int64, data []byte) (returnCode returncodes.Code, bytesWrote int, returnError error) {
 	Log.Info("write command called")
 	Log.Verbose("write : given paranoidDirectory =", paranoidDirectory)
 
 	err := GetFileSystemLock(paranoidDirectory, SharedLock)
 	if err != nil {
-		return returncodes.EUNEXPECTED, err, 0
+		return returncodes.EUNEXPECTED, 0, err
 	}
 
 	defer func() {
@@ -33,30 +32,30 @@ func WriteCommand(paranoidDirectory, filePath string, offset, length int64, data
 	namepath := getParanoidPath(paranoidDirectory, filePath)
 	namepathType, err := getFileType(paranoidDirectory, namepath)
 	if err != nil {
-		return returncodes.EUNEXPECTED, err, 0
+		return returncodes.EUNEXPECTED, 0, err
 	}
 
 	if namepathType == typeENOENT {
-		return returncodes.ENOENT, errors.New(filePath + " does not exist"), 0
+		return returncodes.ENOENT, 0, fmt.Errorf("%s does not exist", filePath)
 	}
 
 	if namepathType == typeDir {
-		return returncodes.EISDIR, errors.New(filePath + " is a paranoidDirectory"), 0
+		return returncodes.EISDIR, 0, fmt.Errorf("%s is a paranoidDirectory", filePath)
 	}
 
 	if namepathType == typeSymlink {
-		return returncodes.EIO, errors.New(filePath + " is a symlink"), 0
+		return returncodes.EIO, 0, fmt.Errorf("%s is a symlink", filePath)
 	}
 
 	fileInodeBytes, code, err := getFileInode(namepath)
 	if code != returncodes.OK {
-		return code, err, 0
+		return code, 0, err
 	}
 	inodeName := string(fileInodeBytes)
 
 	err = getFileLock(paranoidDirectory, inodeName, ExclusiveLock)
 	if err != nil {
-		return returncodes.EUNEXPECTED, err, 0
+		return returncodes.EUNEXPECTED, 0, err
 	}
 
 	defer func() {
@@ -71,7 +70,7 @@ func WriteCommand(paranoidDirectory, filePath string, offset, length int64, data
 	Log.Verbose("write : wrting to " + inodeName)
 	contentsFile, err := os.OpenFile(path.Join(paranoidDirectory, "contents", inodeName), os.O_RDWR, 0777)
 	if err != nil {
-		return returncodes.EUNEXPECTED, fmt.Errorf("error opening contents file: %s", err), 0
+		return returncodes.EUNEXPECTED, 0, fmt.Errorf("error opening contents file: %s", err)
 	}
 	defer contentsFile.Close()
 
@@ -82,7 +81,7 @@ func WriteCommand(paranoidDirectory, filePath string, offset, length int64, data
 	if length == -1 {
 		err = truncate(contentsFile, offset)
 		if err != nil {
-			return returncodes.EUNEXPECTED, fmt.Errorf("error truncating file: %s", err), 0
+			return returncodes.EUNEXPECTED, 0, fmt.Errorf("error truncating file: %s", err)
 		}
 	} else if len(data) > int(length) {
 		data = data[:length]
@@ -93,10 +92,10 @@ func WriteCommand(paranoidDirectory, filePath string, offset, length int64, data
 
 	wroteLen, err := writeAt(contentsFile, data, offset)
 	if err != nil {
-		return returncodes.EUNEXPECTED, fmt.Errorf("error writing to file: %s", err), wroteLen
+		return returncodes.EUNEXPECTED, wroteLen, fmt.Errorf("error writing to file: %s", err)
 	}
 
-	return returncodes.OK, nil, wroteLen
+	return returncodes.OK, wroteLen, nil
 }
 
 func writeAt(file *os.File, data []byte, offset int64) (wroteLen int, err error) {
@@ -104,7 +103,7 @@ func writeAt(file *os.File, data []byte, offset int64) (wroteLen int, err error)
 		return file.WriteAt(data, offset)
 	}
 
-	cipherSizeInt64 := int64(encryption.GetCipherSize())
+	cipherSizeInt64 := int64(encryption.CipherSize())
 	extraStartBytes := offset % cipherSizeInt64
 	writeStart := offset - extraStartBytes
 	startBytes := make([]byte, extraStartBytes)
