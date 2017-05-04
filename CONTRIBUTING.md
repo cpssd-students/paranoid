@@ -3,8 +3,9 @@ Writing Code for Paranoid
 
 ## Code Formatting ##
 
-All `go` code checked into the repository must be formatted according to `go fmt`. To lint your
-code for style errors, use [golint](https://github.com/golang/lint). All code must also be
+All `go` code checked into the repository must be formatted according to `go fmt`.
+The imports are using `goimport` to manage order and to separate stdlib from
+custom packages. To lint your code for style errors, use [golint](https://github.com/golang/lint). All code must also be
 checked by the `go vet` command, which will report valid but poor code. This is separate
 from `golint`, which report style errors.
 
