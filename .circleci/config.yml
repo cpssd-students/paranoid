@@ -1,0 +1,17 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: golang:1.8.1
+    working_directory: /go/src/github.com/pp2p/paranoid
+    steps:
+      - checkout
+      - run:
+          name: Install FUSE
+          command: apt update && apt install -y fuse
+      - run:
+          name: Get Go dependencies
+          command: go get -v ./...
+      - run:
+          name: Test
+          command: go test -v ./...
