@@ -13,5 +13,8 @@ jobs:
           name: Get Go dependencies
           command: go get -v ./...
       - run:
+          name: install go junit
+          command: go get -u github.com/jstemmer/go-junit-report
+      - run:
           name: Test
-          command: go test -v ./...
+          command: go test -v ./... 2>&1 | go-junit-report > report.xml
