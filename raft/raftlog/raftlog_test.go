@@ -3,12 +3,13 @@
 package raftlog
 
 import (
-	"github.com/pp2p/paranoid/logger"
-	pb "github.com/pp2p/paranoid/proto/raft"
 	"io/ioutil"
 	"os"
 	"path"
 	"testing"
+
+	"github.com/pp2p/paranoid/logger"
+	pb "github.com/pp2p/paranoid/proto/raft"
 )
 
 var (

@@ -3,13 +3,14 @@ package raft
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/pp2p/paranoid/pfsd/keyman"
-	pb "github.com/pp2p/paranoid/proto/raft"
-	"github.com/pp2p/paranoid/raft/raftlog"
 	"io/ioutil"
 	"os"
 	"path"
 	"sync"
+
+	"github.com/pp2p/paranoid/pfsd/keyman"
+	pb "github.com/pp2p/paranoid/proto/raft"
+	"github.com/pp2p/paranoid/raft/raftlog"
 )
 
 const (

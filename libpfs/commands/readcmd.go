@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/pp2p/paranoid/libpfs/encryption"
-	"github.com/pp2p/paranoid/libpfs/returncodes"
 	"io"
 	"os"
 	"path"
 	"strconv"
+
+	"github.com/pp2p/paranoid/libpfs/encryption"
+	"github.com/pp2p/paranoid/libpfs/returncodes"
 )
 
 //ReadCommand reads data from a file

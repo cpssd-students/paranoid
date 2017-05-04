@@ -4,6 +4,12 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"math/rand"
+	"strings"
+	"sync"
+	"time"
+
 	"github.com/pp2p/paranoid/logger"
 	"github.com/pp2p/paranoid/pfsd/keyman"
 	pb "github.com/pp2p/paranoid/proto/raft"
@@ -11,11 +17,6 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	"io/ioutil"
-	"math/rand"
-	"strings"
-	"sync"
-	"time"
 )
 
 const (

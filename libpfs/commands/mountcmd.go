@@ -2,10 +2,11 @@ package commands
 
 import (
 	"fmt"
-	"github.com/pp2p/paranoid/libpfs/returncodes"
 	"io/ioutil"
 	"path"
 	"path/filepath"
+
+	"github.com/pp2p/paranoid/libpfs/returncodes"
 )
 
 //MountCommand is used to notify a pfs paranoidDirectory it has been mounted.

@@ -3,15 +3,16 @@
 package commands
 
 import (
-	"github.com/pp2p/paranoid/libpfs/encryption"
-	"github.com/pp2p/paranoid/libpfs/returncodes"
-	"github.com/pp2p/paranoid/logger"
 	"math/rand"
 	"os"
 	"path"
 	"syscall"
 	"testing"
 	"time"
+
+	"github.com/pp2p/paranoid/libpfs/encryption"
+	"github.com/pp2p/paranoid/libpfs/returncodes"
+	"github.com/pp2p/paranoid/logger"
 )
 
 var testDirectory string

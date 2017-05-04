@@ -3,12 +3,13 @@ package raftlog
 import (
 	"errors"
 	"fmt"
-	"github.com/golang/protobuf/proto"
-	"github.com/pp2p/paranoid/libpfs/encryption"
-	pb "github.com/pp2p/paranoid/proto/raft"
 	"os"
 	"path"
 	"strconv"
+
+	"github.com/golang/protobuf/proto"
+	"github.com/pp2p/paranoid/libpfs/encryption"
+	pb "github.com/pp2p/paranoid/proto/raft"
 )
 
 // AppendEntry will write the entry provided and return the

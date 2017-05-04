@@ -3,9 +3,10 @@ package commands
 import (
 	"errors"
 	"fmt"
-	"github.com/pp2p/paranoid/libpfs/returncodes"
 	"io/ioutil"
 	"os"
+
+	"github.com/pp2p/paranoid/libpfs/returncodes"
 )
 
 // RenameCommand is called when renaming a file

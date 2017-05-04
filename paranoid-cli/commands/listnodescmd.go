@@ -2,15 +2,16 @@ package commands
 
 import (
 	"fmt"
-	"github.com/pp2p/paranoid/pfsd/intercom"
-	"github.com/pp2p/paranoid/raft"
-	"github.com/urfave/cli"
 	"io/ioutil"
 	"net/rpc"
 	"os"
 	"os/user"
 	"path"
 	"path/filepath"
+
+	"github.com/pp2p/paranoid/pfsd/intercom"
+	"github.com/pp2p/paranoid/raft"
+	"github.com/urfave/cli"
 )
 
 // Status displays statistics for the specified PFSD instances.

@@ -3,15 +3,16 @@ package commands
 import (
 	"errors"
 	"fmt"
-	"github.com/golang/protobuf/proto"
-	"github.com/pp2p/paranoid/logger"
-	pb "github.com/pp2p/paranoid/proto/raft"
 	"io/ioutil"
 	"math/rand"
 	"os"
 	"os/user"
 	"path"
 	"time"
+
+	"github.com/golang/protobuf/proto"
+	"github.com/pp2p/paranoid/logger"
+	pb "github.com/pp2p/paranoid/proto/raft"
 )
 
 var Log *logger.ParanoidLogger

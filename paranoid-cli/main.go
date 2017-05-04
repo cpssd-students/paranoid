@@ -2,14 +2,15 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"os/user"
+	"path"
+
 	pfscommands "github.com/pp2p/paranoid/libpfs/commands"
 	"github.com/pp2p/paranoid/logger"
 	"github.com/pp2p/paranoid/paranoid-cli/commands"
 	"github.com/pp2p/paranoid/paranoid-cli/tls"
 	"github.com/urfave/cli"
-	"os"
-	"os/user"
-	"path"
 )
 
 func main() {

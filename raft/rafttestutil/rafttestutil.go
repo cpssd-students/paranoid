@@ -1,13 +1,14 @@
 package rafttestutil
 
 import (
-	"github.com/pp2p/paranoid/raft"
 	"io/ioutil"
 	"log"
 	"net"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/pp2p/paranoid/raft"
 )
 
 func GenerateNewUUID() string {

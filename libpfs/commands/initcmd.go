@@ -3,11 +3,12 @@ package commands
 import (
 	"errors"
 	"fmt"
-	"github.com/pp2p/paranoid/libpfs/returncodes"
 	"io/ioutil"
 	"os"
 	"path"
 	"strings"
+
+	"github.com/pp2p/paranoid/libpfs/returncodes"
 )
 
 //makeDir creates a new directory with permissions 0777 with the name newDir in parentDir.

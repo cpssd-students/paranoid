@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/pp2p/paranoid/libpfs/returncodes"
 	"os"
 	"path"
 	"syscall"
+
+	"github.com/pp2p/paranoid/libpfs/returncodes"
 )
 
 // MkdirCommand is called when making a paranoidDirectory

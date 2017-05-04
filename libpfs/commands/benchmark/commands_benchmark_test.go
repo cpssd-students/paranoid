@@ -1,15 +1,16 @@
 package libpfsbenchmark
 
 import (
-	. "github.com/pp2p/paranoid/libpfs/commands"
-	"github.com/pp2p/paranoid/libpfs/returncodes"
-	"github.com/pp2p/paranoid/logger"
 	"log"
 	"os"
 	"path"
 	"strconv"
 	"testing"
 	"time"
+
+	. "github.com/pp2p/paranoid/libpfs/commands"
+	"github.com/pp2p/paranoid/libpfs/returncodes"
+	"github.com/pp2p/paranoid/logger"
 )
 
 var testDirectory string

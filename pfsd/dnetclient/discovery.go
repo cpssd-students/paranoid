@@ -2,10 +2,11 @@ package dnetclient
 
 import (
 	"errors"
-	"github.com/pp2p/paranoid/pfsd/globals"
-	"github.com/pp2p/paranoid/pfsd/pnetclient"
 	"net"
 	"time"
+
+	"github.com/pp2p/paranoid/pfsd/globals"
+	"github.com/pp2p/paranoid/pfsd/pnetclient"
 )
 
 func SetDiscovery(host, port string) {

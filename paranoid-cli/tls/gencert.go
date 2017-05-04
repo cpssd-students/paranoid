@@ -8,7 +8,6 @@ import (
 	"crypto/x509/pkix"
 	"encoding/pem"
 	"fmt"
-	"github.com/pp2p/paranoid/logger"
 	"math/big"
 	"net"
 	"os"
@@ -16,6 +15,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/pp2p/paranoid/logger"
 )
 
 var Log *logger.ParanoidLogger

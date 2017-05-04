@@ -4,10 +4,6 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"github.com/pp2p/paranoid/libpfs/commands"
-	"github.com/pp2p/paranoid/libpfs/returncodes"
-	"github.com/pp2p/paranoid/pfsd/intercom"
-	"github.com/urfave/cli"
 	"io/ioutil"
 	"net"
 	"net/rpc"
@@ -18,6 +14,11 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/pp2p/paranoid/libpfs/commands"
+	"github.com/pp2p/paranoid/libpfs/returncodes"
+	"github.com/pp2p/paranoid/pfsd/intercom"
+	"github.com/urfave/cli"
 )
 
 //Talks to the necessary other programs to mount the pfs filesystem.

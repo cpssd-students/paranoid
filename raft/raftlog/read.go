@@ -3,13 +3,14 @@ package raftlog
 import (
 	"errors"
 	"fmt"
-	"github.com/golang/protobuf/proto"
-	"github.com/pp2p/paranoid/libpfs/encryption"
-	pb "github.com/pp2p/paranoid/proto/raft"
 	"io/ioutil"
 	"math"
 	"path"
 	"strconv"
+
+	"github.com/golang/protobuf/proto"
+	"github.com/pp2p/paranoid/libpfs/encryption"
+	pb "github.com/pp2p/paranoid/proto/raft"
 )
 
 func (rl *RaftLog) GetLogEntryUnsafe(index uint64) (entry *pb.LogEntry, err error) {

@@ -2,9 +2,6 @@ package commands
 
 import (
 	"fmt"
-	pb "github.com/pp2p/paranoid/proto/raft"
-	"github.com/pp2p/paranoid/raft"
-	"github.com/urfave/cli"
 	"io/ioutil"
 	"log"
 	"os"
@@ -12,6 +9,10 @@ import (
 	"os/user"
 	"path"
 	"strconv"
+
+	pb "github.com/pp2p/paranoid/proto/raft"
+	"github.com/pp2p/paranoid/raft"
+	"github.com/urfave/cli"
 )
 
 func History(c *cli.Context) {
