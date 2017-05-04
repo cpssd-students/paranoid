@@ -71,7 +71,7 @@ func UtimesCommand(paranoidDirectory, filePath string, atime, mtime *time.Time) 
 	}
 
 	stat := fi.Sys().(*syscall.Stat_t)
-	oldatime := time.Unix(int64(stat.Atim.Sec), int64(stat.Atim.Nsec))
+	oldatime := lastAccess(stat)
 	oldmtime := fi.ModTime()
 	if atime == nil && mtime == nil {
 		return returncodes.EUNEXPECTED, errors.New("no times to update!")
