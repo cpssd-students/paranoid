@@ -2,11 +2,13 @@ package server
 
 import (
 	"fmt"
+
 	"github.com/pp2p/paranoid/discovery-server/dnetserver"
 	pb "github.com/pp2p/paranoid/proto/fileserver"
 	"golang.org/x/net/context"
 )
 
+// UnServeFile implements the protobuf UnServeFile method
 func (s *FileserverServer) UnServeFile(ctx context.Context, req *pb.UnServeRequest) (*pb.ServeResponse, error) {
 	for _, node := range dnetserver.Pools[req.Pool].Info.Nodes {
 		if node.Uuid == req.Uuid {

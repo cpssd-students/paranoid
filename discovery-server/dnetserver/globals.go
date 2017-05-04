@@ -13,6 +13,7 @@ import (
 	"google.golang.org/grpc/codes"
 )
 
+// Log used by discovery-server
 var Log *logger.ParanoidLogger
 
 // DiscoveryServer struct
@@ -25,6 +26,7 @@ type PoolInfo struct {
 	Nodes        map[string]*pb.Node
 }
 
+// Pool is the safe wrapper around PoolInfo with a mutex.
 type Pool struct {
 	PoolLock sync.Mutex
 	Info     PoolInfo
@@ -42,7 +44,7 @@ var RenewInterval time.Duration
 // StateDirectoryPath is the path to the directory in which the discovery server stores its state
 var StateDirectoryPath string
 
-// TempDirecotryPath is the path to the directory where temporary state files are stored
+// TempDirectoryPath is the path to the directory where temporary state files are stored
 var TempDirectoryPath string
 
 func checkPoolPassword(pool, password string, node *pb.Node) error {
