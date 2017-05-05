@@ -319,11 +319,11 @@ func TestLinkCommand(t *testing.T) {
 		t.Error("Readdir did not return OK. Actual:", code, " Error:", err)
 	}
 
-	if files[0] != "test2.txt" {
+	if len(files) != 1 {
 		t.Error("Readdir got incorrect result")
 	}
 
-	if len(files) != 1 {
+	if files[0] != "test2.txt" {
 		t.Error("Readdir got incorrect result")
 	}
 
