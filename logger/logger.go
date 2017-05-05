@@ -12,6 +12,7 @@ import (
 // input of SetLogLevel
 type LogLevel int
 
+// Different logging levels
 const (
 	DEBUG LogLevel = iota
 	VERBOSE
@@ -20,9 +21,10 @@ const (
 	ERROR
 )
 
-// Output enums to set the outputs
+// LogOutput is an enum to set the outputs
 type LogOutput int
 
+// Enums representing different log locations.
 const (
 	STDERR  LogOutput = 1 << (iota + 1)
 	LOGFILE LogOutput = 1 << (iota + 1)
@@ -92,7 +94,7 @@ func (l *ParanoidLogger) Debug(v ...interface{}) {
 	}
 }
 
-// Debug only prints if LogLevel is set to DEBUG
+// Debugf only prints if LogLevel is set to DEBUG
 func (l *ParanoidLogger) Debugf(format string, v ...interface{}) {
 	if l.logLevel <= DEBUG {
 		l.outputf("DEBUG", format, v...)
@@ -108,7 +110,7 @@ func (l *ParanoidLogger) Verbose(v ...interface{}) {
 	}
 }
 
-// Verbose only prints if LogLevel is set to VERBOSE or lower in importance
+// Verbosef only prints if LogLevel is set to VERBOSE or lower in importance
 func (l *ParanoidLogger) Verbosef(format string, v ...interface{}) {
 	if l.logLevel <= VERBOSE {
 		l.Infof(format, v...)
@@ -124,7 +126,7 @@ func (l *ParanoidLogger) Info(v ...interface{}) {
 	}
 }
 
-// Info only prints if LogLevel is set to INFO or lower in importance
+// Infof only prints if LogLevel is set to INFO or lower in importance
 func (l *ParanoidLogger) Infof(format string, v ...interface{}) {
 	if l.logLevel <= INFO {
 		l.outputf("INFO", format, v...)
@@ -140,7 +142,7 @@ func (l *ParanoidLogger) Warn(v ...interface{}) {
 	}
 }
 
-// Warn only prints if LogLevel is set to WARNING or lower in importance
+// Warnf only prints if LogLevel is set to WARNING or lower in importance
 func (l *ParanoidLogger) Warnf(format string, v ...interface{}) {
 	if l.logLevel <= WARNING {
 		l.outputf("WARN", format, v...)
@@ -156,7 +158,7 @@ func (l *ParanoidLogger) Error(v ...interface{}) {
 	}
 }
 
-// Error only prints if LogLevel is set to ERROR or lower in importance
+// Errorf only prints if LogLevel is set to ERROR or lower in importance
 func (l *ParanoidLogger) Errorf(format string, v ...interface{}) {
 	if l.logLevel <= ERROR {
 		l.outputf("ERROR", format, v...)
@@ -171,7 +173,7 @@ func (l *ParanoidLogger) Fatal(v ...interface{}) {
 	os.Exit(1)
 }
 
-// Fatal always prints and exits the program with exit code 1
+// Fatalf always prints and exits the program with exit code 1
 func (l *ParanoidLogger) Fatalf(format string, v ...interface{}) {
 	l.outputf("FATAL", format, v...)
 	os.Exit(1)
