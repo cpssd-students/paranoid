@@ -12,6 +12,6 @@ engines:
     enabled: false
 ratings:
   paths:
-    - "**"
+    - "**.go"
 exclude_paths:
   - "**.pb.go"
