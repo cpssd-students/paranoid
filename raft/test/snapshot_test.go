@@ -89,7 +89,7 @@ func TestSnapshoting(t *testing.T) {
 		t.Fatal("Error reverting to snapshot:", err)
 	}
 
-	code, err, data := commands.ReadCommand(pfsDirectory, "test.txt", -1, -1)
+	code, data, err := commands.ReadCommand(pfsDirectory, "test.txt", -1, -1)
 	if string(data) != "hello" {
 		t.Fatal("Error reverting snapshot. Read does not match 'hello'. Actual:", string(data))
 	}
@@ -130,12 +130,12 @@ func TestSnapshoting(t *testing.T) {
 		t.Fatal("Error reverting to snapshot:", err)
 	}
 
-	code, err, data = commands.ReadCommand(pfsDirectory, "test.txt", -1, -1)
+	code, data, err = commands.ReadCommand(pfsDirectory, "test.txt", -1, -1)
 	if string(data) != "hello" {
 		t.Fatal("Error reverting snapshot. Read does not match 'hello'. Actual:", string(data))
 	}
 
-	code, err, data = commands.ReadCommand(pfsDirectory, "test2.txt", -1, -1)
+	code, data, err = commands.ReadCommand(pfsDirectory, "test2.txt", -1, -1)
 	if string(data) != "world" {
 		t.Fatal("Error reverting snapshot. Read does not match 'world'. Actual:", string(data))
 	}
