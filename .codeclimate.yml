@@ -10,5 +10,8 @@ engines:
     enabled: false
   csslint:
     enabled: false
+ratings:
+  paths:
+    - "**"
 exclude_paths:
   - "**.pb.go"
