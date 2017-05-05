@@ -14,7 +14,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-//Adds files from Paranoid File Server
+// Serve subcommand adds files to the Paranoid File Server
 func Serve(c *cli.Context) {
 	args := c.Args()
 	if len(args) < 2 {

@@ -15,6 +15,7 @@ import (
 	"github.com/urfave/cli"
 )
 
+// History subcommand
 func History(c *cli.Context) {
 	args := c.Args()
 	if len(args) < 1 {

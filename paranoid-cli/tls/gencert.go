@@ -19,6 +19,7 @@ import (
 	"github.com/pp2p/paranoid/logger"
 )
 
+// Log is used by gencert package
 var Log *logger.ParanoidLogger
 
 // GenCertificate will generate a TLS cert and key, prompting the user

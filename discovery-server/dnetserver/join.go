@@ -12,7 +12,8 @@ import (
 )
 
 const (
-	PASSWORD_SALT_LENGTH int = 64
+	// PasswordSaltLength is the length of the generated password salt.
+	PasswordSaltLength int = 64
 )
 
 // Join method for Discovery Server
@@ -41,7 +42,7 @@ func (s *DiscoveryServer) Join(ctx context.Context, req *pb.JoinRequest) (*pb.Jo
 			}
 		} else {
 			hash := make([]byte, 0)
-			salt := make([]byte, PASSWORD_SALT_LENGTH)
+			salt := make([]byte, PasswordSaltLength)
 			n, err := io.ReadFull(rand.Reader, salt)
 			if err != nil {
 				returnError := grpc.Errorf(codes.Internal,
@@ -50,7 +51,7 @@ func (s *DiscoveryServer) Join(ctx context.Context, req *pb.JoinRequest) (*pb.Jo
 				)
 				return &pb.JoinResponse{}, returnError
 			}
-			if n != PASSWORD_SALT_LENGTH {
+			if n != PasswordSaltLength {
 				returnError := grpc.Errorf(codes.Internal,
 					"error hashing password: unable to read salt from random number generator",
 				)
@@ -90,10 +91,10 @@ func (s *DiscoveryServer) Join(ctx context.Context, req *pb.JoinRequest) (*pb.Jo
 	return &response, nil
 }
 
-func getNodes(pool, requesterUuid string) []*pb.Node {
+func getNodes(pool, requesterUUID string) []*pb.Node {
 	var nodes []*pb.Node
 	if _, ok := Pools[pool]; ok {
-		for nodeUUID, _ := range Pools[pool].Info.Nodes {
+		for nodeUUID := range Pools[pool].Info.Nodes {
 			nodes = append(nodes, Pools[pool].Info.Nodes[nodeUUID])
 		}
 	}

@@ -14,7 +14,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-// Status displays statistics for the specified PFSD instances.
+// ListNodes subcommand shows the statistics about nodes
 func ListNodes(c *cli.Context) {
 	args := c.Args()
 	usr, err := user.Current()
