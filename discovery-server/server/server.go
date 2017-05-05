@@ -2,15 +2,17 @@ package server
 
 import (
 	"fmt"
-	"github.com/pp2p/paranoid/logger"
 	"log"
 	"net/http"
 	"path/filepath"
 	"time"
+
+	"github.com/pp2p/paranoid/logger"
 )
 
+// FileCache stores the cache of the file
 type FileCache struct {
-	Uuid           string
+	UUID           string
 	AccessAmmount  int32
 	AccessLimit    int32
 	FileData       []byte
@@ -19,10 +21,16 @@ type FileCache struct {
 	ExpirationTime time.Time
 }
 
+// FileserverServer implements the proto FileserverServer interface
 type FileserverServer struct{}
 
+// FileMap of hashes to individual files
 var FileMap map[string]*FileCache
+
+// Log of discoveryserver file server
 var Log *logger.ParanoidLogger
+
+// Port to run the server on
 var Port string
 
 func getFileFromHash(hash string) ([]byte, string, error) {
@@ -42,6 +50,7 @@ func getFileFromHash(hash string) ([]byte, string, error) {
 	return value.FileData, filepath.Base(value.FilePath), nil
 }
 
+// ServeFiles starts an http server handling the requests
 func ServeFiles(serverPort string) {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/" {

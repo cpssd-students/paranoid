@@ -82,7 +82,7 @@ func TestStateLoad(t *testing.T) {
 		t.Error("Wrong number of pools loaded from state file")
 	}
 
-	for poolName, _ := range Pools {
+	for poolName := range Pools {
 		if len(Pools[poolName].Info.Nodes) != 1 {
 			t.Error("Wrong number of nodes loaded from state file")
 		}

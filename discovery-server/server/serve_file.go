@@ -3,14 +3,16 @@ package server
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"time"
+
 	"github.com/pp2p/paranoid/discovery-server/dnetserver"
 	pb "github.com/pp2p/paranoid/proto/fileserver"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
-	"time"
 )
 
+// ServeFile implements the protobuf ServeFile method
 func (s *FileserverServer) ServeFile(ctx context.Context, req *pb.ServeRequest) (*pb.ServeResponse, error) {
 	if req.Timeout <= 0 {
 		req.Timeout = 1000

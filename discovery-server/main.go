@@ -20,8 +20,10 @@ import (
 )
 
 const (
-	DISCOVERY_STATE_DIR string = "discovery_state"
-	TEMP_STATE_DIR      string = ".tmp_state"
+	// DiscoveryStateDir defines where the state should be kept
+	DiscoveryStateDir string = "discovery_state"
+	// TempStateDir defines where the state should be temporarely kept
+	TempStateDir string = ".tmp_state"
 )
 
 var (
@@ -111,8 +113,8 @@ func analyseWorkspace(log *logger.ParanoidLogger) {
 	metaDirPath := path.Join(pfsDirPath, "discovery_meta")
 	checkDir(metaDirPath, log)
 
-	dnetserver.StateDirectoryPath = path.Join(metaDirPath, DISCOVERY_STATE_DIR)
-	dnetserver.TempDirectoryPath = path.Join(metaDirPath, TEMP_STATE_DIR)
+	dnetserver.StateDirectoryPath = path.Join(metaDirPath, DiscoveryStateDir)
+	dnetserver.TempDirectoryPath = path.Join(metaDirPath, TempStateDir)
 	checkDir(dnetserver.StateDirectoryPath, log)
 	checkDir(dnetserver.TempDirectoryPath, log)
 }
