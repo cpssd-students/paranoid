@@ -22,6 +22,7 @@ func cleanupPFS(pfsDir string) {
 	}
 }
 
+// Init subcommand
 func Init(c *cli.Context) {
 	args := c.Args()
 	if len(args) < 1 {
@@ -95,13 +96,13 @@ func doInit(pfsname, pool, cert, key string, unsecure, unencrypted, networkoff b
 		NetworkOff:   networkoff,
 	}
 
-	attributesJson, err := json.Marshal(fileAttributes)
+	attributesJSON, err := json.Marshal(fileAttributes)
 	if err != nil {
 		fmt.Println("FATAL: Cannot save file system information")
 		Log.Fatal("cannot save file system information:", err)
 	}
 
-	err = ioutil.WriteFile(path.Join(directory, "meta", "attributes"), attributesJson, 0600)
+	err = ioutil.WriteFile(path.Join(directory, "meta", "attributes"), attributesJSON, 0600)
 	if err != nil {
 		fmt.Println("FATAL: Cannot save file system information")
 		Log.Fatal("cannot save file system information:", err)

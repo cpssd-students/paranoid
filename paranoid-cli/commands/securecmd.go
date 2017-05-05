@@ -11,6 +11,7 @@ import (
 	"github.com/urfave/cli"
 )
 
+// Secure subcommand
 func Secure(c *cli.Context) {
 	args := c.Args()
 	if len(args) < 1 {

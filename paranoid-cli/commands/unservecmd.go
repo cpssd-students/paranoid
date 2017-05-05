@@ -13,7 +13,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-//Removes files from Paranoid File Server
+// Unserve subcommand removes files from Paranoid File Server
 func Unserve(c *cli.Context) {
 	args := c.Args()
 

@@ -15,6 +15,7 @@ import (
 	pb "github.com/pp2p/paranoid/proto/raft"
 )
 
+// Log is used to log information from paranoid-cli
 var Log *logger.ParanoidLogger
 
 type fileSystemAttributes struct {

@@ -21,8 +21,8 @@ import (
 	"github.com/urfave/cli"
 )
 
-//Talks to the necessary other programs to mount the pfs filesystem.
-//If the file system doesn't exist it creates it.
+// Mount subcommand talks to other programs to mount the pfs filesystem.
+// If the file system doesn't exist it creates it.
 func Mount(c *cli.Context) {
 	args := c.Args()
 	if len(args) < 2 {
@@ -77,14 +77,14 @@ func doMount(c *cli.Context, args []string) {
 		}
 	}
 
-	attributesJson, err := ioutil.ReadFile(path.Join(pfsDir, "meta", "attributes"))
+	attributesJSON, err := ioutil.ReadFile(path.Join(pfsDir, "meta", "attributes"))
 	if err != nil {
 		fmt.Println("FATAL: unable to read file system attributes")
 		Log.Fatal("unable to read file system attributes:", err)
 	}
 
 	attributes := &fileSystemAttributes{}
-	err = json.Unmarshal(attributesJson, attributes)
+	err = json.Unmarshal(attributesJSON, attributes)
 	if err != nil {
 		fmt.Println("FATAL: unable to read file system attributes")
 		Log.Fatal("unable to read file system attributes:", err)
