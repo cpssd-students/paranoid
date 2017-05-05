@@ -1,12 +1,14 @@
 engines:
   golint:
-    enabled: false
+    enabled: true
   gofmt:
-    enabled: false
+    enabled: true
   govet:
-    enabled: false
+    enabled: true
   # Might be moved out with #24. Disabling for now
   eslint:
     enabled: false
   csslint:
     enabled: false
+exclude_paths:
+  - "**.pb.go"
