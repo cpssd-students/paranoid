@@ -18,6 +18,9 @@ installed and you are in the `fuse` group.
 
 To build a specific binary, consult the README file for that directory.
 
+### GUI
+Paranoid GUI is available in the [pp2p/gui](https://github.com/pp2p/gui) repo.
+
 ---
 
 ## Testing
