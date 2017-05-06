@@ -197,7 +197,7 @@ func (ksm *KeyStateMachine) NewGeneration(newNode string) (generationNumber int6
 }
 
 // NodeInGeneration checks is the specified node in the provided generation
-func (ksm KeyStateMachine) NodeInGeneration(generationNumber int64, nodeID string) bool {
+func (ksm *KeyStateMachine) NodeInGeneration(generationNumber int64, nodeID string) bool {
 	generation, ok := ksm.Generations[generationNumber]
 	if !ok {
 		return false
