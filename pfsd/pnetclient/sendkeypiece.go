@@ -3,6 +3,7 @@ package pnetclient
 import (
 	"errors"
 	"fmt"
+
 	"github.com/pp2p/paranoid/pfsd/globals"
 	"github.com/pp2p/paranoid/pfsd/keyman"
 	pb "github.com/pp2p/paranoid/proto/paranoidnetwork"
@@ -10,6 +11,7 @@ import (
 	"golang.org/x/net/context"
 )
 
+// SendKeyPiece to the node specified by the UUID
 func SendKeyPiece(uuid string, generation int64, piece *keyman.KeyPiece, addElement bool) error {
 	node, err := globals.Nodes.GetNode(uuid)
 	if err != nil {
