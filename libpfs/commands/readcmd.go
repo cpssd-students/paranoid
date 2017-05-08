@@ -2,7 +2,6 @@ package commands
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -14,14 +13,15 @@ import (
 )
 
 //ReadCommand reads data from a file
-func ReadCommand(paranoidDirectory, filePath string, offset, length int64) (returnCode returncodes.Code, returnError error, fileContents []byte) {
+func ReadCommand(paranoidDirectory, filePath string, offset, length int64) (returnCode returncodes.Code, fileContents []byte, returnError error) {
+	Log.Info("read command called")
 	Log.Verbose("read : given paranoidDirectory = " + paranoidDirectory)
 
 	namepath := getParanoidPath(paranoidDirectory, filePath)
 
 	err := GetFileSystemLock(paranoidDirectory, SharedLock)
 	if err != nil {
-		return returncodes.EUNEXPECTED, err, nil
+		return returncodes.EUNEXPECTED, nil, err
 	}
 
 	defer func() {
@@ -35,30 +35,30 @@ func ReadCommand(paranoidDirectory, filePath string, offset, length int64) (retu
 
 	fileType, err := getFileType(paranoidDirectory, namepath)
 	if err != nil {
-		return returncodes.EUNEXPECTED, err, nil
+		return returncodes.EUNEXPECTED, nil, err
 	}
 
 	if fileType == typeENOENT {
-		return returncodes.ENOENT, errors.New(filePath + " does not exist"), nil
+		return returncodes.ENOENT, nil, fmt.Errorf("%s does not exist", filePath)
 	}
 
 	if fileType == typeDir {
-		return returncodes.EISDIR, errors.New(filePath + " is a paranoidDirectory"), nil
+		return returncodes.EISDIR, nil, fmt.Errorf("%s is a paranoidDirectory", filePath)
 	}
 
 	if fileType == typeSymlink {
-		return returncodes.EIO, errors.New(filePath + " is a symlink"), nil
+		return returncodes.EIO, nil, fmt.Errorf("%s is a symlink", filePath)
 	}
 
 	inodeBytes, code, err := getFileInode(namepath)
 	if code != returncodes.OK || err != nil {
-		return code, err, nil
+		return code, nil, err
 	}
 	inodeFileName := string(inodeBytes)
 
 	err = getFileLock(paranoidDirectory, inodeFileName, SharedLock)
 	if err != nil {
-		return returncodes.EUNEXPECTED, err, nil
+		return returncodes.EUNEXPECTED, nil, err
 	}
 
 	defer func() {
@@ -72,7 +72,7 @@ func ReadCommand(paranoidDirectory, filePath string, offset, length int64) (retu
 
 	file, err := os.OpenFile(path.Join(paranoidDirectory, "contents", inodeFileName), os.O_RDONLY, 0777)
 	if err != nil {
-		return returncodes.EUNEXPECTED, fmt.Errorf("error opening contents file: %s", err), nil
+		return returncodes.EUNEXPECTED, nil, fmt.Errorf("error opening contents file: %s", err)
 	}
 	defer file.Close()
 
@@ -95,14 +95,14 @@ func ReadCommand(paranoidDirectory, filePath string, offset, length int64) (retu
 	for {
 		n, readerror, err := readAt(file, bytesRead, offset)
 		if err != nil {
-			return returncodes.EUNEXPECTED, fmt.Errorf("error reading file %s", err), nil
+			return returncodes.EUNEXPECTED, nil, fmt.Errorf("error reading file %s", err)
 		}
 
 		if n > maxRead {
 			bytesRead = bytesRead[0:maxRead]
 			_, err := fileBuffer.Write(bytesRead)
 			if err != nil {
-				return returncodes.EUNEXPECTED, fmt.Errorf("error writing to file buffer: %s", err), nil
+				return returncodes.EUNEXPECTED, nil, fmt.Errorf("error writing to file buffer: %s", err)
 			}
 			break
 		}
@@ -113,22 +113,22 @@ func ReadCommand(paranoidDirectory, filePath string, offset, length int64) (retu
 			bytesRead = bytesRead[:n]
 			_, err := fileBuffer.Write(bytesRead)
 			if err != nil {
-				return returncodes.EUNEXPECTED, fmt.Errorf("error writing to file buffer: %s", err), nil
+				return returncodes.EUNEXPECTED, nil, fmt.Errorf("error writing to file buffer: %s", err)
 			}
 			break
 		}
 
 		if readerror != nil {
-			return returncodes.EUNEXPECTED, fmt.Errorf("error reading from %s: %s", filePath, err), nil
+			return returncodes.EUNEXPECTED, nil, fmt.Errorf("error reading from %s: %s", filePath, err)
 		}
 
 		bytesRead = bytesRead[:n]
 		_, err = fileBuffer.Write(bytesRead)
 		if err != nil {
-			return returncodes.EUNEXPECTED, fmt.Errorf("error writing to file buffer: %s", err), nil
+			return returncodes.EUNEXPECTED, nil, fmt.Errorf("error writing to file buffer: %s", err)
 		}
 	}
-	return returncodes.OK, nil, fileBuffer.Bytes()
+	return returncodes.OK, fileBuffer.Bytes(), nil
 }
 
 func readAt(file *os.File, bytesRead []byte, offset int64) (n int, readerror error, err error) {
@@ -141,7 +141,7 @@ func readAt(file *os.File, bytesRead []byte, offset int64) (n int, readerror err
 		return 0, nil, nil
 	}
 
-	cipherSizeInt64 := int64(encryption.GetCipherSize())
+	cipherSizeInt64 := int64(encryption.CipherSize())
 	extraStartBytes := offset % cipherSizeInt64
 	extraEndBytes := cipherSizeInt64 - ((offset + int64(len(bytesRead))) % cipherSizeInt64)
 	readStart := 1 + offset - extraStartBytes

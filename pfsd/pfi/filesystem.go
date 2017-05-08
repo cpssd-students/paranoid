@@ -30,7 +30,7 @@ func (fs *ParanoidFileSystem) GetAttr(name string, context *fuse.Context) (*fuse
 		}, fuse.OK
 	}
 
-	code, err, stats := commands.StatCommand(globals.ParanoidDir, name)
+	code, stats, err := commands.StatCommand(globals.ParanoidDir, name)
 	if code == returncodes.EUNEXPECTED {
 		Log.Fatal("Error running stat command :", err)
 	}
@@ -58,7 +58,7 @@ func (fs *ParanoidFileSystem) GetAttr(name string, context *fuse.Context) (*fuse
 func (fs *ParanoidFileSystem) OpenDir(name string, context *fuse.Context) ([]fuse.DirEntry, fuse.Status) {
 	Log.Info("OpenDir called on : " + name)
 
-	code, err, fileNames := commands.ReadDirCommand(globals.ParanoidDir, name)
+	code, fileNames, err := commands.ReadDirCommand(globals.ParanoidDir, name)
 	if code == returncodes.EUNEXPECTED {
 		Log.Fatal("Error running readdir command :", err)
 	}
@@ -196,7 +196,7 @@ func (fs *ParanoidFileSystem) Symlink(oldName string, newName string, context *f
 // Readlink to where the file is pointing to
 func (fs *ParanoidFileSystem) Readlink(name string, context *fuse.Context) (string, fuse.Status) {
 	Log.Info("Readlink called on", name)
-	code, err, link := commands.ReadlinkCommand(globals.ParanoidDir, name)
+	code, link, err := commands.ReadlinkCommand(globals.ParanoidDir, name)
 	if code == returncodes.EUNEXPECTED {
 		Log.Fatal("Error running readlink command :", err)
 	}

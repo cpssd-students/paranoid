@@ -15,6 +15,7 @@ import (
 	"github.com/pp2p/paranoid/logger"
 )
 
+// Log the data from libpfs
 var Log *logger.ParanoidLogger
 
 type inode struct {
@@ -82,7 +83,7 @@ func getFileLength(file *os.File) (int64, error) {
 	}
 	fileLength := fi.Size() - 1
 	if fileLength > 0 {
-		fileLength = fileLength - int64(encryption.GetCipherSize()-lastBlockSize)
+		fileLength = fileLength - int64(encryption.CipherSize()-lastBlockSize)
 	}
 	return fileLength, nil
 }
@@ -93,6 +94,7 @@ const (
 	ExclusiveLock
 )
 
+// GetFileSystemLock locks the filesystem
 func GetFileSystemLock(paranoidDir string, lockType int) error {
 	lockPath := path.Join(paranoidDir, "meta", "lock")
 	file, err := os.Open(lockPath)
@@ -135,6 +137,7 @@ func getFileLock(paranoidDir, fileName string, lockType int) error {
 	return nil
 }
 
+// UnLockFileSystem removes the lock from the filesystem
 func UnLockFileSystem(paranoidDir string) error {
 	lockPath := path.Join(paranoidDir, "meta", "lock")
 	file, err := os.Open(lockPath)

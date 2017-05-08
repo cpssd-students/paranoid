@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path"
@@ -11,7 +10,8 @@ import (
 	"github.com/pp2p/paranoid/libpfs/returncodes"
 )
 
-type statInfo struct {
+// StatInfo contains the file metadata
+type StatInfo struct {
 	Length int64
 	Ctime  time.Time
 	Mtime  time.Time
@@ -19,13 +19,13 @@ type statInfo struct {
 	Mode   os.FileMode
 }
 
-// StatCommand returns information about a file as statInfo object
-func StatCommand(paranoidDirectory, filePath string) (returnCode returncodes.Code, returnError error, info statInfo) {
+// StatCommand returns information about a file as StatInfo object
+func StatCommand(paranoidDirectory, filePath string) (returnCode returncodes.Code, info StatInfo, returnError error) {
 	Log.Verbose("stat : given paranoidDirectory", paranoidDirectory)
 
 	err := GetFileSystemLock(paranoidDirectory, SharedLock)
 	if err != nil {
-		return returncodes.EUNEXPECTED, err, statInfo{}
+		return returncodes.EUNEXPECTED, StatInfo{}, err
 	}
 
 	defer func() {
@@ -33,23 +33,23 @@ func StatCommand(paranoidDirectory, filePath string) (returnCode returncodes.Cod
 		if err != nil {
 			returnCode = returncodes.EUNEXPECTED
 			returnError = err
-			info = statInfo{}
+			info = StatInfo{}
 		}
 	}()
 
 	namepath := getParanoidPath(paranoidDirectory, filePath)
 	namePathType, err := getFileType(paranoidDirectory, namepath)
 	if err != nil {
-		return returncodes.EUNEXPECTED, err, statInfo{}
+		return returncodes.EUNEXPECTED, StatInfo{}, err
 	}
 
 	if namePathType == typeENOENT {
-		return returncodes.ENOENT, errors.New(filePath + " does not exist"), statInfo{}
+		return returncodes.ENOENT, StatInfo{}, fmt.Errorf("%s does not exist", filePath)
 	}
 
 	inodeBytes, code, err := getFileInode(namepath)
 	if code != returncodes.OK {
-		return code, err, statInfo{}
+		return code, StatInfo{}, err
 	}
 
 	inodeName := string(inodeBytes)
@@ -57,12 +57,12 @@ func StatCommand(paranoidDirectory, filePath string) (returnCode returncodes.Cod
 
 	contentsFile, err := os.Open(contentsFilePath)
 	if err != nil {
-		return returncodes.EUNEXPECTED, fmt.Errorf("error opening contents file: %s", err), statInfo{}
+		return returncodes.EUNEXPECTED, StatInfo{}, fmt.Errorf("error opening contents file: %s", err)
 	}
 
 	fi, err := os.Lstat(contentsFilePath)
 	if err != nil {
-		return returncodes.EUNEXPECTED, fmt.Errorf("error Lstating file: %s", err), statInfo{}
+		return returncodes.EUNEXPECTED, StatInfo{}, fmt.Errorf("error Lstating file: %s", err)
 	}
 
 	stat := fi.Sys().(*syscall.Stat_t)
@@ -70,15 +70,15 @@ func StatCommand(paranoidDirectory, filePath string) (returnCode returncodes.Cod
 	ctime := createTime(stat)
 	mode, err := getFileMode(paranoidDirectory, inodeName)
 	if err != nil {
-		return returncodes.EUNEXPECTED, fmt.Errorf("error getting filemode: %s", err), statInfo{}
+		return returncodes.EUNEXPECTED, StatInfo{}, fmt.Errorf("error getting filemode: %s", err)
 	}
 
 	fileLength, err := getFileLength(contentsFile)
 	if err != nil {
-		return returncodes.EUNEXPECTED, fmt.Errorf("error getting file length: %s", err), statInfo{}
+		return returncodes.EUNEXPECTED, StatInfo{}, fmt.Errorf("error getting file length: %s", err)
 	}
 
-	statData := &statInfo{
+	statData := &StatInfo{
 		Length: fileLength,
 		Mtime:  fi.ModTime(),
 		Ctime:  ctime,
@@ -86,5 +86,5 @@ func StatCommand(paranoidDirectory, filePath string) (returnCode returncodes.Cod
 		Mode:   mode}
 
 	Log.Verbose("stat : returning", statData)
-	return returncodes.OK, nil, *statData
+	return returncodes.OK, *statData, nil
 }

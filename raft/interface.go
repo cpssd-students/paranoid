@@ -437,7 +437,7 @@ func (s *RaftNetworkServer) ChangeNodeLocation(UUID, IP, Port string) {
 func PerformLibPfsCommand(directory string, command *pb.StateMachineCommand) *StateMachineResult {
 	switch command.Type {
 	case TYPE_WRITE:
-		code, err, bytesWritten := commands.WriteCommand(directory, command.Path, int64(command.Offset), int64(command.Length), command.Data)
+		code, bytesWritten, err := commands.WriteCommand(directory, command.Path, int64(command.Offset), int64(command.Length), command.Data)
 		return &StateMachineResult{Code: code, Err: err, BytesWritten: bytesWritten}
 	case TYPE_CREAT:
 		code, err := commands.CreatCommand(directory, command.Path, os.FileMode(command.Mode))

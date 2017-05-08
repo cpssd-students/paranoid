@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"path"
@@ -11,12 +10,13 @@ import (
 )
 
 //ReadDirCommand returns a list of all the files in the given paranoidDirectory
-func ReadDirCommand(paranoidDirectory, dirPath string) (returnCode returncodes.Code, returnError error, fileNames []string) {
+func ReadDirCommand(paranoidDirectory, dirPath string) (returnCode returncodes.Code, fileNames []string, returnError error) {
+	Log.Info("readdir command called")
 	Log.Verbose("readdir : given paranoidDirectory = " + paranoidDirectory)
 
 	err := GetFileSystemLock(paranoidDirectory, SharedLock)
 	if err != nil {
-		return returncodes.EUNEXPECTED, err, nil
+		return returncodes.EUNEXPECTED, nil, err
 	}
 
 	defer func() {
@@ -36,25 +36,25 @@ func ReadDirCommand(paranoidDirectory, dirPath string) (returnCode returncodes.C
 		dirParanoidPath = getParanoidPath(paranoidDirectory, dirPath)
 		pathFileType, err := getFileType(paranoidDirectory, dirParanoidPath)
 		if err != nil {
-			return returncodes.EUNEXPECTED, err, nil
+			return returncodes.EUNEXPECTED, nil, err
 		}
 
 		if pathFileType == typeENOENT {
-			return returncodes.ENOENT, errors.New(dirPath + " does not exist"), nil
+			return returncodes.ENOENT, nil, fmt.Errorf("%s does not exist", dirPath)
 		}
 
 		if pathFileType == typeFile {
-			return returncodes.ENOTDIR, errors.New(dirPath + " is of type file"), nil
+			return returncodes.ENOTDIR, nil, fmt.Errorf("%s is of type file", dirPath)
 		}
 
 		if pathFileType == typeSymlink {
-			return returncodes.ENOTDIR, errors.New(dirPath + " is of type symlink"), nil
+			return returncodes.ENOTDIR, nil, fmt.Errorf("%s is of type symlink", dirPath)
 		}
 	}
 
 	files, err := ioutil.ReadDir(dirParanoidPath)
 	if err != nil {
-		return returncodes.EUNEXPECTED, fmt.Errorf("error reading paranoidDirectory %s: %s", dirPath, err), nil
+		return returncodes.EUNEXPECTED, nil, fmt.Errorf("error reading paranoidDirectory %s: %s", dirPath, err)
 	}
 
 	var names []string
@@ -64,5 +64,5 @@ func ReadDirCommand(paranoidDirectory, dirPath string) (returnCode returncodes.C
 			names = append(names, file[:strings.LastIndex(file, "-")])
 		}
 	}
-	return returncodes.OK, nil, names
+	return returncodes.OK, names, nil
 }

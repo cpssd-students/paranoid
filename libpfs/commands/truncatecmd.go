@@ -86,7 +86,7 @@ func truncate(file *os.File, length int64) error {
 		return file.Truncate(length)
 	}
 
-	cipherSizeInt64 := int64(encryption.GetCipherSize())
+	cipherSizeInt64 := int64(encryption.CipherSize())
 	newLastBlockLength := length % cipherSizeInt64
 
 	if newLastBlockLength == 0 {

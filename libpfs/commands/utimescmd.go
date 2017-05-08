@@ -74,7 +74,7 @@ func UtimesCommand(paranoidDirectory, filePath string, atime, mtime *time.Time) 
 	oldatime := lastAccess(stat)
 	oldmtime := fi.ModTime()
 	if atime == nil && mtime == nil {
-		return returncodes.EUNEXPECTED, errors.New("no times to update!")
+		return returncodes.EUNEXPECTED, errors.New("no times to update")
 	}
 
 	if atime == nil {
