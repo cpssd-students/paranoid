@@ -2,14 +2,15 @@ package main
 
 import (
 	"encoding/gob"
-	"github.com/pp2p/paranoid/libpfs/encryption"
-	"github.com/pp2p/paranoid/pfsd/globals"
-	"github.com/pp2p/paranoid/pfsd/keyman"
-	"github.com/pp2p/paranoid/pfsd/pnetclient"
 	"os"
 	"path"
 	"sync"
 	"time"
+
+	"github.com/pp2p/paranoid/libpfs/encryption"
+	"github.com/pp2p/paranoid/pfsd/globals"
+	"github.com/pp2p/paranoid/pfsd/keyman"
+	"github.com/pp2p/paranoid/pfsd/pnetclient"
 )
 
 const unlockQueryInterval time.Duration = time.Second * 10
@@ -33,9 +34,8 @@ func requestKeyPiece(uuid string, generation int64, recievedPieceChan chan keyRe
 	}
 }
 
-//Attempt to unlock the state machine
+// Unlock the state machine. This might fail terribly
 func Unlock() {
-
 	timer := time.NewTimer(0)
 	defer timer.Stop()
 	timeout := time.After(unlockTimeout)
@@ -115,6 +115,7 @@ func Unlock() {
 	}
 }
 
+// LoadPieces from the meta directory
 func LoadPieces() {
 	if _, err := os.Stat(path.Join(globals.ParanoidDir, "meta", "pieces")); os.IsNotExist(err) {
 		log.Info("Filesystem not locked. Will not attepmt to load KeyPieces.")

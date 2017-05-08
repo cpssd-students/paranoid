@@ -67,7 +67,7 @@ func BenchmarkWrite(b *testing.B) {
 		if code != returncodes.OK {
 			log.Fatal("error creating test file:", err)
 		}
-		code, err, _ = WriteCommand(testDirectory, "test.txt"+str, 0, 0, []byte("Hello World"))
+		code, _, err = WriteCommand(testDirectory, "test.txt"+str, 0, 0, []byte("Hello World"))
 		if code != returncodes.OK {
 			log.Fatal("error writing to test file:", err)
 		}
@@ -110,7 +110,7 @@ func BenchmarkStat(b *testing.B) {
 		log.Fatal("Error creating test file:", err)
 	}
 	for n := 0; n < b.N; n++ {
-		code, err, _ := StatCommand(testDirectory, "test.txt")
+		code, _, err := StatCommand(testDirectory, "test.txt")
 		if code != returncodes.OK {
 			log.Fatal("error stat test file:", err)
 		}
@@ -189,7 +189,7 @@ func BenchmarkReadDir(b *testing.B) {
 		log.Fatal("error creating test file:", err)
 	}
 	for n := 0; n < b.N; n++ {
-		code, err, _ = ReadDirCommand(testDirectory, "testDir")
+		code, _, err = ReadDirCommand(testDirectory, "testDir")
 		if code != returncodes.OK {
 			log.Fatal("error reading benchDir:", err)
 		}
@@ -226,7 +226,7 @@ func BenchmarkReadLink(b *testing.B) {
 		log.Fatal("Symlink did not return OK. Actual:", code, " Error:", err)
 	}
 	for n := 0; n < b.N; n++ {
-		code, err, _ = ReadlinkCommand(testDirectory, "testsymlink")
+		code, _, err = ReadlinkCommand(testDirectory, "testsymlink")
 		if code != returncodes.OK {
 			log.Fatalln("Readlink did not return OK. Actual:", code, " Error:", err)
 		}

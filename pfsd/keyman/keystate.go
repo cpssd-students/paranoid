@@ -4,16 +4,21 @@ import (
 	"encoding/gob"
 	"errors"
 	"fmt"
-	pb "github.com/pp2p/paranoid/proto/raft"
 	"io"
 	"os"
 	"path"
 	"sync"
+
+	pb "github.com/pp2p/paranoid/proto/raft"
 )
 
-const KSM_FILE_NAME string = "key_state"
+// KsmFileName stores the name of the file used to store the key state (duh)
+const KsmFileName string = "key_state"
 
+// ErrGenerationDeprecated is self explanatory. Just read it.
 var ErrGenerationDeprecated = errors.New("given generation was created before the current generation was set")
+
+// StateMachine is an instance of KeyStateMachine
 var StateMachine *KeyStateMachine
 
 type keyStateElement struct {
@@ -21,6 +26,7 @@ type keyStateElement struct {
 	Holder *pb.Node
 }
 
+// Generation stores the information about specific key generation.
 type Generation struct {
 	//A list of all nodes included in the generation
 	Nodes         []string
@@ -28,22 +34,27 @@ type Generation struct {
 	Elements      []*keyStateElement
 }
 
+// AddElement to the generation
 func (g *Generation) AddElement(elem *keyStateElement) {
 	g.Elements = append(g.Elements, elem)
 }
 
+// RemoveElement fromm the generation
 func (g *Generation) RemoveElement() {
 	g.Elements = g.Elements[:len(g.Elements)-1]
 }
 
-func (g *Generation) AddCompleteNode(ownerId string) {
-	g.CompleteNodes = append(g.CompleteNodes, ownerId)
+// AddCompleteNode to the generation
+func (g *Generation) AddCompleteNode(ownerID string) {
+	g.CompleteNodes = append(g.CompleteNodes, ownerID)
 }
 
+// RemoveCompleteNode from the generation
 func (g *Generation) RemoveCompleteNode() {
 	g.CompleteNodes = g.CompleteNodes[:len(g.CompleteNodes)-1]
 }
 
+// KeyStateMachine controls the key state
 type KeyStateMachine struct {
 	CurrentGeneration    int64
 	InProgressGeneration int64
@@ -62,18 +73,23 @@ type KeyStateMachine struct {
 	Events chan bool
 }
 
+// GetCurrentGeneration returns the number of the current gen.
 func (ksm *KeyStateMachine) GetCurrentGeneration() int64 {
 	ksm.lock.Lock()
 	defer ksm.lock.Unlock()
 	return ksm.CurrentGeneration
 }
 
+// GetInProgressGenertion returns the number of the new upcoming gen.
+// TODO: s/GetInProgressGenertion/GetInProgressGeneration
 func (ksm *KeyStateMachine) GetInProgressGenertion() int64 {
 	ksm.lock.Lock()
 	defer ksm.lock.Unlock()
 	return ksm.InProgressGeneration
 }
 
+// GetNodes of the generation. If there is a problem with getting the nodes an
+// error is returned
 func (ksm *KeyStateMachine) GetNodes(generation int64) ([]string, error) {
 	ksm.lock.Lock()
 	defer ksm.lock.Unlock()
@@ -89,6 +105,7 @@ func (ksm *KeyStateMachine) GetNodes(generation int64) ([]string, error) {
 	return ksm.Generations[generation].Nodes, nil
 }
 
+// NewKSM returns a new instantiated KeyStateMachine
 func NewKSM(pfsDir string) *KeyStateMachine {
 	return &KeyStateMachine{
 		CurrentGeneration:    -1,
@@ -100,6 +117,8 @@ func NewKSM(pfsDir string) *KeyStateMachine {
 	}
 }
 
+// NewKSMFromReader returns a new instantiated KeyStateMachine from the
+// io.Reader interface
 func NewKSMFromReader(reader io.Reader) (*KeyStateMachine, error) {
 	ksm := new(KeyStateMachine)
 	dec := gob.NewDecoder(reader)
@@ -112,8 +131,10 @@ func NewKSMFromReader(reader io.Reader) (*KeyStateMachine, error) {
 	return ksm, nil
 }
 
+// NewKSMFromPFSDir returns a new instantiated KeyStateMachine from the
+// specific paranoid directory
 func NewKSMFromPFSDir(pfsDir string) (*KeyStateMachine, error) {
-	file, err := os.Open(path.Join(pfsDir, "meta", KSM_FILE_NAME))
+	file, err := os.Open(path.Join(pfsDir, "meta", KsmFileName))
 	if err != nil {
 		Log.Errorf("Unable to open %s for reading state: %s", pfsDir, err)
 		return nil, fmt.Errorf("unable to open %s: %s", pfsDir, err)
@@ -122,6 +143,7 @@ func NewKSMFromPFSDir(pfsDir string) (*KeyStateMachine, error) {
 	return NewKSMFromReader(file)
 }
 
+// UpdateFromStateFile updates the KeyStateMachine from a file.
 func (ksm *KeyStateMachine) UpdateFromStateFile(filePath string) error {
 	ksm.lock.Lock()
 	defer ksm.lock.Unlock()
@@ -144,6 +166,7 @@ func (ksm *KeyStateMachine) UpdateFromStateFile(filePath string) error {
 	return nil
 }
 
+// NewGeneration creates a new generation when a new node is added.
 func (ksm *KeyStateMachine) NewGeneration(newNode string) (generationNumber int64, peers []string, err error) {
 	ksm.lock.Lock()
 	defer ksm.lock.Unlock()
@@ -173,19 +196,22 @@ func (ksm *KeyStateMachine) NewGeneration(newNode string) (generationNumber int6
 	return ksm.InProgressGeneration, existingNodes, nil
 }
 
-func (ksm KeyStateMachine) NodeInGeneration(generationNumber int64, nodeId string) bool {
+// NodeInGeneration checks is the specified node in the provided generation
+func (ksm *KeyStateMachine) NodeInGeneration(generationNumber int64, nodeID string) bool {
 	generation, ok := ksm.Generations[generationNumber]
 	if !ok {
 		return false
 	}
 	for _, v := range generation.Nodes {
-		if v == nodeId {
+		if v == nodeID {
 			return true
 		}
 	}
 	return false
 }
 
+// NeedsReplication checks does a new generation have to be created
+// TODO: Make sure this is correct.
 func (ksm *KeyStateMachine) NeedsReplication(uuid string, generationNumber int64) bool {
 	ksm.lock.Lock()
 	defer ksm.lock.Unlock()
@@ -226,6 +252,7 @@ func (ksm *KeyStateMachine) NeedsReplication(uuid string, generationNumber int64
 	return false
 }
 
+// Update the KeyStateMachine
 func (ksm *KeyStateMachine) Update(req *pb.KeyStateCommand) error {
 	ksm.lock.Lock()
 	defer ksm.lock.Unlock()
@@ -286,7 +313,9 @@ func (ksm *KeyStateMachine) Update(req *pb.KeyStateCommand) error {
 	return nil
 }
 
-func (ksm *KeyStateMachine) OwnerComplete(ownerId string, generation int64) error {
+// OwnerComplete assigns an owner
+// TODO: Make sure this is correct.
+func (ksm *KeyStateMachine) OwnerComplete(ownerID string, generation int64) error {
 	ksm.lock.Lock()
 	defer ksm.lock.Unlock()
 
@@ -299,12 +328,12 @@ func (ksm *KeyStateMachine) OwnerComplete(ownerId string, generation int64) erro
 	}
 
 	for _, v := range ksm.Generations[generation].CompleteNodes {
-		if v == ownerId {
+		if v == ownerID {
 			return errors.New("complete owner already present in this generation")
 		}
 	}
 
-	ksm.Generations[generation].AddCompleteNode(ownerId)
+	ksm.Generations[generation].AddCompleteNode(ownerID)
 	// If a new generation is created, the state machine will only
 	// update its CurrentGeneration when enough generation N+1 elements
 	// exist for every node in the cluster to unlock if locked.
@@ -337,7 +366,7 @@ func (ksm *KeyStateMachine) OwnerComplete(ownerId string, generation int64) erro
 		return fmt.Errorf("failed to commit change to KeyStateMachine: %s", err)
 	}
 
-	Log.Verbosef("Owner complete tracked: %s", ownerId)
+	Log.Verbosef("Owner complete tracked: %s", ownerID)
 	return nil
 }
 
@@ -346,13 +375,13 @@ func (ksm KeyStateMachine) canUpdateGeneration(generation int64) bool {
 	// Map of UUIDs (as string) to int
 	owners := make(map[string]int)
 	for _, v := range ksm.Generations[generation].Nodes {
-		owners[v] += 1
+		owners[v]++
 	}
 	for _, v := range ksm.Generations[generation].CompleteNodes {
 		owners[v] += 1000
 	}
 	for _, v := range ksm.Generations[generation].Elements {
-		owners[v.Owner.NodeId] += 1
+		owners[v.Owner.NodeId]++
 	}
 	minNodesRequired := len(ksm.Generations[generation].Nodes)/2 + 1
 	for _, count := range owners {
@@ -363,18 +392,20 @@ func (ksm KeyStateMachine) canUpdateGeneration(generation int64) bool {
 	return true
 }
 
+// Serialise to GOB encoding and write to the io.Writer
 func (ksm *KeyStateMachine) Serialise(writer io.Writer) error {
 	enc := gob.NewEncoder(writer)
 	err := enc.Encode(ksm)
 	if err != nil {
-		Log.Error("Failed encoding KeyStateMachine to GOB:", err)
-		return fmt.Errorf("failed encoding KeyStateMachine to GOB:", err)
+		Log.Error("failed encoding KeyStateMachine to GOB:", err)
+		return fmt.Errorf("failed encoding KeyStateMachine to GOB: %v", err)
 	}
 	return nil
 }
 
+// SerialiseToPFSDir as gob and write to file
 func (ksm *KeyStateMachine) SerialiseToPFSDir() error {
-	ksmpath := path.Join(ksm.PfsDir, "meta", KSM_FILE_NAME)
+	ksmpath := path.Join(ksm.PfsDir, "meta", KsmFileName)
 	file, err := os.Create(ksmpath + "-new")
 	if err != nil {
 		Log.Errorf("Unable to open %s for writing state: %s", ksm.PfsDir, err)

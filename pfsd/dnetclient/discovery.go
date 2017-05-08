@@ -9,6 +9,7 @@ import (
 	"github.com/pp2p/paranoid/pfsd/pnetclient"
 )
 
+// SetDiscovery sets up the discovery server to use
 func SetDiscovery(host, port string) {
 	globals.DiscoveryAddr = host + ":" + port
 
@@ -34,6 +35,7 @@ func SetDiscovery(host, port string) {
 	}
 }
 
+// JoinDiscovery connects to the selected discovery server
 func JoinDiscovery(pool, password string) {
 	if err := Join(pool, password); err != nil {
 		if err = retryJoin(pool, password); err != nil {

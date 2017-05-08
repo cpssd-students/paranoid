@@ -9,11 +9,12 @@ import (
 )
 
 var (
+	// Encrypted determines whether or not the FS is encrypted
 	Encrypted   bool
 	cipherBlock cipher.Block
 )
 
-// GenerateAEScipherBlock generates the cipher used for encryption and decryption of data
+// GenerateAESCipherBlock generates the cipher used for encryption and decryption of data
 // It takes in a byte array key and returns an error if the key is not
 // of size 16, 24 or 32 or when the cipher failed to initialize.
 func GenerateAESCipherBlock(key []byte) (cipherBlock cipher.Block, err error) {
@@ -35,7 +36,8 @@ func SetCipher(cb cipher.Block) {
 	cipherBlock = cb
 }
 
-func GetCipherSize() int {
+// CipherSize returns the size of the cipher used
+func CipherSize() int {
 	return cipherBlock.BlockSize()
 }
 

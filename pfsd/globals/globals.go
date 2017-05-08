@@ -5,21 +5,24 @@ import (
 	"encoding/gob"
 	"errors"
 	"fmt"
-	"github.com/pp2p/paranoid/logger"
-	"github.com/pp2p/paranoid/pfsd/keyman"
-	"github.com/pp2p/paranoid/raft"
-	"golang.org/x/crypto/bcrypt"
 	"io"
 	"os"
 	"path"
 	"sync"
 	"time"
+
+	"github.com/pp2p/paranoid/logger"
+	"github.com/pp2p/paranoid/pfsd/keyman"
+	"github.com/pp2p/paranoid/raft"
+	"golang.org/x/crypto/bcrypt"
 )
 
 const (
-	PASSWORD_SALT_LENGTH int = 64
+	// PasswordSaltLength is the length of the password salt
+	PasswordSaltLength int = 64
 )
 
+// Log is used to log messages from pfsd
 var Log *logger.ParanoidLogger
 
 // Node struct
@@ -34,6 +37,7 @@ func (n Node) String() string {
 	return fmt.Sprintf("%s:%s", n.IP, n.Port)
 }
 
+// FileSystemAttributes stores the information written onto the disk
 type FileSystemAttributes struct {
 	Encrypted     bool       `json:"encrypted"`
 	KeyGenerated  bool       `json:"keygenerated"`
@@ -41,18 +45,22 @@ type FileSystemAttributes struct {
 	EncryptionKey keyman.Key `json:"encryptionkey,omitempty"` //The encryption key is only saved to file in this manner if networking is turned off
 }
 
+// RaftNetworkServer is an instance of the network server
 var RaftNetworkServer *raft.RaftNetworkServer
 
+// ParanoidDir is the location of the stored encrypted data
 var ParanoidDir string
+
+// MountPoint of the FUSE filesystem
 var MountPoint string
 
-// Time at which PFSD started. Used for calculating uptime.
+// BootTime at which PFSD started. Used for calculating uptime.
 var BootTime time.Time
 
-// Node information for the current node
+// ThisNode stores information about the current node
 var ThisNode Node
 
-// If UPnP is enabled and a port mapping has been establised.
+// UPnPEnabled is kinda self explanatory
 var UPnPEnabled bool
 
 // ResetInterval containing how often the Renew function has to be called
@@ -64,26 +72,32 @@ var DiscoveryAddr string
 // Nodes instance which controls all the information about other pfsd instances
 var Nodes = nodes{m: make(map[string]Node)}
 
+// NetworkOff if the network should not be used
+// TODO: Rename it to NetworkActive
 var NetworkOff bool
 
-// If true, TLS is being used in all connections to and from PFSD
+// TLSEnabled if network encryption is used in all connections to and from PFSD
 var TLSEnabled bool
 
-// If true, PFSD will not verify the TLS credentials of anything it connects to
+// TLSSkipVerify will cause PFSD to not verify the TLS credentials of anything
+// it connects to
 var TLSSkipVerify bool
 
-// The hash of the password required to join the raft cluster
+// PoolPasswordHash used to connect to the pool
 var PoolPasswordHash []byte
+
+// PoolPasswordSalt used to connect to the pool
 var PoolPasswordSalt []byte
 
+// SetPoolPasswordHash generates and sets a new password hash from the password
 func SetPoolPasswordHash(password string) error {
 	PoolPasswordHash = make([]byte, 0)
-	PoolPasswordSalt = make([]byte, PASSWORD_SALT_LENGTH)
+	PoolPasswordSalt = make([]byte, PasswordSaltLength)
 	n, err := io.ReadFull(rand.Reader, PoolPasswordSalt)
 	if err != nil {
 		return err
 	}
-	if n != PASSWORD_SALT_LENGTH {
+	if n != PasswordSaltLength {
 		return errors.New("unable to read correct number of bytes from random number generator")
 	}
 
@@ -94,9 +108,14 @@ func SetPoolPasswordHash(password string) error {
 	return nil
 }
 
-// Global waitgroup for all goroutines in PFSD
+// Wait for all goroutines in PFSD
 var Wait sync.WaitGroup
-var Quit = make(chan bool) // Doesn't matter what the channel holds
+
+// Quit channel used for killing the application
+// TODO: Use struct{} instead
+var Quit = make(chan bool)
+
+// ShuttingDown is set when the PFSD is in shutdown phase
 var ShuttingDown bool
 
 // --------------------------------------------
@@ -145,17 +164,25 @@ func (ns *nodes) GetAll() []Node {
 //	---- Encryption ----
 //	--------------------
 
-// Global key used by this instance of PFSD
+// Encrypted determines whether the whole filesystem is encrypted
 var Encrypted bool
+
+// KeyGenerated is set to true when the key is generated
 var KeyGenerated bool
+
+// EncryptionKey stores the actual key used for encryption
 var EncryptionKey *keyman.Key
 
 var keyPieceStoreLock sync.Mutex
 
+// KeyPieceMap of the key pieces
 type KeyPieceMap map[string]*keyman.KeyPiece
+
+// KeyPieceStore maps key generations to individual key pieces
 type KeyPieceStore map[int64]KeyPieceMap
 
-// Returns nil if the piece is not found
+// GetPiece gets the key piece based on the generation and the UUID of the node.
+// It returns nil if the key is not found.
 func (ks KeyPieceStore) GetPiece(generation int64, nodeUUID string) *keyman.KeyPiece {
 	keyPieceStoreLock.Lock()
 	defer keyPieceStoreLock.Unlock()
@@ -172,6 +199,8 @@ func (ks KeyPieceStore) GetPiece(generation int64, nodeUUID string) *keyman.KeyP
 	return piece
 }
 
+// AddPiece adds a specific piece of the key, associated with the node to a
+// generation
 func (ks KeyPieceStore) AddPiece(generation int64, nodeUUID string, piece *keyman.KeyPiece) error {
 	keyPieceStoreLock.Lock()
 	defer keyPieceStoreLock.Unlock()
@@ -185,6 +214,7 @@ func (ks KeyPieceStore) AddPiece(generation int64, nodeUUID string, piece *keyma
 	return ks.SaveToDisk()
 }
 
+// DeletePiece for a node from a given generation
 func (ks KeyPieceStore) DeletePiece(generation int64, nodeUUID string) error {
 	keyPieceStoreLock.Lock()
 	defer keyPieceStoreLock.Unlock()
@@ -198,6 +228,7 @@ func (ks KeyPieceStore) DeletePiece(generation int64, nodeUUID string) error {
 	return ks.SaveToDisk()
 }
 
+// DeleteGeneration removes the whole generation
 func (ks KeyPieceStore) DeleteGeneration(generation int64) error {
 	keyPieceStoreLock.Lock()
 	defer keyPieceStoreLock.Unlock()
@@ -205,6 +236,7 @@ func (ks KeyPieceStore) DeleteGeneration(generation int64) error {
 	return ks.SaveToDisk()
 }
 
+// SaveToDisk saves all the keypieces in the meta directory
 func (ks KeyPieceStore) SaveToDisk() error {
 	piecePath := path.Join(ParanoidDir, "meta", "pieces-new")
 	file, err := os.Create(piecePath)
@@ -227,4 +259,5 @@ func (ks KeyPieceStore) SaveToDisk() error {
 	return nil
 }
 
+// HeldKeyPieces is an instance of KeyPieceStore
 var HeldKeyPieces = make(KeyPieceStore)
