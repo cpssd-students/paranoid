@@ -1,4 +1,4 @@
-all: pnetwork dnetwork raftnetwork fileserver
+all: pnetwork dnetwork raftnetwork
 
 pnetwork:
 	protoc --go_out=plugins=grpc:. paranoidnetwork/paranoid.proto
@@ -8,6 +8,3 @@ dnetwork:
 
 raftnetwork:
 	protoc --go_out=plugins=grpc:. raft/raft.proto
-
-fileserver:
-	protoc --go_out=plugins=grpc:. fileserver/fileserver.proto
