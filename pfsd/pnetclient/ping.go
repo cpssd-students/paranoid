@@ -7,6 +7,7 @@ import (
 	"golang.org/x/net/context"
 )
 
+// Ping the peers
 func Ping() {
 	ip, err := upnp.GetIP()
 	if err != nil {

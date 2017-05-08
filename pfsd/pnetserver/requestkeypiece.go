@@ -8,6 +8,7 @@ import (
 	"google.golang.org/grpc/codes"
 )
 
+// RequestKeyPiece implements the RequestKeyPiece RPC
 func (s *ParanoidServer) RequestKeyPiece(ctx context.Context, req *pb.KeyPieceRequest) (*pb.KeyPiece, error) {
 	key := globals.HeldKeyPieces.GetPiece(req.Generation, req.Node.Uuid)
 	if key == nil {

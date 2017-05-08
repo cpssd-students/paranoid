@@ -78,7 +78,7 @@ func printStatusInfo(pfsName string, info intercom.StatusResponse) {
 	fmt.Printf("\nFilesystem Name:\t%s\n", pfsName)
 	fmt.Printf("Uptime:\t\t\t%s\n", info.Uptime.String())
 	fmt.Printf("Raft Status:\t\t%s\n", info.Status)
-	if info.Status != intercom.STATUS_NETWORKOFF {
+	if info.Status != intercom.StatusNetworkOff {
 		fmt.Printf("TLS Enabled:\t\t%t\n", info.TLSActive)
 		fmt.Printf("Port:\t\t\t%d\n", info.Port)
 	}

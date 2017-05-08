@@ -1,17 +1,23 @@
 package pfi
 
 import (
+	"syscall"
+
 	"github.com/hanwen/go-fuse/fuse"
 	"github.com/pp2p/paranoid/libpfs/returncodes"
 	"github.com/pp2p/paranoid/logger"
-	"syscall"
 )
 
 var (
+	// SendOverNetwork determines whether the message should be send over network
+	// or locally
 	SendOverNetwork bool
-	Log             *logger.ParanoidLogger
+
+	// Log used for pfi
+	Log *logger.ParanoidLogger
 )
 
+// GetFuseReturnCode from the internal return code
 func GetFuseReturnCode(retcode returncodes.Code) fuse.Status {
 	switch retcode {
 	case returncodes.ENOENT:

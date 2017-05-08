@@ -3,6 +3,7 @@ package pnetserver
 import (
 	"errors"
 	"fmt"
+
 	"github.com/pp2p/paranoid/pfsd/globals"
 	pb "github.com/pp2p/paranoid/proto/paranoidnetwork"
 	"github.com/pp2p/paranoid/raft"
@@ -10,7 +11,7 @@ import (
 	"golang.org/x/net/context"
 )
 
-//JoinCluster receives requests from nodes asking to join raft cluster
+// JoinCluster receives requests from nodes asking to join raft cluster
 func (s *ParanoidServer) JoinCluster(ctx context.Context, req *pb.JoinClusterRequest) (*pb.EmptyMessage, error) {
 	if req.PoolPassword == "" {
 		if len(globals.PoolPasswordHash) != 0 {
@@ -19,7 +20,7 @@ func (s *ParanoidServer) JoinCluster(ctx context.Context, req *pb.JoinClusterReq
 	} else {
 		err := bcrypt.CompareHashAndPassword(globals.PoolPasswordHash, append(globals.PoolPasswordSalt, []byte(req.PoolPassword)...))
 		if err != nil {
-			return &pb.EmptyMessage{}, fmt.Errorf("unable to add node to raft cluster, password error:", err)
+			return &pb.EmptyMessage{}, fmt.Errorf("unable to add node to raft cluster, password error: %v", err)
 		}
 	}
 
@@ -32,7 +33,7 @@ func (s *ParanoidServer) JoinCluster(ctx context.Context, req *pb.JoinClusterReq
 	Log.Infof("Got Ping from Node:", node)
 	err := globals.RaftNetworkServer.RequestAddNodeToConfiguration(node)
 	if err != nil {
-		return &pb.EmptyMessage{}, fmt.Errorf("unable to add node to raft cluster:", err)
+		return &pb.EmptyMessage{}, fmt.Errorf("unable to add node to raft cluster: %v", err)
 	}
 	return &pb.EmptyMessage{}, nil
 }

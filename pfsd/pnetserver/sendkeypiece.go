@@ -1,6 +1,8 @@
 package pnetserver
 
 import (
+	"math/big"
+
 	"github.com/pp2p/paranoid/pfsd/globals"
 	"github.com/pp2p/paranoid/pfsd/keyman"
 	pb "github.com/pp2p/paranoid/proto/paranoidnetwork"
@@ -8,9 +10,9 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
-	"math/big"
 )
 
+// SendKeyPiece implements the SendKeyPiece RPC
 func (s *ParanoidServer) SendKeyPiece(ctx context.Context, req *pb.KeyPieceSend) (*pb.SendKeyPieceResponse, error) {
 	var prime big.Int
 	prime.SetBytes(req.Key.Prime)
@@ -46,9 +48,9 @@ func (s *ParanoidServer) SendKeyPiece(ctx context.Context, req *pb.KeyPieceSend)
 		if err != nil {
 			if err == keyman.ErrGenerationDeprecated {
 				return &pb.SendKeyPieceResponse{}, err
-			} else {
-				return &pb.SendKeyPieceResponse{}, grpc.Errorf(codes.FailedPrecondition, "failed to commit to Raft: %s", err)
 			}
+
+			return &pb.SendKeyPieceResponse{}, grpc.Errorf(codes.FailedPrecondition, "failed to commit to Raft: %s", err)
 		}
 	} else {
 		return &pb.SendKeyPieceResponse{true}, nil

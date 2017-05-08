@@ -2,15 +2,18 @@ package pnetclient
 
 import (
 	"crypto/tls"
+	"time"
+
 	"github.com/pp2p/paranoid/logger"
 	"github.com/pp2p/paranoid/pfsd/globals"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	"time"
 )
 
+// Log used by the pnetclient
 var Log *logger.ParanoidLogger
 
+// Dial a node and return a connection if successful
 func Dial(node globals.Node) (*grpc.ClientConn, error) {
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithTimeout(5*time.Second))

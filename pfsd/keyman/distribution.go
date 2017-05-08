@@ -13,8 +13,11 @@ import (
 	"math/big"
 )
 
+// PrimeSize determines the size of the prime number to be used when creating
+// the key
 const PrimeSize int = 320 // 40 bytes
 
+// KeyPiece stores the individual information about a piece of the key
 type KeyPiece struct {
 	Data              []byte
 	ParentFingerprint [32]byte // The SHA-256 fingerprint of the key it was generated from.
@@ -22,6 +25,7 @@ type KeyPiece struct {
 	Seq               int64    // Where f(Seq) = Data, for some polynomial f
 }
 
+// FingerMismatchError is rained when the key fingerprint does not match
 type FingerMismatchError struct {
 	ExpectedFingerprint [32]byte
 	ActualFingerprint   [32]byte
@@ -31,8 +35,8 @@ func (e *FingerMismatchError) Error() string {
 	return fmt.Sprintf("key fingerprint does not match keypiece fingerprint")
 }
 
-// Generates numPieces KeyPieces from key. requiredPieces is the number of KeyPieces
-// needed to reconstruct the original key.
+// GeneratePieces from key. The number is defined by numPieces. requiredPieces
+// is the number of KeyPieces needed to reconstruct the original key.
 func GeneratePieces(key *Key, numPieces, requiredPieces int64) ([]*KeyPiece, error) {
 	// Some input validation
 	if requiredPieces > numPieces {
@@ -72,7 +76,7 @@ func GeneratePieces(key *Key, numPieces, requiredPieces int64) ([]*KeyPiece, err
 	return pieces, nil
 }
 
-// Rebuild a Key from a set of KeyPieces. This function will succeed iff
+// RebuildKey from a set of KeyPieces. This function will succeed iff
 // len(pieces) >= requiredPieces from the Generate function.
 func RebuildKey(pieces []*KeyPiece) (*Key, error) {
 	fingerprint := pieces[0].ParentFingerprint

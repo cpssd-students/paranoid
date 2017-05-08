@@ -2,11 +2,12 @@ package pnetclient
 
 import (
 	"fmt"
+
 	"github.com/pp2p/paranoid/pfsd/globals"
 	"github.com/pp2p/paranoid/pfsd/keyman"
 )
 
-// Chunks key and sends the pieces to other nodes on the network.
+// Distribute chunked key over the network
 func Distribute(key *keyman.Key, peers []globals.Node, generation int) error {
 	numPieces := int64(len(peers) + 1)
 	requiredPieces := numPieces/2 + 1
@@ -40,6 +41,7 @@ func Distribute(key *keyman.Key, peers []globals.Node, generation int) error {
 	return nil
 }
 
+// KSMObserver does raft stuff when the key state machine changes
 func KSMObserver(ksm *keyman.KeyStateMachine) {
 	defer globals.Wait.Done()
 	for {

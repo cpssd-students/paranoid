@@ -4,6 +4,16 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io/ioutil"
+	"net"
+	"os"
+	"path"
+	"path/filepath"
+	"strconv"
+	"strings"
+	"sync"
+	"time"
+
 	"github.com/pp2p/paranoid/libpfs/commands"
 	"github.com/pp2p/paranoid/libpfs/encryption"
 	"github.com/pp2p/paranoid/logger"
@@ -21,20 +31,14 @@ import (
 	"github.com/pp2p/paranoid/raft/raftlog"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	"io/ioutil"
-	"net"
-	"os"
-	"path"
-	"path/filepath"
-	"strconv"
-	"strings"
-	"sync"
-	"time"
 )
 
 const (
+	// GenerationJoinTimeout determines the timeout for joining a generation
 	GenerationJoinTimeout time.Duration = time.Minute * 3
-	JoinSendKeysInterval  time.Duration = time.Second
+	// JoinSendKeysInterval determines the interval at which the keys should be
+	// sent
+	JoinSendKeysInterval time.Duration = time.Second
 )
 
 var (
@@ -54,7 +58,7 @@ type keySentResponse struct {
 }
 
 func startKeyStateMachine() {
-	_, err := os.Stat(path.Join(globals.ParanoidDir, "meta", keyman.KSM_FILE_NAME))
+	_, err := os.Stat(path.Join(globals.ParanoidDir, "meta", keyman.KsmFileName))
 	if err == nil {
 		var err error
 		keyman.StateMachine, err = keyman.NewKSMFromPFSDir(globals.ParanoidDir)
@@ -237,7 +241,7 @@ func startRPCServer(lis *net.Listener, password string) {
 								if peers[i] == keySendInfo.uuid {
 									peers = append(peers[:i], peers[i+1:]...)
 									keyPieces = append(keyPieces[:i], keyPieces[i+1:]...)
-									keysReplicated += 1
+									keysReplicated++
 									if keysReplicated >= minKeysRequired {
 										attemptJoin <- true
 									}
@@ -325,13 +329,13 @@ func setupLogging() {
 }
 
 func getFileSystemAttributes() {
-	attributesJson, err := ioutil.ReadFile(path.Join(globals.ParanoidDir, "meta", "attributes"))
+	attributesJSON, err := ioutil.ReadFile(path.Join(globals.ParanoidDir, "meta", "attributes"))
 	if err != nil {
 		log.Fatal("unable to read file system attributes:", err)
 	}
 
 	attributes := &globals.FileSystemAttributes{}
-	err = json.Unmarshal(attributesJson, attributes)
+	err = json.Unmarshal(attributesJSON, attributes)
 	if err != nil {
 		log.Fatal("unable to read file system attributes:", err)
 	}
@@ -379,13 +383,13 @@ func getFileSystemAttributes() {
 }
 
 func saveFileSystemAttributes(attributes *globals.FileSystemAttributes) {
-	attributesJson, err := json.Marshal(attributes)
+	attributesJSON, err := json.Marshal(attributes)
 	if err != nil {
 		log.Fatal("unable to save new file system attributes to file:", err)
 	}
 
 	newAttributesFile := path.Join(globals.ParanoidDir, "meta", "attributes-new")
-	err = ioutil.WriteFile(newAttributesFile, attributesJson, 0600)
+	err = ioutil.WriteFile(newAttributesFile, attributesJSON, 0600)
 	if err != nil {
 		log.Fatal("unable to save new file system attributes to file:", err)
 	}

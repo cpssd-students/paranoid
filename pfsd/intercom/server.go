@@ -2,23 +2,30 @@ package intercom
 
 import (
 	"fmt"
-	"github.com/pp2p/paranoid/pfsd/globals"
-	"github.com/pp2p/paranoid/raft"
 	"net"
 	"net/rpc"
 	"os"
 	"path"
 	"strconv"
 	"time"
+
+	"github.com/pp2p/paranoid/pfsd/globals"
+	"github.com/pp2p/paranoid/raft"
 )
 
+// Message constants
 const (
-	STATUS_NETWORKOFF string = "Networking disabled"
+	StatusNetworkOff string = "Networking disabled"
 )
 
+// IntercomServer listens on a Unix socket to respond to questions asked by
+// external applications.
 type IntercomServer struct{}
+
+// EmptyMessage with no data
 type EmptyMessage struct{}
 
+// StatusResponse with data about the status of pfsd
 type StatusResponse struct {
 	Uptime    time.Duration
 	Status    string
@@ -26,20 +33,21 @@ type StatusResponse struct {
 	Port      int
 }
 
+// ListNodesResponse with all Nodes
 type ListNodesResponse struct {
 	Nodes []raft.Node
 }
 
-// Literally just a method for paranoid-cli to ping PFSD
+// ConfirmUp is simple method that paranoid-cli uses to ping PFSD
 func (s *IntercomServer) ConfirmUp(req *EmptyMessage, resp *EmptyMessage) error {
 	return nil
 }
 
-// Provides health data for the current node.
+// Status provides health data for the current node.
 func (s *IntercomServer) Status(req *EmptyMessage, resp *StatusResponse) error {
 	if globals.NetworkOff {
 		resp.Uptime = time.Since(globals.BootTime)
-		resp.Status = STATUS_NETWORKOFF
+		resp.Status = StatusNetworkOff
 		return nil
 	}
 
@@ -69,6 +77,7 @@ func (s *IntercomServer) Status(req *EmptyMessage, resp *StatusResponse) error {
 	return nil
 }
 
+// ListNodes that pfsd is connected to
 func (s *IntercomServer) ListNodes(req *EmptyMessage, resp *ListNodesResponse) error {
 	if globals.RaftNetworkServer == nil {
 		return fmt.Errorf("Networking Disabled")
@@ -77,6 +86,8 @@ func (s *IntercomServer) ListNodes(req *EmptyMessage, resp *ListNodesResponse) e
 	return nil
 }
 
+// RunServer starts the intercom server on a socket stored in the specified
+// meta directory
 func RunServer(metaDir string) {
 	socketPath := path.Join(metaDir, "intercom.sock")
 	err := os.Remove(socketPath)

@@ -3,13 +3,15 @@ package pnetclient
 import (
 	"errors"
 	"fmt"
+	"math/big"
+
 	"github.com/pp2p/paranoid/pfsd/globals"
 	"github.com/pp2p/paranoid/pfsd/keyman"
 	pb "github.com/pp2p/paranoid/proto/paranoidnetwork"
 	"golang.org/x/net/context"
-	"math/big"
 )
 
+// RequestKeyPiece from a node based on its UUID
 func RequestKeyPiece(uuid string, generation int64) (*keyman.KeyPiece, error) {
 	node, err := globals.Nodes.GetNode(uuid)
 	if err != nil {

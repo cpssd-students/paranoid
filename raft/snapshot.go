@@ -139,14 +139,14 @@ func tarSnapshot(snapshotDirectory string) error {
 		return fmt.Errorf("error creating tar file: %s", err)
 	}
 
-	err = os.Rename(path.Join(snapshotDirectory, "meta", keyman.KSM_FILE_NAME),
-		path.Join(snapshotDirectory, "meta", keyman.KSM_FILE_NAME+"-tar"))
+	err = os.Rename(path.Join(snapshotDirectory, "meta", keyman.KsmFileName),
+		path.Join(snapshotDirectory, "meta", keyman.KsmFileName+"-tar"))
 	if err != nil {
 		return fmt.Errorf("error creating tar file: %s", err)
 	}
 
 	tar := exec.Command("tar", "--directory="+snapshotDirectory, "-cf", path.Join(snapshotDirectory, TarFileName),
-		"contents-tar", "names-tar", "inodes-tar", PersistentConfigurationFileName, path.Join("meta", keyman.KSM_FILE_NAME+"-tar"))
+		"contents-tar", "names-tar", "inodes-tar", PersistentConfigurationFileName, path.Join("meta", keyman.KsmFileName+"-tar"))
 	err = tar.Run()
 	if err != nil {
 		return fmt.Errorf("error creating tar file: %s", err)
@@ -161,8 +161,8 @@ func startNextSnapshotWithCurrent(currentSnapshot, nextSnapshot string) error {
 		return fmt.Errorf("error starting new snapshot from current snapshot:", err)
 	}
 
-	err = os.Rename(path.Join(nextSnapshot, "meta", keyman.KSM_FILE_NAME+"-tar"),
-		path.Join(nextSnapshot, "meta", keyman.KSM_FILE_NAME))
+	err = os.Rename(path.Join(nextSnapshot, "meta", keyman.KsmFileName+"-tar"),
+		path.Join(nextSnapshot, "meta", keyman.KsmFileName))
 	if err != nil {
 		return fmt.Errorf("error starting next snapshot: %s", err)
 	}
@@ -226,7 +226,7 @@ func (s *RaftNetworkServer) startNextSnapshot(nextSnapshot string) error {
 func (s *RaftNetworkServer) applyLogUpdates(snapshotDirectory string, startIndex, endIndex uint64) (lastIncludedTerm uint64, err error) {
 	snapshotConfig := newConfiguration(snapshotDirectory, nil, s.nodeDetails, false)
 	var snapshotKeyMachine *keyman.KeyStateMachine
-	_, err = os.Stat(path.Join(snapshotDirectory, "meta", keyman.KSM_FILE_NAME))
+	_, err = os.Stat(path.Join(snapshotDirectory, "meta", keyman.KsmFileName))
 	if os.IsNotExist(err) {
 		snapshotKeyMachine = keyman.NewKSM(snapshotDirectory)
 		err = snapshotKeyMachine.SerialiseToPFSDir()
@@ -437,12 +437,12 @@ func (s *RaftNetworkServer) RevertToSnapshot(snapshotPath string) error {
 		Log.Warn("Unable to delete snapshot configuration file")
 	}
 
-	err = keyman.StateMachine.UpdateFromStateFile(path.Join(s.State.pfsDirectory, "meta", keyman.KSM_FILE_NAME+"-tar"))
+	err = keyman.StateMachine.UpdateFromStateFile(path.Join(s.State.pfsDirectory, "meta", keyman.KsmFileName+"-tar"))
 	if err != nil {
 		return fmt.Errorf("error reverting to snapshot: %s", err)
 	}
 
-	err = os.Remove(path.Join(s.State.pfsDirectory, "meta", keyman.KSM_FILE_NAME+"-tar"))
+	err = os.Remove(path.Join(s.State.pfsDirectory, "meta", keyman.KsmFileName+"-tar"))
 	if err != nil {
 		Log.Warn("Unable to delete snapshot configuration file:", err)
 	}

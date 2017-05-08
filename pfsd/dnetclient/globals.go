@@ -16,6 +16,7 @@ const peerPingInterval time.Duration = time.Minute
 var (
 	discoveryCommonName string
 
+	// Log is used to log dnetclient messages
 	Log *logger.ParanoidLogger
 )
 

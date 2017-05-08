@@ -3,13 +3,14 @@ package upnp
 import (
 	"errors"
 	"flag"
-	"github.com/huin/goupnp/dcps/internetgateway1"
-	"github.com/pp2p/paranoid/logger"
-	"github.com/pp2p/paranoid/pfsd/globals"
 	"math/rand"
 	"net"
 	"strconv"
 	"sync"
+
+	"github.com/huin/goupnp/dcps/internetgateway1"
+	"github.com/pp2p/paranoid/logger"
+	"github.com/pp2p/paranoid/pfsd/globals"
 )
 
 var (
@@ -20,12 +21,14 @@ var (
 
 	iface = flag.String("interface", "default",
 		"network interface on which to perform connections. If not set, will use default interface.")
+
+	// Log used for upnp
 	Log *logger.ParanoidLogger
 )
 
 const attemptedPortAssignments = 10
 
-//Discovers UPnP devices on the network.
+// DiscoverDevices with UPnP on the network
 func DiscoverDevices() error {
 	var discoveryFinished sync.WaitGroup
 	discoveryFinished.Add(2)
@@ -53,7 +56,7 @@ func DiscoverDevices() error {
 	return errors.New("No devices found")
 }
 
-func getUnoccupiedPortsIp(client *internetgateway1.WANIPConnection1) []int {
+func getUnoccupiedPortsIP(client *internetgateway1.WANIPConnection1) []int {
 	m := make(map[int]bool)
 	for i := 1; i < 65536; i++ {
 		_, port, _, _, _, _, _, _, err := client.GetGenericPortMappingEntry(uint16(i))
@@ -89,20 +92,21 @@ func getUnoccupiedPortsppp(client *internetgateway1.WANPPPConnection1) []int {
 	return openPorts
 }
 
-func AddPortMapping(internalIp string, internalPort int) (int, error) {
+// AddPortMapping maps to a port
+func AddPortMapping(internalIP string, internalPort int) (int, error) {
 	for _, client := range uPnPClientsIP {
-		openPorts := getUnoccupiedPortsIp(client)
+		openPorts := getUnoccupiedPortsIP(client)
 		if len(openPorts) > 0 {
 			for i := 0; i < attemptedPortAssignments; i++ {
 				port := openPorts[rand.Intn(len(openPorts))]
 				Log.Info("Picked port:", port)
-				err := client.AddPortMapping("", uint16(port), "tcp", uint16(internalPort), internalIp, true, "", 0)
+				err := client.AddPortMapping("", uint16(port), "tcp", uint16(internalPort), internalIP, true, "", 0)
 				if err == nil {
 					ipPortMappedClient = client
 					return port, nil
-				} else {
-					Log.Warn("Unable to map port", port, ". Error:", err)
 				}
+
+				Log.Warn("Unable to map port", port, ". Error:", err)
 			}
 		}
 	}
@@ -112,19 +116,20 @@ func AddPortMapping(internalIp string, internalPort int) (int, error) {
 			for i := 0; i < attemptedPortAssignments; i++ {
 				port := openPorts[rand.Intn(len(openPorts))]
 				Log.Info("Picked port:", port)
-				err := client.AddPortMapping("", uint16(port), "tcp", uint16(internalPort), internalIp, true, "", 0)
+				err := client.AddPortMapping("", uint16(port), "tcp", uint16(internalPort), internalIP, true, "", 0)
 				if err == nil {
 					pppPortMappedClient = client
 					return port, nil
-				} else {
-					Log.Warn("Unable to map port", port, ". Error:", err)
 				}
+
+				Log.Warn("Unable to map port", port, ". Error:", err)
 			}
 		}
 	}
 	return 0, errors.New("Unable to map port")
 }
 
+// ClearPortMapping removes a UPnP port
 func ClearPortMapping(externalPortString string) error {
 	externalPort, err := strconv.Atoi(externalPortString)
 	if err != nil {
@@ -139,8 +144,8 @@ func ClearPortMapping(externalPortString string) error {
 	return errors.New("No UPnP device available")
 }
 
-//GetInternalIp gets the internal Ip address
-func GetInternalIp() (string, error) {
+// GetInternalIP gets the internal Ip address
+func GetInternalIP() (string, error) {
 	ifaces, _ := net.Interfaces()
 	for _, i := range ifaces {
 		if (i.Flags & net.FlagLoopback) != 0 {
@@ -164,27 +169,28 @@ func GetInternalIp() (string, error) {
 	return "", errors.New("No matching interfaces found")
 }
 
-//GetExternalIp gets the external IP of the port mapped device.
-func GetExternalIp() (string, error) {
+// GetExternalIP gets the external IP of the port mapped device.
+func GetExternalIP() (string, error) {
 	if ipPortMappedClient != nil {
-		externalIp, err := ipPortMappedClient.GetExternalIPAddress()
+		externalIP, err := ipPortMappedClient.GetExternalIPAddress()
 		if err == nil {
-			return externalIp, nil
+			return externalIP, nil
 		}
 	}
 	if pppPortMappedClient != nil {
-		externalIp, err := pppPortMappedClient.GetExternalIPAddress()
+		externalIP, err := pppPortMappedClient.GetExternalIPAddress()
 		if err == nil {
-			return externalIp, nil
+			return externalIP, nil
 		}
 	}
 	return "", errors.New("Unable to get get external IP address")
 }
 
+// GetIP gets an IP address that can be used
 func GetIP() (string, error) {
 	if globals.UPnPEnabled {
-		return GetExternalIp()
-	} else {
-		return GetInternalIp()
+		return GetExternalIP()
 	}
+
+	return GetInternalIP()
 }
