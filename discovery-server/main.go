@@ -70,17 +70,13 @@ func main() {
 
 	dnetserver.RenewInterval = renewDuration
 
-	if *port < 1 || *port > 65535 || *fileServerPort < 1 || *fileServerPort > 65535 {
-		dnetserver.Log.Fatal("Ports must be a number between 1 and 65535, inclusive.")
-	}
-
 	dnetserver.Log.Info("Starting Paranoid Discovery Server")
 
 	lis, err := net.Listen("tcp", ":"+strconv.Itoa(*port))
 	if err != nil {
 		dnetserver.Log.Fatalf("Failed to listen on port %d: %v.", *port, err)
 	}
-	dnetserver.Log.Info("Listening on port", *port)
+	dnetserver.Log.Infof("Listening on %s", lis.Addr().String())
 
 	if *loadState {
 		dnetserver.LoadState()
