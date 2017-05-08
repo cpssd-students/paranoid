@@ -11,10 +11,8 @@ import (
 	"time"
 
 	"github.com/pp2p/paranoid/discovery-server/dnetserver"
-	"github.com/pp2p/paranoid/discovery-server/server"
 	"github.com/pp2p/paranoid/logger"
 	pb "github.com/pp2p/paranoid/proto/discoverynetwork"
-	fileServe "github.com/pp2p/paranoid/proto/fileserver"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -27,13 +25,12 @@ const (
 )
 
 var (
-	port           = flag.Int("port", 10101, "port to listen on")
-	logDir         = flag.String("log-directory", "/var/log", "directory in which to create ParanoidDiscovery.log")
-	renewInterval  = flag.Int("renew-interval", 5*60*1000, "time after which membership expires, in ms")
-	certFile       = flag.String("cert", "", "TLS certificate file - if empty connection will be unencrypted")
-	keyFile        = flag.String("key", "", "TLS key file - if empty connection will be unencrypted")
-	loadState      = flag.Bool("state", true, "Load the Nodes from the statefile")
-	fileServerPort = flag.Int("filePort", 10111, "File Server Port")
+	port          = flag.Int("port", 10101, "port to listen on")
+	logDir        = flag.String("log-directory", "/var/log", "directory in which to create ParanoidDiscovery.log")
+	renewInterval = flag.Int("renew-interval", 5*60*1000, "time after which membership expires, in ms")
+	certFile      = flag.String("cert", "", "TLS certificate file - if empty connection will be unencrypted")
+	keyFile       = flag.String("key", "", "TLS key file - if empty connection will be unencrypted")
+	loadState     = flag.Bool("state", true, "Load the Nodes from the statefile")
 )
 
 func createRPCServer() *grpc.Server {
@@ -55,7 +52,6 @@ func main() {
 	flag.Parse()
 	dnetserver.Log = logger.New("main", "discovery-server", *logDir)
 	dnetserver.Pools = make(map[string]*dnetserver.Pool)
-	server.Log = logger.New("fileServer", "discovery-server", *logDir)
 	err := dnetserver.Log.SetOutput(logger.LOGFILE | logger.STDERR)
 	if err != nil {
 		dnetserver.Log.Error("Failed to set logger output:", err)
@@ -81,12 +77,8 @@ func main() {
 	if *loadState {
 		dnetserver.LoadState()
 	}
-	server.FileMap = make(map[string]*server.FileCache)
-	servePort := strconv.Itoa(*fileServerPort)
-	go server.ServeFiles(servePort)
 	srv := createRPCServer()
 	pb.RegisterDiscoveryNetworkServer(srv, &dnetserver.DiscoveryServer{})
-	fileServe.RegisterFileserverServer(srv, &server.FileserverServer{})
 
 	dnetserver.Log.Info("gRPC server created")
 	srv.Serve(lis)
