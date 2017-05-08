@@ -1,23 +1,23 @@
 package rafttestutil
 
 import (
-	"io/ioutil"
 	"log"
 	"net"
 	"os"
 	"strings"
 	"time"
 
+	"github.com/pp2p/paranoid/libpfs/commands"
 	"github.com/pp2p/paranoid/raft"
 )
 
 // GenerateNewUUID creates a new UUID
 func GenerateNewUUID() string {
-	uuidBytes, err := ioutil.ReadFile("/proc/sys/kernel/random/uuid")
+	uuidString, err := commands.NewUUID()
 	if err != nil {
 		log.Fatalln("Error generating new UUID:", err)
 	}
-	return strings.TrimSpace(string(uuidBytes))
+	return uuidString
 }
 
 // StartListener starts a new listener on a random port
