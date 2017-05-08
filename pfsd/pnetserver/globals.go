@@ -6,6 +6,8 @@ import (
 	"github.com/pp2p/paranoid/logger"
 )
 
+// ParanoidServer implements the paranoidnetwork gRPC server
 type ParanoidServer struct{}
 
+// Log used by pnetserver
 var Log *logger.ParanoidLogger

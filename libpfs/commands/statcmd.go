@@ -21,7 +21,6 @@ type StatInfo struct {
 
 // StatCommand returns information about a file as StatInfo object
 func StatCommand(paranoidDirectory, filePath string) (returnCode returncodes.Code, info StatInfo, returnError error) {
-	Log.Info("stat command called")
 	Log.Verbose("stat : given paranoidDirectory", paranoidDirectory)
 
 	err := GetFileSystemLock(paranoidDirectory, SharedLock)

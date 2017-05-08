@@ -1,14 +1,16 @@
 package pfi
 
 import (
+	"path"
+
 	"github.com/pp2p/paranoid/logger"
 	"github.com/pp2p/paranoid/pfsd/globals"
-	"path"
 
 	"github.com/hanwen/go-fuse/fuse/nodefs"
 	"github.com/hanwen/go-fuse/fuse/pathfs"
 )
 
+// StartPfi with given verbosity level
 func StartPfi(logVerbose bool) {
 	// Create a logger
 	var err error

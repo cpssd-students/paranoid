@@ -6,6 +6,7 @@ import (
 	"golang.org/x/net/context"
 )
 
+// Ping implements the Ping RPC
 func (s *ParanoidServer) Ping(ctx context.Context, req *pb.Node) (*pb.EmptyMessage, error) {
 	node := globals.Node{
 		IP:         req.Ip,

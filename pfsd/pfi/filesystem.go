@@ -193,6 +193,7 @@ func (fs *ParanoidFileSystem) Symlink(oldName string, newName string, context *f
 	return GetFuseReturnCode(code)
 }
 
+// Readlink to where the file is pointing to
 func (fs *ParanoidFileSystem) Readlink(name string, context *fuse.Context) (string, fuse.Status) {
 	Log.Info("Readlink called on", name)
 	code, link, err := commands.ReadlinkCommand(globals.ParanoidDir, name)

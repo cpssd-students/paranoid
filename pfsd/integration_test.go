@@ -4,9 +4,6 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/pp2p/paranoid/libpfs/commands"
-	"github.com/pp2p/paranoid/logger"
-	"github.com/pp2p/paranoid/pfsd/globals"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -15,6 +12,10 @@ import (
 	"syscall"
 	"testing"
 	"time"
+
+	"github.com/pp2p/paranoid/libpfs/commands"
+	"github.com/pp2p/paranoid/logger"
+	"github.com/pp2p/paranoid/pfsd/globals"
 )
 
 func createTestDir(t *testing.T, name string) {
@@ -71,12 +72,12 @@ func TestKillSignal(t *testing.T) {
 		NetworkOff:   false,
 	}
 
-	attributesJson, err := json.Marshal(attributes)
+	attributesJSON, err := json.Marshal(attributes)
 	if err != nil {
 		t.Fatal("unable to save file system attributes to file:", err)
 	}
 
-	err = ioutil.WriteFile(path.Join(os.TempDir(), "testksDirectory", "meta", "attributes"), attributesJson, 0600)
+	err = ioutil.WriteFile(path.Join(os.TempDir(), "testksDirectory", "meta", "attributes"), attributesJSON, 0600)
 	if err != nil {
 		t.Fatal("unable to save file system attributes to file:", err)
 	}
