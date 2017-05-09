@@ -27,7 +27,7 @@ jobs:
             go test -v ./... | tee ${TEST_RESULTS}/go-test.out
       - run: mkdir -p $ARTIFACTS_FOLDER
       - run:
-          name: Coverage
+          name: Check Coverage
           command: |
             tmp="/tmp/cov"
             mkdir -p $tmp
@@ -38,6 +38,9 @@ jobs:
             echo "mode: count" > "${ARTIFACTS_FOLDER}/cover.out"
             ls $tmp
             grep -h -v "^mode:" "$tmp"/*.cover >> "${ARTIFACTS_FOLDER}/cover.out"
+      -run:
+        name: Export Coverage
+        command: bash <(curl -s https://codecov.io/bash) -t 719c4b88-3c7b-4755-95ed-be4442c026ea
       - store_test_results:
           path: /tmp/test-results
       - store_artifacts:
