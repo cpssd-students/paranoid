@@ -32,7 +32,7 @@ jobs:
             tmp="/tmp/cov"
             mkdir -p $tmp
             for pkg in $(go list ./...); do
-              f="$tmp$(echo $pkg | tr / -).cover"
+              f="$tmp/$(echo $pkg | tr / -).cover"
               go test -coverprofile="$f" $pkg
             done
             echo "mode: count" > "${ARTIFACTS_FOLDER}/cover.out"
