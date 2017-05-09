@@ -40,7 +40,7 @@ jobs:
             grep -h -v "^mode:" "$tmp"/*.cover >> "${ARTIFACTS_FOLDER}/cover.out"
       - run:
           name: Export Coverage
-          command: bash <(curl -s https://codecov.io/bash) -t 719c4b88-3c7b-4755-95ed-be4442c026ea
+          command: bash <(curl -s https://codecov.io/bash) -t 719c4b88-3c7b-4755-95ed-be4442c026ea -f $ARTIFACTS_FOLDER/cover.out
       - store_test_results:
           path: /tmp/test-results
       - store_artifacts:
