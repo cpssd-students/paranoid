@@ -36,6 +36,7 @@ jobs:
               go test -coverprofile="$f" $pkg
             done
             echo "mode: count" > "${ARTIFACTS_FOLDER}/cover.out"
+            ls $tmp
             grep -h -v "^mode:" "$tmp"/*.cover >> "${ARTIFACTS_FOLDER}/cover.out"
       - store_test_results:
           path: /tmp/test-results
