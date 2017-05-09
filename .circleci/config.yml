@@ -28,7 +28,15 @@ jobs:
       - run: mkdir -p $ARTIFACTS_FOLDER
       - run:
           name: Coverage
-          command: go test -coverprofile=/tmp/artifacts/cover.out ./...
+          command: |
+            tmp="/tmp/cov"
+            mkdir -p $tmp
+            for pkg in $(go list ./...); do
+              f="$tmp$(echo $pkg | tr / -).cover"
+              go test -coverprofile="$f" $pkg
+            done
+            echo "mode: count" > "${ARTIFACTS_FOLDER}/cover.out"
+            grep -h -v "^mode:" "$tmp"/*.cover >> "${ARTIFACTS_FOLDER}/cover.out"
       - store_test_results:
           path: /tmp/test-results
       - store_artifacts:
