@@ -6,6 +6,8 @@ jobs:
     working_directory: /go/src/github.com/pp2p/paranoid
     environment:
       TEST_RESULTS: /tmp/test-results
+      ARTIFACTS_FOLDER: /tmp/artifacts
+      CODECLIMATE_REPO_TOKEN: f2dca1014d606354431516620eb3d4707d9080c076883314c9dee34efc55e852
     steps:
       - checkout
       - run:
@@ -23,5 +25,23 @@ jobs:
           command: |
             trap "go-junit-report <${TEST_RESULTS}/go-test.out > ${TEST_RESULTS}/go-test-report.xml" EXIT
             go test -v ./... | tee ${TEST_RESULTS}/go-test.out
+      - run: mkdir -p $ARTIFACTS_FOLDER
+      - run:
+          name: Check Coverage
+          command: |
+            tmp="/tmp/cov"
+            mkdir -p $tmp
+            for pkg in $(go list ./...); do
+              f="$tmp/$(echo $pkg | tr / -).cover"
+              go test -coverprofile="$f" $pkg
+            done
+            echo "mode: count" > "${ARTIFACTS_FOLDER}/cover.out"
+            ls $tmp
+            grep -h -v "^mode:" "$tmp"/*.cover >> "${ARTIFACTS_FOLDER}/cover.out"
+      - run:
+          name: Export Coverage
+          command: bash <(curl -s https://codecov.io/bash) -t 719c4b88-3c7b-4755-95ed-be4442c026ea -f $ARTIFACTS_FOLDER/cover.out
       - store_test_results:
           path: /tmp/test-results
+      - store_artifacts:
+          path: /tmp/artifacts
