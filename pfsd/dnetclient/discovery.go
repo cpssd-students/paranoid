@@ -3,6 +3,7 @@ package dnetclient
 import (
 	"errors"
 	"net"
+	"strings"
 	"time"
 
 	"github.com/pp2p/paranoid/pfsd/globals"
@@ -10,9 +11,10 @@ import (
 )
 
 // SetDiscovery sets up the discovery server to use
-func SetDiscovery(host, port string) {
-	globals.DiscoveryAddr = host + ":" + port
+func SetDiscovery(addr string) {
+	globals.DiscoveryAddr = addr
 
+	host := strings.Split(addr, ":")[0]
 	if globals.TLSEnabled && !globals.TLSSkipVerify {
 		// If host is an IP, we need to get the hostname via DNS
 		ip := net.ParseIP(host)

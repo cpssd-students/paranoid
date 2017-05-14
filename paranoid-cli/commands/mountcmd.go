@@ -33,9 +33,9 @@ func Mount(c *cli.Context) {
 }
 
 func doMount(c *cli.Context, args []string) {
-	var serverAddress string
-	if serverAddress = c.String("discovery-addr"); len(serverAddress) == 0 {
-		serverAddress = "paranoid.discovery.razoft.net:10101"
+	var dAddr string
+	if dAddr = c.String("discovery-addr"); len(dAddr) == 0 {
+		dAddr = "paranoid.discovery.razoft.net:10101"
 	}
 	poolPassword := c.String("pool-password")
 	pfsName := args[0]
@@ -91,10 +91,10 @@ func doMount(c *cli.Context, args []string) {
 	}
 
 	if !attributes.NetworkOff {
-		_, err := net.DialTimeout("tcp", serverAddress, time.Duration(5*time.Second))
+		_, err := net.DialTimeout("tcp", dAddr, time.Duration(5*time.Second))
 		if err != nil {
-			fmt.Println("FATAL: Unable to reach server", err)
-			Log.Fatal("Unable to reach server")
+			fmt.Println("FATAL: Unable to reach discovery server", err)
+			Log.Fatal("Unable to reach discovery server")
 		}
 	}
 
@@ -105,44 +105,34 @@ func doMount(c *cli.Context, args []string) {
 	}
 	pool := string(poolBytes)
 
-	splitAddress := strings.Split(serverAddress, ":")
-	if len(splitAddress) != 2 {
-		fmt.Println("FATAL: discovery address in wrong format. Should be HOST:PORT")
-		Log.Fatal("discovery address in wrong format. Should be HOST:PORT")
-	}
-
-	returncode, err := commands.MountCommand(pfsDir, splitAddress[0], splitAddress[1], mountPoint)
+	returncode, err := commands.MountCommand(pfsDir, dAddr, mountPoint)
 	if returncode != returncodes.OK {
 		fmt.Println("FATAL: Error running pfs mount command : ", err)
 		Log.Fatal("Error running pfs mount command : ", err)
 	}
 
+	pfsFlags := []string{
+		fmt.Sprintf("-paranoid_dir=%s", pfsDir),
+		fmt.Sprintf("-mount_dir=%s", mountPoint),
+		fmt.Sprintf("-discovery_addr=%s", dAddr),
+		fmt.Sprintf("-discovery_pool=%s", pool),
+		fmt.Sprintf("-pool_password=%s", poolPassword),
+	}
+	if c.GlobalBool("verbose") {
+		pfsFlags = append(pfsFlags, "-v")
+	}
 	if !attributes.NetworkOff {
-		// Check if the cert and key files are present.
+		if iface := c.String("interface"); iface != "" {
+			pfsFlags = append(pfsFlags, fmt.Sprintf("-interface=%s", iface))
+		}
+
 		certPath := path.Join(pfsDir, "meta", "cert.pem")
 		keyPath := path.Join(pfsDir, "meta", "key.pem")
 		if pathExists(certPath) && pathExists(keyPath) {
 			Log.Info("Starting PFSD in secure mode.")
-			//TODO(terry): Add a way to check if the given cert is its own CA,
-			// and skip validation based on that.
-			pfsdArgs := []string{"-cert=" + certPath, "-key=" + keyPath, "-skip_verification",
-				pfsDir, mountPoint, splitAddress[0], splitAddress[1], pool, poolPassword}
-			var pfsdFlags []string
-			if c.GlobalBool("verbose") {
-				pfsdFlags = append(pfsdFlags, "-v")
-			}
-			iface := c.String("interface")
-			if iface != "" {
-				pfsdFlags = append(pfsdFlags, "-interface="+iface)
-			}
-			cmd := exec.Command("pfsd", append(pfsdFlags, pfsdArgs...)...)
-			err = cmd.Start()
-			if err != nil {
-				fmt.Println("FATAL: Error running pfsd command :", err)
-				Log.Fatal("Error running pfsd command:", err)
-			}
+			pfsFlags = append(pfsFlags, fmt.Sprintf("-cert=%s", certPath))
+			pfsFlags = append(pfsFlags, fmt.Sprintf("-key=%s", keyPath))
 		} else {
-			// Start in unsecure mode
 			if !c.Bool("noprompt") {
 				scanner := bufio.NewScanner(os.Stdin)
 				fmt.Print("Starting networking in unsecure mode. Are you sure? [y/N] ")
@@ -153,38 +143,15 @@ func doMount(c *cli.Context, args []string) {
 					os.Exit(1)
 				}
 			}
-
-			Log.Info("Starting PFSD in unsecure mode.")
-			pfsdArgs := []string{pfsDir, mountPoint, splitAddress[0], splitAddress[1], pool, poolPassword}
-			var pfsdFlags []string
-			if c.GlobalBool("verbose") {
-				pfsdFlags = append(pfsdFlags, "-v")
-			}
-			iface := c.String("interface")
-			if iface != "" {
-				pfsdFlags = append(pfsdFlags, "-interface="+iface)
-			}
-			cmd := exec.Command("pfsd", append(pfsdFlags, pfsdArgs...)...)
-			err = cmd.Start()
-			if err != nil {
-				fmt.Println("FATAL: Error running pfsd")
-				Log.Fatal("Error Running pfsd:", err)
-			}
-		}
-	} else {
-		//No need to worry about security certs
-		pfsdArgs := []string{pfsDir, mountPoint, splitAddress[0], splitAddress[1], pool, poolPassword}
-		var pfsdFlags []string
-		if c.GlobalBool("verbose") {
-			pfsdFlags = append(pfsdFlags, "-v")
-		}
-		cmd := exec.Command("pfsd", append(pfsdFlags, pfsdArgs...)...)
-		err = cmd.Start()
-		if err != nil {
-			fmt.Println("FATAL: Error running pfsd")
-			Log.Fatal("Error running pfsd:", err)
 		}
 	}
+
+	cmd := exec.Command("pfsd", pfsFlags...)
+	if err = cmd.Start(); err != nil {
+		fmt.Println("FATAL: Error running pfsd command :", err)
+		Log.Fatal("Error running pfsd command:", err)
+	}
+
 	// Now that we've successfully told PFSD to start, ping it until we can confirm it is up
 	var ws sync.WaitGroup
 	ws.Add(1)

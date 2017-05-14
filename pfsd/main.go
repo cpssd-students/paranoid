@@ -44,12 +44,47 @@ const (
 var (
 	srv *grpc.Server
 	log *logger.ParanoidLogger
+)
 
-	certFile   = flag.String("cert", "", "TLS certificate file - if empty connection will be unencrypted")
-	keyFile    = flag.String("key", "", "TLS key file - if empty connection will be unencrypted")
-	skipVerify = flag.Bool("skip_verification", false,
-		"skip verification of TLS certificate chain and hostname - not recommended unless using self-signed certs")
-	verbose = flag.Bool("v", false, "Use verbose logging")
+// Flags
+var (
+	certFile = flag.String(
+		"cert",
+		"",
+		"TLS certificate file - if empty connection will be unencrypted")
+	keyFile = flag.String(
+		"key",
+		"",
+		"TLS key file - if empty connection will be unencrypted")
+	skipVerify = flag.Bool(
+		"skip_verification",
+		false,
+		"skip verification of TLS certificate chain and hostname"+
+			"- not recommended unless using self-signed certs")
+	verbose = flag.Bool(
+		"v",
+		false,
+		"Use verbose logging")
+	paranoidDirFlag = flag.String(
+		"paranoid_dir",
+		"",
+		"Paranoid directory")
+	mountDirFlag = flag.String(
+		"mount_dir",
+		"",
+		"FUSE mount directory")
+	discoveryAddrFlag = flag.String(
+		"discovery_addr",
+		"",
+		"Address of discovery server")
+	discoveryPoolFlag = flag.String(
+		"discovery_pool",
+		"",
+		"pool to join")
+	discoveryPasswordFlag = flag.String(
+		"pool_password",
+		"",
+		"pool password")
 )
 
 type keySentResponse struct {
@@ -403,27 +438,29 @@ func saveFileSystemAttributes(attributes *globals.FileSystemAttributes) {
 func main() {
 	flag.Parse()
 
-	if len(flag.Args()) < 6 {
-		fmt.Print("Usage:\n\tpfsd <paranoid_directory> <mount_point> <Discovery Server> <Discovery Port> <Discovery Pool>, <Discovery Pool Password>\n")
+	var err error
+
+	if len(*paranoidDirFlag) == 0 {
+		fmt.Println("FATAL: paranoid directory must be provided")
 		os.Exit(1)
 	}
-
-	paranoidDirAbs, err := filepath.Abs(flag.Arg(0))
+	globals.ParanoidDir, err = filepath.Abs(*paranoidDirFlag)
 	if err != nil {
 		fmt.Println("FATAL: Could not get absolute paranoid dir:", err)
 		os.Exit(1)
 	}
 
-	mountPointAbs, err := filepath.Abs(flag.Arg(1))
+	if len(*mountDirFlag) == 0 {
+		fmt.Println("FATAL: mount point must be provided")
+		os.Exit(1)
+	}
+	globals.MountPoint, err = filepath.Abs(*mountDirFlag)
 	if err != nil {
 		fmt.Println("FATAL: Could not get absolute mount point:", err)
 		os.Exit(1)
 	}
 
-	globals.ParanoidDir = paranoidDirAbs
-	globals.MountPoint = mountPointAbs
 	setupLogging()
-
 	getFileSystemAttributes()
 
 	globals.TLSSkipVerify = *skipVerify
@@ -441,11 +478,6 @@ func main() {
 	}
 
 	if !globals.NetworkOff {
-		discoveryPort, err := strconv.Atoi(flag.Arg(3))
-		if err != nil || discoveryPort < 1 || discoveryPort > 65535 {
-			log.Fatal("Discovery port must be a number between 1 and 65535, inclusive.")
-		}
-
 		uuid, err := ioutil.ReadFile(path.Join(globals.ParanoidDir, "meta", "uuid"))
 		if err != nil {
 			log.Fatal("Could not get node UUID:", err)
@@ -497,13 +529,15 @@ func main() {
 			log.Fatal("Path", globals.ParanoidDir, "is not valid PFS root.")
 		}
 
-		dnetclient.SetDiscovery(flag.Arg(2), flag.Arg(3))
-		dnetclient.JoinDiscovery(flag.Arg(4), flag.Arg(5))
-		err = globals.SetPoolPasswordHash(flag.Arg(5))
-		if err != nil {
+		if len(*discoveryAddrFlag) == 0 {
+			log.Fatal("discovery server address must be specified")
+		}
+		dnetclient.SetDiscovery(*discoveryAddrFlag)
+		dnetclient.JoinDiscovery(*discoveryPoolFlag, *discoveryPasswordFlag)
+		if err = globals.SetPoolPasswordHash(*discoveryPasswordFlag); err != nil {
 			log.Fatal("Error setting up password hash:", err)
 		}
-		startRPCServer(&lis, flag.Arg(5))
+		startRPCServer(&lis, *discoveryPasswordFlag)
 	}
 	createPid("pfsd")
 	pfi.StartPfi(*verbose)
