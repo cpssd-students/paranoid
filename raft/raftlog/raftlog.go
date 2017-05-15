@@ -11,16 +11,20 @@ import (
 	"github.com/pp2p/paranoid/logger"
 )
 
+// Constants used by the raftlog
 const (
-	LogEntryDirectoryName string = "log_entries"
-	LogMetaFileName       string = "logmetainfo"
+	LogEntryDirectoryName = "log_entries"
+	LogMetaFileName       = "logmetainfo"
 )
 
+// ErrIndexBelowStartIndex is returned if the given index is below start index.
 var ErrIndexBelowStartIndex = errors.New("given index is below start index")
 
+// Log used by the raftlog
 var Log *logger.ParanoidLogger
 
-type PeristentLogState struct {
+// PersistentLogState stores the state information
+type PersistentLogState struct {
 	LogSizeBytes uint64 `json:"logsizebytes"`
 	StartIndex   uint64 `json:"startindex"`
 	StartTerm    uint64 `json:"startterm"`
@@ -70,7 +74,7 @@ func New(logDirectory string) *RaftLog {
 			Log.Fatal("unable to read raft log meta information:", err)
 		}
 	} else {
-		metaInfo := &PeristentLogState{}
+		metaInfo := &PersistentLogState{}
 		err = json.Unmarshal(metaFileContents, metaInfo)
 		if err != nil {
 			Log.Fatal("unable to read raft log meta information:", err)
@@ -93,19 +97,19 @@ func New(logDirectory string) *RaftLog {
 }
 
 func (rl *RaftLog) saveMetaInfo() {
-	metaInfo := &PeristentLogState{
+	metaInfo := &PersistentLogState{
 		LogSizeBytes: rl.logSizeBytes,
 		StartIndex:   rl.startIndex,
 		StartTerm:    rl.startTerm,
 	}
 
-	metaInfoJson, err := json.Marshal(metaInfo)
+	metaInfoJSON, err := json.Marshal(metaInfo)
 	if err != nil {
 		Log.Fatal("unable to save raft log meta information:", err)
 	}
 
 	newMetaFile := path.Join(rl.logDir, LogMetaFileName+"-new")
-	err = ioutil.WriteFile(newMetaFile, metaInfoJson, 0600)
+	err = ioutil.WriteFile(newMetaFile, metaInfoJSON, 0600)
 	if err != nil {
 		Log.Fatal("unable to save raft log meta information:", err)
 	}
@@ -145,6 +149,7 @@ func (rl *RaftLog) setLogSizeBytes(x uint64) {
 	rl.saveMetaInfo()
 }
 
+// GetLogSizeBytes returns the side of the log in bytes
 func (rl *RaftLog) GetLogSizeBytes() uint64 {
 	rl.indexLock.Lock()
 	defer rl.indexLock.Unlock()
@@ -161,12 +166,14 @@ func (rl *RaftLog) setStartTerm(x uint64) {
 	rl.saveMetaInfo()
 }
 
+// GetStartTerm returns start term
 func (rl *RaftLog) GetStartTerm() uint64 {
 	rl.indexLock.Lock()
 	defer rl.indexLock.Unlock()
 	return rl.startTerm
 }
 
+// GetStartIndex returns the starting index
 func (rl *RaftLog) GetStartIndex() uint64 {
 	rl.indexLock.Lock()
 	defer rl.indexLock.Unlock()

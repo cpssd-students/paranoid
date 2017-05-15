@@ -13,18 +13,24 @@ import (
 	"github.com/pp2p/paranoid/raft/raftlog"
 )
 
+// NodeType provides information about the type of node
+type NodeType int
+
+// Different node types
 const (
-	FOLLOWER int = iota
+	FOLLOWER NodeType = iota
 	CANDIDATE
 	LEADER
 	INACTIVE
 )
 
+// Constants used by raftstate
 const (
 	PersistentStateFileName string = "persistentStateFile"
 	LogDirectory            string = "raft_logs"
 )
 
+// Node data
 type Node struct {
 	IP         string
 	Port       string
@@ -36,13 +42,14 @@ func (n Node) String() string {
 	return fmt.Sprintf("%s:%s", n.IP, n.Port)
 }
 
+// RaftState information
 type RaftState struct {
 	//Used for testing purposes
 	specialNumber uint64
 
-	NodeId       string
+	NodeID       string
 	pfsDirectory string
-	currentState int
+	currentState NodeType
 
 	currentTerm uint64
 	votedFor    string
@@ -50,7 +57,7 @@ type RaftState struct {
 	commitIndex uint64
 	lastApplied uint64
 
-	leaderId      string
+	leaderID      string
 	Configuration *Configuration
 
 	StartElection     chan bool
@@ -76,12 +83,14 @@ type RaftState struct {
 	ApplyEntryLock      sync.Mutex
 }
 
+// GetCurrentTerm returns the current term
 func (s *RaftState) GetCurrentTerm() uint64 {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
 	return s.currentTerm
 }
 
+// SetCurrentTerm sets the current term
 func (s *RaftState) SetCurrentTerm(x uint64) {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
@@ -91,13 +100,15 @@ func (s *RaftState) SetCurrentTerm(x uint64) {
 	s.savePersistentState()
 }
 
-func (s *RaftState) GetCurrentState() int {
+// GetCurrentState of the RaftState
+func (s *RaftState) GetCurrentState() NodeType {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
 	return s.currentState
 }
 
-func (s *RaftState) SetCurrentState(x int) {
+// SetCurrentState of the RaftState
+func (s *RaftState) SetCurrentState(x NodeType) {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
 
@@ -109,29 +120,34 @@ func (s *RaftState) SetCurrentState(x int) {
 		s.StartElection <- true
 	}
 	if x == LEADER {
-		s.setLeaderIdUnsafe(s.NodeId)
+		s.setLeaderIDUnsafe(s.NodeID)
 		s.StartLeading <- true
 	}
 }
 
+// GetPerformingSnapshot from the RaftState
 func (s *RaftState) GetPerformingSnapshot() bool {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
 	return s.performingSnapshot
 }
 
+// SetPerformingSnapshot of the RaftState
 func (s *RaftState) SetPerformingSnapshot(x bool) {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
 	s.performingSnapshot = x
 }
 
+// IncrementSnapshotCounter updates the counter
 func (s *RaftState) IncrementSnapshotCounter() {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
 	s.snapshotCounter++
 }
 
+// DecrementSnapshotCounter reduces the snapshot counter. If the snapshotCounter
+// reaches 0, SnapshotCounterAtZero is notified
 func (s *RaftState) DecrementSnapshotCounter() {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
@@ -141,18 +157,21 @@ func (s *RaftState) DecrementSnapshotCounter() {
 	}
 }
 
+// GetSnapshotCounterValue returns the current snapshot counter
 func (s *RaftState) GetSnapshotCounterValue() int {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
 	return s.snapshotCounter
 }
 
+// GetCommitIndex returns the current commit index
 func (s *RaftState) GetCommitIndex() uint64 {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
 	return s.commitIndex
 }
 
+// SetCommitIndex sets the current commit index to a given value
 func (s *RaftState) SetCommitIndex(x uint64) {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
@@ -168,24 +187,28 @@ func (s *RaftState) setCommitIndexUnsafe(x uint64) {
 	s.ApplyEntries <- true
 }
 
+// SetWaitingForApplied set the value
 func (s *RaftState) SetWaitingForApplied(x bool) {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
 	s.waitingForApplied = x
 }
 
+// GetWaitingForApplied sets the value
 func (s *RaftState) GetWaitingForApplied() bool {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
 	return s.waitingForApplied
 }
 
+// GetVotedFor returns the voted for
 func (s *RaftState) GetVotedFor() string {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
 	return s.votedFor
 }
 
+// SetVotedFor sets the voted for
 func (s *RaftState) SetVotedFor(x string) {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
@@ -193,36 +216,41 @@ func (s *RaftState) SetVotedFor(x string) {
 	s.savePersistentState()
 }
 
-func (s *RaftState) GetLeaderId() string {
+// GetLeaderID returns the ID of the leader
+func (s *RaftState) GetLeaderID() string {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
-	return s.leaderId
+	return s.leaderID
 }
 
-//setLeaderIdUnsafe must only be used when the stateChangeLock has already been locked
-func (s *RaftState) setLeaderIdUnsafe(x string) {
-	if s.leaderId == "" {
+// setLeaderIDUnsafe must only be used when the stateChangeLock has already been
+// locked
+func (s *RaftState) setLeaderIDUnsafe(x string) {
+	if s.leaderID == "" {
 		s.LeaderElected <- true
 	}
-	s.leaderId = x
+	s.leaderID = x
 }
 
-func (s *RaftState) SetLeaderId(x string) {
+// SetLeaderID sets the ID of the leader
+func (s *RaftState) SetLeaderID(x string) {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
 
-	if s.leaderId == "" {
+	if s.leaderID == "" {
 		s.LeaderElected <- true
 	}
-	s.leaderId = x
+	s.leaderID = x
 }
 
+// GetLastApplied returns the last applied
 func (s *RaftState) GetLastApplied() uint64 {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
 	return s.lastApplied
 }
 
+// SetLastApplied sets the last applied and saves the state
 func (s *RaftState) SetLastApplied(x uint64) {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
@@ -230,12 +258,14 @@ func (s *RaftState) SetLastApplied(x uint64) {
 	s.savePersistentState()
 }
 
-//setLastAppliedUnsafe must only be used when the stateChangeLock has already been locked
+// setLastAppliedUnsafe must only be used when the stateChangeLock has already
+// been locked
 func (s *RaftState) setLastAppliedUnsafe(x uint64) {
 	s.lastApplied = x
 	s.savePersistentState()
 }
 
+// SetSpecialNumber sets the number and saves the state
 func (s *RaftState) SetSpecialNumber(x uint64) {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
@@ -243,6 +273,7 @@ func (s *RaftState) SetSpecialNumber(x uint64) {
 	s.savePersistentState()
 }
 
+// GetSpecialNumber from the raft state
 func (s *RaftState) GetSpecialNumber() uint64 {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
@@ -381,13 +412,13 @@ func newRaftState(myNodeDetails Node, pfsDirectory, raftInfoDirectory string, te
 		raftState = &RaftState{
 			specialNumber:      0,
 			pfsDirectory:       pfsDirectory,
-			NodeId:             myNodeDetails.NodeID,
+			NodeID:             myNodeDetails.NodeID,
 			currentTerm:        0,
 			votedFor:           "",
 			Log:                raftlog.New(path.Join(raftInfoDirectory, LogDirectory)),
 			commitIndex:        0,
 			lastApplied:        0,
-			leaderId:           "",
+			leaderID:           "",
 			snapshotCounter:    0,
 			performingSnapshot: false,
 			Configuration:      newConfiguration(raftInfoDirectory, testConfiguration, myNodeDetails, true),
@@ -397,13 +428,13 @@ func newRaftState(myNodeDetails Node, pfsDirectory, raftInfoDirectory string, te
 		raftState = &RaftState{
 			specialNumber:      persistentState.SpecialNumber,
 			pfsDirectory:       pfsDirectory,
-			NodeId:             myNodeDetails.NodeID,
+			NodeID:             myNodeDetails.NodeID,
 			currentTerm:        persistentState.CurrentTerm,
 			votedFor:           persistentState.VotedFor,
 			Log:                raftlog.New(path.Join(raftInfoDirectory, LogDirectory)),
 			commitIndex:        0,
 			lastApplied:        persistentState.LastApplied,
-			leaderId:           "",
+			leaderID:           "",
 			snapshotCounter:    0,
 			performingSnapshot: false,
 			Configuration:      newConfiguration(raftInfoDirectory, testConfiguration, myNodeDetails, true),

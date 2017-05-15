@@ -58,7 +58,7 @@ func TestSnapshoting(t *testing.T) {
 		t.Fatal("Error performing create command:", err)
 	}
 
-	code, err, _ = raftServer.RequestWriteCommand("test.txt", 0, 5, []byte("hello"))
+	code, _, err = raftServer.RequestWriteCommand("test.txt", 0, 5, []byte("hello"))
 	if code != returncodes.OK {
 		t.Fatal("Error performing write command:", err)
 	}
@@ -69,7 +69,7 @@ func TestSnapshoting(t *testing.T) {
 		t.Fatal("Error taking snapshot:", err)
 	}
 
-	code, err, _ = raftServer.RequestWriteCommand("test.txt", 0, 7, []byte("goodbye"))
+	code, _, err = raftServer.RequestWriteCommand("test.txt", 0, 7, []byte("goodbye"))
 	if code != returncodes.OK {
 		t.Fatal("Error performing write command:", err)
 	}
@@ -89,7 +89,7 @@ func TestSnapshoting(t *testing.T) {
 		t.Fatal("Error reverting to snapshot:", err)
 	}
 
-	code, data, err := commands.ReadCommand(pfsDirectory, "test.txt", -1, -1)
+	_, data, err := commands.ReadCommand(pfsDirectory, "test.txt", -1, -1)
 	if string(data) != "hello" {
 		t.Fatal("Error reverting snapshot. Read does not match 'hello'. Actual:", string(data))
 	}
@@ -99,7 +99,7 @@ func TestSnapshoting(t *testing.T) {
 		t.Fatal("Error performing create command:", err)
 	}
 
-	code, err, _ = raftServer.RequestWriteCommand("test2.txt", 0, 5, []byte("world"))
+	code, _, err = raftServer.RequestWriteCommand("test2.txt", 0, 5, []byte("world"))
 	if code != returncodes.OK {
 		t.Fatal("Error performing write command:", err)
 	}
@@ -110,7 +110,7 @@ func TestSnapshoting(t *testing.T) {
 		t.Fatal("Error taking snapshot:", err)
 	}
 
-	code, err, _ = raftServer.RequestWriteCommand("test2.txt", 0, 5, []byte("earth"))
+	code, _, err = raftServer.RequestWriteCommand("test2.txt", 0, 5, []byte("earth"))
 	if code != returncodes.OK {
 		t.Fatal("Error performing write command:", err)
 	}

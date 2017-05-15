@@ -13,6 +13,7 @@ import (
 	pb "github.com/pp2p/paranoid/proto/raft"
 )
 
+// GetLogEntryUnsafe returns an unsafe log entry
 func (rl *RaftLog) GetLogEntryUnsafe(index uint64) (entry *pb.LogEntry, err error) {
 	if index < 1 || index >= rl.currentIndex {
 		return nil, errors.New("index out of bounds")

@@ -11,14 +11,15 @@ import (
 	"github.com/pp2p/paranoid/raft/raftlog"
 )
 
+// Different constants
 const (
-	PersistentConfigurationFileName string = "persistentConfigFile"
-	OriginalConfigurationFileName   string = "originalConfigFile"
+	PersistentConfigurationFileName = "persistentConfigFile"
+	OriginalConfigurationFileName   = "originalConfigFile"
 )
 
-//Configuration manages configuration information of a raft server
+// Configuration manages configuration information of a raft server
 type Configuration struct {
-	myNodeId                  string
+	myNodeID                  string
 	futureConfigurationActive bool
 
 	currentConfiguration []Node
@@ -36,19 +37,21 @@ type Configuration struct {
 	configLock           sync.Mutex
 }
 
-//persistentConfiguration is the configuration information that is saved to disk
+// persistentConfiguration stores the configuration information which is written
+// to the disk
 type persistentConfiguration struct {
 	FutureConfigurationActive bool   `json:"futureconfigactive"`
 	CurrentConfiguration      []Node `json:"currentconfig"`
 	FutureConfiguration       []Node `json:"futureconfig"`
 }
 
-//StartConfiguration is used to start a raft node with a specific congiuration for testing purposes
-//or if the node is the first node to join a cluster
+// StartConfiguration is used to start a raft node with a specific congiuration
+// for testing purposes or if the node is the first node to join a cluster
 type StartConfiguration struct {
 	Peers []Node
 }
 
+// GetNode based on the node ID. If the node is not found, an error is returned
 func (c *Configuration) GetNode(nodeID string) (Node, error) {
 	c.configLock.Lock()
 	defer c.configLock.Unlock()
@@ -68,7 +71,7 @@ func (c *Configuration) GetNode(nodeID string) (Node, error) {
 	return Node{}, errors.New("Node not found in configuration")
 }
 
-//ChangeNodeLocation changes the IP and Port of a given nodeID
+// ChangeNodeLocation changes the IP and Port of a given nodeID
 func (c *Configuration) ChangeNodeLocation(nodeID, IP, Port string) {
 	c.configLock.Lock()
 	defer c.configLock.Unlock()
@@ -88,7 +91,8 @@ func (c *Configuration) ChangeNodeLocation(nodeID, IP, Port string) {
 	}
 }
 
-//NewFutureConfiguration creates a future configuration and sets the next index of those nodes to lastLogIndex + 1
+// NewFutureConfiguration creates a future configuration and sets the next index
+// of those nodes to lastLogIndex + 1
 func (c *Configuration) NewFutureConfiguration(nodes []Node, lastLogIndex uint64) {
 	c.configLock.Lock()
 	defer c.configLock.Unlock()
@@ -106,8 +110,9 @@ func (c *Configuration) NewFutureConfiguration(nodes []Node, lastLogIndex uint64
 	}
 }
 
-//UpdateCurrentConfiguration updates the current configuration given a set of nodes.
-//If all the nodes are in the future configuration, the future configuration is changed to the current configuration.
+// UpdateCurrentConfiguration updates the current configuration given a set of
+// nodes. If all the nodes are in the future configuration, the future
+// configuration is changed to the current configuration.
 func (c *Configuration) UpdateCurrentConfiguration(nodes []Node, lastLogIndex uint64) {
 	c.configLock.Lock()
 	defer c.configLock.Unlock()
@@ -137,6 +142,9 @@ func (c *Configuration) UpdateCurrentConfiguration(nodes []Node, lastLogIndex ui
 	}
 }
 
+// UpdateFromConfigurationFile updates the configuration based on the provided
+// file path and the last log index. If the configuration cannot be updated,
+// an error is returned
 func (c *Configuration) UpdateFromConfigurationFile(configurationFilePath string, lastLogIndex uint64) error {
 	c.configLock.Lock()
 	defer c.configLock.Unlock()
@@ -168,11 +176,14 @@ func (c *Configuration) UpdateFromConfigurationFile(configurationFilePath string
 	return nil
 }
 
+// GetFutureConfigurationActive returns true if the future configuration is
+// active
 func (c *Configuration) GetFutureConfigurationActive() bool {
 	return c.futureConfigurationActive
 }
 
-//futureToCurrentConfiguration changes the current configuration to the future configuration and clears the future configuration.
+//  futureToCurrentConfiguration changes the current configuration to the future
+// configuration and clears the future configuration.
 func (c *Configuration) futureToCurrentConfiguration() {
 	c.futureConfigurationActive = false
 	c.currentConfiguration = c.futureConfiguration
@@ -198,7 +209,8 @@ func (c *Configuration) inCurrentConfiguration(nodeID string) bool {
 	return false
 }
 
-//inCurrentConfigurationUnsafe must only be called if the configLock has already been locked
+// inCurrentConfigurationUnsafe must only be called if the configLock has
+// already been locked
 func (c *Configuration) inCurrentConfigurationUnsafe(nodeID string) bool {
 	for i := 0; i < len(c.currentConfiguration); i++ {
 		if c.currentConfiguration[i].NodeID == nodeID {
@@ -220,7 +232,8 @@ func (c *Configuration) inFutureConfiguration(nodeID string) bool {
 	return false
 }
 
-//inFutureConfigurationUnsafe must only be called if the configLock has already been locked
+// inFutureConfigurationUnsafe must only be called if the configLock has already
+// been locked
 func (c *Configuration) inFutureConfigurationUnsafe(nodeID string) bool {
 	for i := 0; i < len(c.futureConfiguration); i++ {
 		if c.futureConfiguration[i].NodeID == nodeID {
@@ -230,13 +243,14 @@ func (c *Configuration) inFutureConfigurationUnsafe(nodeID string) bool {
 	return false
 }
 
+// InConfiguration checks is the node ID in the current or future configuration
 func (c *Configuration) InConfiguration(nodeID string) bool {
 	return c.inCurrentConfiguration(nodeID) || c.inFutureConfiguration(nodeID)
 }
 
 //MyConfigurationGood checks if the configuration contains the current node and has more than one member
 func (c *Configuration) MyConfigurationGood() bool {
-	if c.InConfiguration(c.myNodeId) {
+	if c.InConfiguration(c.myNodeID) {
 		if c.GetTotalPossibleVotes() > 1 {
 			return true
 		}
@@ -244,12 +258,14 @@ func (c *Configuration) MyConfigurationGood() bool {
 	return false
 }
 
+// HasConfiguration checks if the local node is in the configuration
 func (c *Configuration) HasConfiguration() bool {
-	return c.InConfiguration(c.myNodeId)
+	return c.InConfiguration(c.myNodeID)
 }
 
-//GetTotalPossibleVotes returns the number of nodes in the current configuration plus
-//the number in the future configuration not also in the current configuration
+// GetTotalPossibleVotes returns the number of nodes in the current
+// configuration plus the number in the future configuration not also in the
+// current configuration.
 func (c *Configuration) GetTotalPossibleVotes() int {
 	c.configLock.Lock()
 	defer c.configLock.Unlock()
@@ -263,19 +279,20 @@ func (c *Configuration) GetTotalPossibleVotes() int {
 	return votes
 }
 
-//GetPeersList returns a list of all the nodes that must be queried to decide on state changes or leader election.
+// GetPeersList returns a list of all the nodes that must be queried to decide
+// on state changes or leader election.
 func (c *Configuration) GetPeersList() []Node {
 	c.configLock.Lock()
 	defer c.configLock.Unlock()
 
 	var peers []Node
 	for i := 0; i < len(c.currentConfiguration); i++ {
-		if c.currentConfiguration[i].NodeID != c.myNodeId {
+		if c.currentConfiguration[i].NodeID != c.myNodeID {
 			peers = append(peers, c.currentConfiguration[i])
 		}
 	}
 	for i := 0; i < len(c.futureConfiguration); i++ {
-		if c.futureConfiguration[i].NodeID != c.myNodeId {
+		if c.futureConfiguration[i].NodeID != c.myNodeID {
 			if c.inCurrentConfigurationUnsafe(c.futureConfiguration[i].NodeID) == false {
 				peers = append(peers, c.futureConfiguration[i])
 			}
@@ -284,10 +301,11 @@ func (c *Configuration) GetPeersList() []Node {
 	return peers
 }
 
-//GetNodesList returns a list of all the nodes in the cluster including the current nodes information.
+// GetNodesList returns a list of all the nodes in the cluster including the
+// current nodes information.
 func (c *Configuration) GetNodesList() []Node {
 	peers := c.GetPeersList()
-	myNode, err := c.GetNode(c.myNodeId)
+	myNode, err := c.GetNode(c.myNodeID)
 	if err == nil {
 		return append(peers, myNode)
 	}
@@ -298,8 +316,9 @@ func getRequiredVotes(nodeCount int) int {
 	return (nodeCount / 2) + 1
 }
 
-//Check has a majority of votes have been received given a list of NodeIDs
-//A majority is needed in both the current and future configurations
+// HasMajority checks if the majority of votes have been received given a list
+// of NodeIDs. A majority is needed in both the current and future
+// configurations
 func (c *Configuration) HasMajority(votesRecieved []string) bool {
 	c.configLock.Lock()
 	defer c.configLock.Unlock()
@@ -330,7 +349,8 @@ func (c *Configuration) HasMajority(votesRecieved []string) bool {
 	return true
 }
 
-//ResetNodeIndices is used to reset the currentIndex and matchindex of each peer when elected as a leader.
+// ResetNodeIndices is used to reset the currentIndex and matchindex of each
+// peer when elected as a leader.
 func (c *Configuration) ResetNodeIndices(lastLogIndex uint64) {
 	c.configLock.Lock()
 	defer c.configLock.Unlock()
@@ -345,6 +365,7 @@ func (c *Configuration) ResetNodeIndices(lastLogIndex uint64) {
 	}
 }
 
+// GetNextIndex gets the index of the configuration that he node is in.
 func (c *Configuration) GetNextIndex(nodeID string) uint64 {
 	c.configLock.Lock()
 	defer c.configLock.Unlock()
@@ -363,6 +384,7 @@ func (c *Configuration) GetNextIndex(nodeID string) uint64 {
 	return 0
 }
 
+// GetMatchIndex returns the index matched by the node.
 func (c *Configuration) GetMatchIndex(nodeID string) uint64 {
 	c.configLock.Lock()
 	defer c.configLock.Unlock()
@@ -381,6 +403,7 @@ func (c *Configuration) GetMatchIndex(nodeID string) uint64 {
 	return 0
 }
 
+// SetNextIndex sets the next index for the node.
 func (c *Configuration) SetNextIndex(nodeID string, x uint64) {
 	c.configLock.Lock()
 	defer c.configLock.Unlock()
@@ -397,6 +420,7 @@ func (c *Configuration) SetNextIndex(nodeID string, x uint64) {
 	}
 }
 
+// SetMatchIndex sets the matched index for the node.
 func (c *Configuration) SetMatchIndex(nodeID string, x uint64) {
 	c.configLock.Lock()
 	defer c.configLock.Unlock()
@@ -413,6 +437,8 @@ func (c *Configuration) SetMatchIndex(nodeID string, x uint64) {
 	}
 }
 
+// GetSendingSnapshot gets the snapshot of the node sending it
+// TODO: Verify this
 func (c *Configuration) GetSendingSnapshot(nodeID string) bool {
 	c.configLock.Lock()
 	defer c.configLock.Unlock()
@@ -420,6 +446,7 @@ func (c *Configuration) GetSendingSnapshot(nodeID string) bool {
 	return c.sendingSnapshot[nodeID]
 }
 
+// SetSendingSnapshot of the node
 func (c *Configuration) SetSendingSnapshot(nodeID string, x bool) {
 	c.configLock.Lock()
 	defer c.configLock.Unlock()
@@ -427,7 +454,8 @@ func (c *Configuration) SetSendingSnapshot(nodeID string, x bool) {
 	c.sendingSnapshot[nodeID] = x
 }
 
-//CalculateNewCommitIndex calculates a new commit index in the manner described in the Raft paper
+//CalculateNewCommitIndex calculates a new commit index in the manner described
+// in the Raft paper
 func (c *Configuration) CalculateNewCommitIndex(lastCommitIndex, term uint64, log *raftlog.RaftLog) uint64 {
 	c.configLock.Lock()
 	defer c.configLock.Unlock()
@@ -447,11 +475,11 @@ func (c *Configuration) CalculateNewCommitIndex(lastCommitIndex, term uint64, lo
 		}
 		if logEntry.Term == term {
 			currentCount := 0
-			if c.inCurrentConfigurationUnsafe(c.myNodeId) {
+			if c.inCurrentConfigurationUnsafe(c.myNodeID) {
 				currentCount = 1
 			}
 			for j := 0; j < len(c.currentMatchIndex); j++ {
-				if c.currentConfiguration[j].NodeID != c.myNodeId {
+				if c.currentConfiguration[j].NodeID != c.myNodeID {
 					if c.currentMatchIndex[j] >= i {
 						currentCount++
 					}
@@ -463,7 +491,7 @@ func (c *Configuration) CalculateNewCommitIndex(lastCommitIndex, term uint64, lo
 
 			if c.futureConfigurationActive {
 				futureCount := 0
-				if c.inFutureConfigurationUnsafe(c.myNodeId) {
+				if c.inFutureConfigurationUnsafe(c.myNodeID) {
 					futureCount = 1
 				}
 				for j := 0; j < len(c.futureMatchIndex); j++ {
@@ -542,7 +570,7 @@ func newConfiguration(raftInfoDirectory string, testConfiguration *StartConfigur
 	loadedPersistentState := false
 	if testConfiguration != nil {
 		config = &Configuration{
-			myNodeId:          myNodeDetails.NodeID,
+			myNodeID:          myNodeDetails.NodeID,
 			raftInfoDirectory: raftInfoDirectory,
 
 			currentConfiguration: append(testConfiguration.Peers, myNodeDetails),
@@ -554,7 +582,7 @@ func newConfiguration(raftInfoDirectory string, testConfiguration *StartConfigur
 		if persistentConfig != nil {
 			loadedPersistentState = true
 			config = &Configuration{
-				myNodeId:          myNodeDetails.NodeID,
+				myNodeID:          myNodeDetails.NodeID,
 				raftInfoDirectory: raftInfoDirectory,
 
 				currentConfiguration: persistentConfig.CurrentConfiguration,
@@ -568,7 +596,7 @@ func newConfiguration(raftInfoDirectory string, testConfiguration *StartConfigur
 			}
 		} else {
 			config = &Configuration{
-				myNodeId:          myNodeDetails.NodeID,
+				myNodeID:          myNodeDetails.NodeID,
 				raftInfoDirectory: raftInfoDirectory,
 
 				currentConfiguration: []Node{},

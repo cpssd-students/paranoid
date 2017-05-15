@@ -1,5 +1,6 @@
-//This file stores functions used to interface in or out of raft
 package raft
+
+// This file contains the list of interfaces used by raft
 
 import (
 	"errors"
@@ -14,20 +15,25 @@ import (
 	"google.golang.org/grpc"
 )
 
+// ActionType is the base type of the different action
+type ActionType uint32
+
+// List of the ActionTypes
 const (
-	TYPE_WRITE uint32 = iota
-	TYPE_CREAT
-	TYPE_CHMOD
-	TYPE_TRUNCATE
-	TYPE_UTIMES
-	TYPE_RENAME
-	TYPE_LINK
-	TYPE_SYMLINK
-	TYPE_UNLINK
-	TYPE_MKDIR
-	TYPE_RMDIR
+	TypeWrite ActionType = iota
+	TypeCreat
+	TypeChmod
+	TypeTruncate
+	TypeUtimes
+	TypeRename
+	TypeLink
+	TypeSymlink
+	TypeUnlink
+	TypeMkdir
+	TypeRmdir
 )
 
+// StateMachineResult containing the data of the state machine
 type StateMachineResult struct {
 	Code         returncodes.Code
 	Err          error
@@ -40,12 +46,13 @@ type ksmResult struct {
 	Peers            []string
 }
 
+// EntryAppliedInfo stores the information with the state machine results
 type EntryAppliedInfo struct {
 	Index  uint64
 	Result *StateMachineResult
 }
 
-//Starts a raft server given a listener, node information a directory to store information
+//StartRaft server given a listener, node information a directory to store information
 //Only used for testing purposes
 func StartRaft(lis *net.Listener, nodeDetails Node, pfsDirectory, raftInfoDirectory string,
 	startConfiguration *StartConfiguration) (*RaftNetworkServer, *grpc.Server) {
@@ -65,8 +72,9 @@ func StartRaft(lis *net.Listener, nodeDetails Node, pfsDirectory, raftInfoDirect
 	return raftServer, srv
 }
 
-//A request to add a Log entry from a client. If the node is not the leader, it must forward the request to the leader.
-//Only returns once the request has been committed to the State machine
+// RequestAddLogEntry from a client. If the mode is not the leader, it must
+// follow the request to the leader. Only returns once the request has been
+// committed to the State machine
 func (s *RaftNetworkServer) RequestAddLogEntry(entry *pb.Entry) (*StateMachineResult, error) {
 	s.addEntryLock.Lock()
 	defer s.addEntryLock.Unlock()
@@ -76,13 +84,13 @@ func (s *RaftNetworkServer) RequestAddLogEntry(entry *pb.Entry) (*StateMachineRe
 	defer s.State.SetWaitingForApplied(false)
 
 	//Add entry to leaders Log
-	if currentState == LEADER {
+	if NodeType(currentState) == LEADER {
 		err := s.addLogEntryLeader(entry)
 		if err != nil {
 			return nil, err
 		}
-	} else if currentState == FOLLOWER {
-		if s.State.GetLeaderId() != "" {
+	} else if NodeType(currentState) == FOLLOWER {
+		if s.State.GetLeaderID() != "" {
 			err := s.sendLeaderLogEntry(entry)
 			if err != nil {
 				return nil, err
@@ -132,7 +140,7 @@ func (s *RaftNetworkServer) RequestAddLogEntry(entry *pb.Entry) (*StateMachineRe
 	}
 
 	//Wait for the Log entry to be applied
-	timer := time.NewTimer(ENTRY_APPLIED_TIMEOUT)
+	timer := time.NewTimer(EntryAppliedTimeout)
 	for {
 		select {
 		case <-timer.C:
@@ -150,6 +158,7 @@ func (s *RaftNetworkServer) RequestAddLogEntry(entry *pb.Entry) (*StateMachineRe
 	return nil, errors.New("waited too long to commit Log entry")
 }
 
+// RequestKeyStateUpdate requests and update
 func (s *RaftNetworkServer) RequestKeyStateUpdate(owner, holder *pb.Node, generation int64) error {
 	entry := &pb.Entry{
 		Type: pb.Entry_KeyStateCommand,
@@ -169,7 +178,7 @@ func (s *RaftNetworkServer) RequestKeyStateUpdate(owner, holder *pb.Node, genera
 	return result.Err
 }
 
-// Returns the new generation number, a list of peer nodes, and an error.
+// RequestNewGeneration retrns a number, a list of peer nodes, and an error.
 func (s *RaftNetworkServer) RequestNewGeneration(newNode string) (int, []string, error) {
 	entry := &pb.Entry{
 		Type: pb.Entry_KeyStateCommand,
@@ -187,13 +196,14 @@ func (s *RaftNetworkServer) RequestNewGeneration(newNode string) (int, []string,
 	return result.KSMResult.GenerationNumber, result.KSMResult.Peers, result.Err
 }
 
-func (s *RaftNetworkServer) RequestOwnerComplete(nodeId string, generation int64) error {
+// RequestOwnerComplete of the node
+func (s *RaftNetworkServer) RequestOwnerComplete(nodeID string, generation int64) error {
 	entry := &pb.Entry{
 		Type: pb.Entry_KeyStateCommand,
 		Uuid: generateNewUUID(),
 		KeyCommand: &pb.KeyStateCommand{
 			Type:          pb.KeyStateCommand_OwnerComplete,
-			OwnerComplete: nodeId,
+			OwnerComplete: nodeID,
 			Generation:    generation,
 		},
 	}
@@ -205,13 +215,13 @@ func (s *RaftNetworkServer) RequestOwnerComplete(nodeId string, generation int64
 	return result.Err
 }
 
-func (s *RaftNetworkServer) RequestWriteCommand(filePath string, offset, length int64,
-	data []byte) (returnCode returncodes.Code, returnError error, bytesWrote int) {
+// RequestWriteCommand performs a write
+func (s *RaftNetworkServer) RequestWriteCommand(filePath string, offset, length int64, data []byte) (returnCode returncodes.Code, bytesWrote int, returnError error) {
 	entry := &pb.Entry{
 		Type: pb.Entry_StateMachineCommand,
 		Uuid: generateNewUUID(),
 		Command: &pb.StateMachineCommand{
-			Type:   TYPE_WRITE,
+			Type:   uint32(TypeWrite),
 			Path:   filePath,
 			Data:   data,
 			Offset: offset,
@@ -220,17 +230,18 @@ func (s *RaftNetworkServer) RequestWriteCommand(filePath string, offset, length 
 	}
 	stateMachineResult, err := s.RequestAddLogEntry(entry)
 	if err != nil {
-		return returncodes.EBUSY, err, 0
+		return returncodes.EBUSY, 0, err
 	}
-	return stateMachineResult.Code, stateMachineResult.Err, stateMachineResult.BytesWritten
+	return stateMachineResult.Code, stateMachineResult.BytesWritten, stateMachineResult.Err
 }
 
+// RequestCreatCommand performs the Creat command
 func (s *RaftNetworkServer) RequestCreatCommand(filePath string, mode uint32) (returnCode returncodes.Code, returnError error) {
 	entry := &pb.Entry{
 		Type: pb.Entry_StateMachineCommand,
 		Uuid: generateNewUUID(),
 		Command: &pb.StateMachineCommand{
-			Type: TYPE_CREAT,
+			Type: uint32(TypeCreat),
 			Path: filePath,
 			Mode: mode,
 		},
@@ -242,12 +253,13 @@ func (s *RaftNetworkServer) RequestCreatCommand(filePath string, mode uint32) (r
 	return stateMachineResult.Code, stateMachineResult.Err
 }
 
+// RequestChmodCommand performs the Chmod command
 func (s *RaftNetworkServer) RequestChmodCommand(filePath string, mode uint32) (returnCode returncodes.Code, returnError error) {
 	entry := &pb.Entry{
 		Type: pb.Entry_StateMachineCommand,
 		Uuid: generateNewUUID(),
 		Command: &pb.StateMachineCommand{
-			Type: TYPE_CHMOD,
+			Type: uint32(TypeChmod),
 			Path: filePath,
 			Mode: mode,
 		},
@@ -259,12 +271,13 @@ func (s *RaftNetworkServer) RequestChmodCommand(filePath string, mode uint32) (r
 	return stateMachineResult.Code, stateMachineResult.Err
 }
 
+// RequestTruncateCommand performs the Truncate command
 func (s *RaftNetworkServer) RequestTruncateCommand(filePath string, length int64) (returnCode returncodes.Code, returnError error) {
 	entry := &pb.Entry{
 		Type: pb.Entry_StateMachineCommand,
 		Uuid: generateNewUUID(),
 		Command: &pb.StateMachineCommand{
-			Type:   TYPE_TRUNCATE,
+			Type:   uint32(TypeTruncate),
 			Path:   filePath,
 			Length: length,
 		},
@@ -283,6 +296,7 @@ func splitTime(t *time.Time) (int64, int64) {
 	return 0, 0
 }
 
+// RequestUtimesCommand performs the Utimes command
 func (s *RaftNetworkServer) RequestUtimesCommand(filePath string, atime, mtime *time.Time) (returnCode returncodes.Code, returnError error) {
 	accessSeconds, accessNanoSeconds := splitTime(atime)
 	modifySeconds, modifyNanoSeconds := splitTime(mtime)
@@ -291,7 +305,7 @@ func (s *RaftNetworkServer) RequestUtimesCommand(filePath string, atime, mtime *
 		Type: pb.Entry_StateMachineCommand,
 		Uuid: generateNewUUID(),
 		Command: &pb.StateMachineCommand{
-			Type:              TYPE_UTIMES,
+			Type:              uint32(TypeUtimes),
 			Path:              filePath,
 			AccessSeconds:     accessSeconds,
 			AccessNanoseconds: accessNanoSeconds,
@@ -306,13 +320,13 @@ func (s *RaftNetworkServer) RequestUtimesCommand(filePath string, atime, mtime *
 	return stateMachineResult.Code, stateMachineResult.Err
 }
 
+// RequestRenameCommand performs the rename command
 func (s *RaftNetworkServer) RequestRenameCommand(oldPath, newPath string) (returnCode returncodes.Code, returnError error) {
-
 	entry := &pb.Entry{
 		Type: pb.Entry_StateMachineCommand,
 		Uuid: generateNewUUID(),
 		Command: &pb.StateMachineCommand{
-			Type:    TYPE_RENAME,
+			Type:    uint32(TypeRename),
 			OldPath: oldPath,
 			NewPath: newPath,
 		},
@@ -324,12 +338,13 @@ func (s *RaftNetworkServer) RequestRenameCommand(oldPath, newPath string) (retur
 	return stateMachineResult.Code, stateMachineResult.Err
 }
 
+// RequestLinkCommand performs the link command
 func (s *RaftNetworkServer) RequestLinkCommand(oldPath, newPath string) (returnCode returncodes.Code, returnError error) {
 	entry := &pb.Entry{
 		Type: pb.Entry_StateMachineCommand,
 		Uuid: generateNewUUID(),
 		Command: &pb.StateMachineCommand{
-			Type:    TYPE_LINK,
+			Type:    uint32(TypeLink),
 			OldPath: oldPath,
 			NewPath: newPath,
 		},
@@ -341,12 +356,13 @@ func (s *RaftNetworkServer) RequestLinkCommand(oldPath, newPath string) (returnC
 	return stateMachineResult.Code, stateMachineResult.Err
 }
 
+// RequestSymlinkCommand performs the symlink command
 func (s *RaftNetworkServer) RequestSymlinkCommand(oldPath, newPath string) (returnCode returncodes.Code, returnError error) {
 	entry := &pb.Entry{
 		Type: pb.Entry_StateMachineCommand,
 		Uuid: generateNewUUID(),
 		Command: &pb.StateMachineCommand{
-			Type:    TYPE_SYMLINK,
+			Type:    uint32(TypeSymlink),
 			OldPath: oldPath,
 			NewPath: newPath,
 		},
@@ -358,12 +374,13 @@ func (s *RaftNetworkServer) RequestSymlinkCommand(oldPath, newPath string) (retu
 	return stateMachineResult.Code, stateMachineResult.Err
 }
 
+// RequestUnlinkCommand performs the unlink command
 func (s *RaftNetworkServer) RequestUnlinkCommand(filePath string) (returnCode returncodes.Code, returnError error) {
 	entry := &pb.Entry{
 		Type: pb.Entry_StateMachineCommand,
 		Uuid: generateNewUUID(),
 		Command: &pb.StateMachineCommand{
-			Type: TYPE_UNLINK,
+			Type: uint32(TypeUnlink),
 			Path: filePath,
 		},
 	}
@@ -374,12 +391,13 @@ func (s *RaftNetworkServer) RequestUnlinkCommand(filePath string) (returnCode re
 	return stateMachineResult.Code, stateMachineResult.Err
 }
 
+// RequestMkdirCommand performs the mkdir command
 func (s *RaftNetworkServer) RequestMkdirCommand(filePath string, mode uint32) (returnCode returncodes.Code, returnError error) {
 	entry := &pb.Entry{
 		Type: pb.Entry_StateMachineCommand,
 		Uuid: generateNewUUID(),
 		Command: &pb.StateMachineCommand{
-			Type: TYPE_MKDIR,
+			Type: uint32(TypeMkdir),
 			Path: filePath,
 			Mode: mode,
 		},
@@ -391,12 +409,13 @@ func (s *RaftNetworkServer) RequestMkdirCommand(filePath string, mode uint32) (r
 	return stateMachineResult.Code, stateMachineResult.Err
 }
 
+// RequestRmdirCommand performs the rmdir command
 func (s *RaftNetworkServer) RequestRmdirCommand(filePath string) (returnCode returncodes.Code, returnError error) {
 	entry := &pb.Entry{
 		Type: pb.Entry_StateMachineCommand,
 		Uuid: generateNewUUID(),
 		Command: &pb.StateMachineCommand{
-			Type: TYPE_RMDIR,
+			Type: uint32(TypeRmdir),
 			Path: filePath,
 		},
 	}
@@ -407,6 +426,7 @@ func (s *RaftNetworkServer) RequestRmdirCommand(filePath string) (returnCode ret
 	return stateMachineResult.Code, stateMachineResult.Err
 }
 
+// RequestChangeConfiguration performs a change in Configuration
 func (s *RaftNetworkServer) RequestChangeConfiguration(nodes []Node) error {
 	Log.Info("Configuration change requested:", nodes)
 	entry := &pb.Entry{
@@ -421,6 +441,7 @@ func (s *RaftNetworkServer) RequestChangeConfiguration(nodes []Node) error {
 	return err
 }
 
+// RequestAddNodeToConfiguration adds a node to configuration
 func (s *RaftNetworkServer) RequestAddNodeToConfiguration(node Node) error {
 	if s.State.Configuration.InConfiguration(node.NodeID) {
 		return nil
@@ -434,21 +455,22 @@ func (s *RaftNetworkServer) ChangeNodeLocation(UUID, IP, Port string) {
 	s.State.Configuration.ChangeNodeLocation(UUID, IP, Port)
 }
 
+// PerformLibPfsCommand performs a libpfs command
 func PerformLibPfsCommand(directory string, command *pb.StateMachineCommand) *StateMachineResult {
-	switch command.Type {
-	case TYPE_WRITE:
+	switch ActionType(command.Type) {
+	case TypeWrite:
 		code, bytesWritten, err := commands.WriteCommand(directory, command.Path, int64(command.Offset), int64(command.Length), command.Data)
 		return &StateMachineResult{Code: code, Err: err, BytesWritten: bytesWritten}
-	case TYPE_CREAT:
+	case TypeCreat:
 		code, err := commands.CreatCommand(directory, command.Path, os.FileMode(command.Mode))
 		return &StateMachineResult{Code: code, Err: err}
-	case TYPE_CHMOD:
+	case TypeChmod:
 		code, err := commands.ChmodCommand(directory, command.Path, os.FileMode(command.Mode))
 		return &StateMachineResult{Code: code, Err: err}
-	case TYPE_TRUNCATE:
+	case TypeTruncate:
 		code, err := commands.TruncateCommand(directory, command.Path, int64(command.Length))
 		return &StateMachineResult{Code: code, Err: err}
-	case TYPE_UTIMES:
+	case TypeUtimes:
 		var atime *time.Time
 		var mtime *time.Time
 		if command.AccessNanoseconds != 0 || command.AccessSeconds != 0 {
@@ -461,22 +483,22 @@ func PerformLibPfsCommand(directory string, command *pb.StateMachineCommand) *St
 		}
 		code, err := commands.UtimesCommand(directory, command.Path, atime, mtime)
 		return &StateMachineResult{Code: code, Err: err}
-	case TYPE_RENAME:
+	case TypeRename:
 		code, err := commands.RenameCommand(directory, command.OldPath, command.NewPath)
 		return &StateMachineResult{Code: code, Err: err}
-	case TYPE_LINK:
+	case TypeLink:
 		code, err := commands.LinkCommand(directory, command.OldPath, command.NewPath)
 		return &StateMachineResult{Code: code, Err: err}
-	case TYPE_SYMLINK:
+	case TypeSymlink:
 		code, err := commands.SymlinkCommand(directory, command.OldPath, command.NewPath)
 		return &StateMachineResult{Code: code, Err: err}
-	case TYPE_UNLINK:
+	case TypeUnlink:
 		code, err := commands.UnlinkCommand(directory, command.Path)
 		return &StateMachineResult{Code: code, Err: err}
-	case TYPE_MKDIR:
+	case TypeMkdir:
 		code, err := commands.MkdirCommand(directory, command.Path, os.FileMode(command.Mode))
 		return &StateMachineResult{Code: code, Err: err}
-	case TYPE_RMDIR:
+	case TypeRmdir:
 		code, err := commands.RmdirCommand(directory, command.Path)
 		return &StateMachineResult{Code: code, Err: err}
 	}
@@ -484,6 +506,7 @@ func PerformLibPfsCommand(directory string, command *pb.StateMachineCommand) *St
 	return nil
 }
 
+// PerformKSMCommand updates the keys
 func PerformKSMCommand(sateMachine *keyman.KeyStateMachine, keyCommand *pb.KeyStateCommand) *StateMachineResult {
 	switch keyCommand.Type {
 	case pb.KeyStateCommand_UpdateKeyPiece:
