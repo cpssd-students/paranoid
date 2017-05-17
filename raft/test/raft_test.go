@@ -69,16 +69,16 @@ func TestRaftElection(t *testing.T) {
 	raft.Log.Info("Searching for leader")
 	leader := rafttestutil.GetLeaderTimeout(cluster, 25)
 	if leader != nil {
-		t.Log(leader.State.NodeId, "selected as leader for term", leader.State.GetCurrentTerm())
+		t.Log(leader.State.NodeID, "selected as leader for term", leader.State.GetCurrentTerm())
 	} else {
 		t.Fatal("Failed to select leader")
 	}
 
 	//Shutdown current leader, make sure an election is triggered and another leader is found
 	close(leader.Quit)
-	if leader.State.NodeId == "node1" {
+	if leader.State.NodeID == "node1" {
 		node1srv.Stop()
-	} else if leader.State.NodeId == "node2" {
+	} else if leader.State.NodeID == "node2" {
 		node2srv.Stop()
 	} else {
 		node3srv.Stop()
@@ -94,7 +94,7 @@ func TestRaftElection(t *testing.T) {
 		time.Sleep(5 * time.Second)
 		newLeader := rafttestutil.GetLeader(cluster)
 		if newLeader != nil && leader != newLeader {
-			t.Log(newLeader.State.NodeId, "selected as leader for term", newLeader.State.GetCurrentTerm())
+			t.Log(newLeader.State.NodeID, "selected as leader for term", newLeader.State.GetCurrentTerm())
 			break
 		}
 	}
@@ -110,7 +110,7 @@ func verifySpecialNumber(raftServer *raft.RaftNetworkServer, x uint64, waitInter
 			return nil
 		}
 	}
-	return fmt.Errorf(raftServer.State.NodeId, " special number", raftServer.State.GetSpecialNumber(), " is not equal to", x)
+	return fmt.Errorf(raftServer.State.NodeID, " special number", raftServer.State.GetSpecialNumber(), " is not equal to", x)
 }
 
 func TestRaftLogReplication(t *testing.T) {
@@ -326,11 +326,11 @@ func TestRaftConfigurationChange(t *testing.T) {
 		t.Fatal("Unable to find a leader")
 	}
 
-	raft.Log.Info(leader.State.NodeId, " is to leave configuration")
+	raft.Log.Info(leader.State.NodeID, " is to leave configuration")
 
 	newNodes := []raft.Node{node1, node2, node3, node4}
 	for i := 0; i < len(newNodes); i++ {
-		if newNodes[i].NodeID == leader.State.NodeId {
+		if newNodes[i].NodeID == leader.State.NodeID {
 			newNodes = append(newNodes[:i], newNodes[i+1:]...)
 			raft.Log.Info("Removing leader from new set of nodes")
 			break
@@ -351,14 +351,14 @@ func TestRaftConfigurationChange(t *testing.T) {
 		}
 		time.Sleep(2 * time.Second)
 		newLeader = rafttestutil.GetLeader(cluster)
-		if newLeader != nil && newLeader.State.NodeId != leader.State.NodeId {
+		if newLeader != nil && newLeader.State.NodeID != leader.State.NodeID {
 			break
 		}
 	}
 
-	time.Sleep(raft.HEARTBEAT_TIMEOUT * 2)
+	time.Sleep(raft.HeartbeatTimeout * 2)
 
-	if node1RaftServer.State.NodeId != leader.State.NodeId {
+	if node1RaftServer.State.NodeID != leader.State.NodeID {
 		_, err := node1RaftServer.RequestAddLogEntry(&pb.Entry{
 			Type: pb.Entry_Demo,
 			Uuid: rafttestutil.GenerateNewUUID(),

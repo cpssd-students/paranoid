@@ -11,6 +11,7 @@ import (
 	"github.com/pp2p/paranoid/raft"
 )
 
+// GenerateNewUUID creates a new UUID
 func GenerateNewUUID() string {
 	uuidBytes, err := ioutil.ReadFile("/proc/sys/kernel/random/uuid")
 	if err != nil {
@@ -19,6 +20,7 @@ func GenerateNewUUID() string {
 	return strings.TrimSpace(string(uuidBytes))
 }
 
+// StartListener starts a new listener on a random port
 func StartListener() (*net.Listener, string) {
 	lis, err := net.Listen("tcp", ":0")
 	if err != nil {
@@ -29,6 +31,7 @@ func StartListener() (*net.Listener, string) {
 	return &lis, port
 }
 
+// SetUpNode sets up a new node
 func SetUpNode(name, ip, port, commonName string) raft.Node {
 	return raft.Node{
 		NodeID:     name,
@@ -38,6 +41,7 @@ func SetUpNode(name, ip, port, commonName string) raft.Node {
 	}
 }
 
+// CloseListener closes the given net listener
 func CloseListener(lis *net.Listener) {
 	if lis != nil {
 		(*lis).Close()
@@ -46,12 +50,14 @@ func CloseListener(lis *net.Listener) {
 	}
 }
 
+// StopRaftServer stops the given raft server
 func StopRaftServer(raftServer *raft.RaftNetworkServer) {
 	if raftServer.QuitChannelClosed == false {
 		close(raftServer.Quit)
 	}
 }
 
+// CreateRaftDirectory clears the specified directory
 func CreateRaftDirectory(raftDirectory string) string {
 	os.RemoveAll(raftDirectory)
 	err := os.MkdirAll(raftDirectory, 0700)
@@ -61,6 +67,7 @@ func CreateRaftDirectory(raftDirectory string) string {
 	return raftDirectory
 }
 
+// RemoveRaftDirectory removes the raft directory when the server is finished
 func RemoveRaftDirectory(raftDirectory string, raftServer *raft.RaftNetworkServer) {
 	if raftServer != nil {
 		//Need to wait for server to shut down or the file could be removed while in use
@@ -70,10 +77,12 @@ func RemoveRaftDirectory(raftDirectory string, raftServer *raft.RaftNetworkServe
 	os.RemoveAll(raftDirectory)
 }
 
+// IsLeader checks if the local raft server is the raft leader
 func IsLeader(server *raft.RaftNetworkServer) bool {
 	return server.State.GetCurrentState() == raft.LEADER
 }
 
+// GetLeader from a list of servers
 func GetLeader(cluster []*raft.RaftNetworkServer) *raft.RaftNetworkServer {
 	highestTerm := uint64(0)
 	highestIndex := -1
@@ -92,6 +101,8 @@ func GetLeader(cluster []*raft.RaftNetworkServer) *raft.RaftNetworkServer {
 	return nil
 }
 
+// GetLeaderTimeout gets a leader, if the leader is not found it tires again
+// after the timeout
 func GetLeaderTimeout(cluster []*raft.RaftNetworkServer, timeoutSeconds int) *raft.RaftNetworkServer {
 	var leader *raft.RaftNetworkServer
 	leader = GetLeader(cluster)

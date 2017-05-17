@@ -71,7 +71,7 @@ func (rl *RaftLog) DiscardLogEntriesBefore(endIndex, endTerm uint64) {
 	}
 }
 
-//Used once a new snapshot has been reverted to
+// DiscardAllLogEntries once a new snapshot has been reverted to
 func (rl *RaftLog) DiscardAllLogEntries(snapshotIndex, snapshotTerm uint64) {
 	rl.indexLock.Lock()
 	defer rl.indexLock.Unlock()

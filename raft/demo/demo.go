@@ -21,13 +21,14 @@ import (
 	"google.golang.org/grpc/grpclog"
 )
 
+// Constants used in the demo
 const (
-	DEMO_DURATION            time.Duration = 50 * time.Second
-	PRINT_TIME               time.Duration = 5 * time.Second
-	RANDOM_NUMBER_GEN_MIN    time.Duration = 3000 * time.Millisecond
-	RANDOM_NUMBER_GEN_MAX    time.Duration = 10000 * time.Millisecond
-	RANDOM_DROP_INTERVAL_MIN time.Duration = 5000 * time.Millisecond
-	RANDOM_DROP_INTERVAL_MAX time.Duration = 10000 * time.Millisecond
+	DemoDuration          time.Duration = 50 * time.Second
+	PrintTime                           = 5 * time.Second
+	RandomNumberGenMin                  = 3000 * time.Millisecond
+	RandomNumberGenMax                  = 10000 * time.Millisecond
+	RandomDropIntervalMin               = 5000 * time.Millisecond
+	RandomDropIntervalMax               = 10000 * time.Millisecond
 )
 
 var (
@@ -36,15 +37,15 @@ var (
 )
 
 func getRandomInterval() time.Duration {
-	interval := int64(RANDOM_NUMBER_GEN_MAX) - int64(RANDOM_NUMBER_GEN_MIN)
+	interval := int64(RandomDropIntervalMax) - int64(RandomDropIntervalMin)
 	randx := rand.Int63n(interval)
-	return RANDOM_NUMBER_GEN_MIN + time.Duration(randx)
+	return RandomNumberGenMin + time.Duration(randx)
 }
 
 func getRandomDropInterval() time.Duration {
-	interval := int64(RANDOM_DROP_INTERVAL_MAX) - int64(RANDOM_DROP_INTERVAL_MIN)
+	interval := int64(RandomDropIntervalMax) - int64(RandomDropIntervalMin)
 	randx := rand.Int63n(interval)
-	return RANDOM_DROP_INTERVAL_MIN + time.Duration(randx)
+	return RandomDropIntervalMin + time.Duration(randx)
 }
 
 func getRandomDrop() time.Duration {
@@ -62,7 +63,7 @@ func getRandomDrop() time.Duration {
 
 func manageNode(raftServer *raft.RaftNetworkServer) {
 	defer waitGroup.Done()
-	testTimer := time.NewTimer(DEMO_DURATION)
+	testTimer := time.NewTimer(DemoDuration)
 	randomNumTimer := time.NewTimer(getRandomInterval())
 	for {
 		select {
@@ -73,16 +74,16 @@ func manageNode(raftServer *raft.RaftNetworkServer) {
 				return
 			}
 			randomNumber := rand.Intn(1000)
-			log.Println(raftServer.State.NodeId, "requesting that", randomNumber, "be added to the log")
+			log.Println(raftServer.State.NodeID, "requesting that", randomNumber, "be added to the log")
 			_, err := raftServer.RequestAddLogEntry(&pb.Entry{
 				Type: pb.Entry_Demo,
 				Uuid: rafttestutil.GenerateNewUUID(),
 				Demo: &pb.DemoCommand{uint64(randomNumber)},
 			})
 			if err == nil {
-				log.Println(raftServer.State.NodeId, "successfully added", randomNumber, "to the log")
+				log.Println(raftServer.State.NodeID, "successfully added", randomNumber, "to the log")
 			} else {
-				log.Println(raftServer.State.NodeId, "could not add", randomNumber, "to the log:", err)
+				log.Println(raftServer.State.NodeID, "could not add", randomNumber, "to the log:", err)
 			}
 			randomNumTimer.Reset(getRandomInterval())
 		}
@@ -91,14 +92,14 @@ func manageNode(raftServer *raft.RaftNetworkServer) {
 
 func printLogs(cluster []*raft.RaftNetworkServer) {
 	defer waitGroup.Done()
-	testTimer := time.NewTimer(DEMO_DURATION)
-	printTimer := time.NewTimer(PRINT_TIME)
+	testTimer := time.NewTimer(DemoDuration)
+	printTimer := time.NewTimer(PrintTime)
 	for {
 		select {
 		case <-testTimer.C:
 			return
 		case <-printTimer.C:
-			printTimer.Reset(PRINT_TIME)
+			printTimer.Reset(PrintTime)
 			log.Println("Printing node logs:")
 			for i := 0; i < len(cluster); i++ {
 				logsString := ""
@@ -109,7 +110,7 @@ func printLogs(cluster []*raft.RaftNetworkServer) {
 					}
 					logsString = logsString + " " + strconv.Itoa(int(logEntry.Entry.GetDemo().Number))
 				}
-				log.Println(cluster[i].State.NodeId, "Logs:", logsString)
+				log.Println(cluster[i].State.NodeID, "Logs:", logsString)
 			}
 		}
 	}
@@ -153,7 +154,7 @@ func bringBackUp(currentlyDown []bool, nodePorts []string, nodeServers []*grpc.S
 		bringBackUp(currentlyDown, nodePorts, nodeServers, nodeListners, raftServers, nodeNum)
 		return
 	}
-	log.Println(raftServers[nodeNum].State.NodeId, "coming back up")
+	log.Println(raftServers[nodeNum].State.NodeID, "coming back up")
 	nodeListners[nodeNum] = &lis
 	go nodeServers[nodeNum].Serve(lis)
 	currentlyDown[nodeNum] = false
@@ -168,7 +169,7 @@ func performDemoThree(nodePorts []string, nodeServers []*grpc.Server, nodeListne
 	go printLogs(raftServers)
 
 	nodeDowns := make([]bool, 3)
-	testTimer := time.NewTimer(DEMO_DURATION)
+	testTimer := time.NewTimer(DemoDuration)
 	nodeDownTimer := time.NewTimer(getRandomDropInterval())
 	for {
 		select {
@@ -178,7 +179,7 @@ func performDemoThree(nodePorts []string, nodeServers []*grpc.Server, nodeListne
 			nodeDown := rand.Intn(3)
 			if nodeDowns[nodeDown] == false {
 				nodeDowns[nodeDown] = true
-				log.Println(raftServers[nodeDown].State.NodeId, "dropping messages")
+				log.Println(raftServers[nodeDown].State.NodeID, "dropping messages")
 				rafttestutil.CloseListener(nodeListners[nodeDown])
 				go bringBackUp(nodeDowns, nodePorts, nodeServers, nodeListners, raftServers, nodeDown)
 			}

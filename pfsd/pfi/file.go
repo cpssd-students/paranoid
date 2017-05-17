@@ -54,7 +54,7 @@ func (f *ParanoidFile) Write(content []byte, off int64) (uint32, fuse.Status) {
 		bytesWritten int
 	)
 	if SendOverNetwork {
-		code, err, bytesWritten = globals.RaftNetworkServer.RequestWriteCommand(f.Name, off, int64(len(content)), content)
+		code, bytesWritten, err = globals.RaftNetworkServer.RequestWriteCommand(f.Name, off, int64(len(content)), content)
 	} else {
 		code, bytesWritten, err = commands.WriteCommand(globals.ParanoidDir, f.Name, off, int64(len(content)), content)
 	}

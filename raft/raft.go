@@ -1,3 +1,4 @@
+// Package raft stores function used to interface in and out of raft.
 package raft
 
 import (
@@ -19,24 +20,24 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
+// Raft constants
 const (
-	ELECTION_TIMEOUT       time.Duration = 3000 * time.Millisecond
-	HEARTBEAT              time.Duration = 1000 * time.Millisecond
-	REQUEST_VOTE_TIMEOUT   time.Duration = 5500 * time.Millisecond
-	HEARTBEAT_TIMEOUT      time.Duration = 3000 * time.Millisecond
-	SEND_ENTRY_TIMEOUT     time.Duration = 7500 * time.Millisecond
-	ENTRY_APPLIED_TIMEOUT  time.Duration = 20000 * time.Millisecond
-	LEADER_REQUEST_TIMEOUT time.Duration = 10000 * time.Millisecond
+	ElectionTimeout      time.Duration = 3000 * time.Millisecond
+	Heartbeat                          = 1000 * time.Millisecond
+	RequestVoteTimeout                 = 5500 * time.Millisecond
+	HeartbeatTimeout                   = 3000 * time.Millisecond
+	SendEntryTimeout                   = 7500 * time.Millisecond
+	EntryAppliedTimeout                = 20000 * time.Millisecond
+	leaderRequestTimeout               = 10000 * time.Millisecond
 )
 
-const (
-	MAX_APPEND_ENTRIES uint64 = 100 //How many entries can be sent in one append entries request
-)
+// MaxAppendEntries that can be send it one append request
+const MaxAppendEntries uint64 = 100
 
-var (
-	Log *logger.ParanoidLogger
-)
+// Log for raft
+var Log *logger.ParanoidLogger
 
+// RaftNetworkServer implements the raft protobuf server interface
 type RaftNetworkServer struct {
 	State *RaftState
 	Wait  sync.WaitGroup
@@ -56,6 +57,7 @@ type RaftNetworkServer struct {
 	clientRequest     *pb.Entry
 }
 
+// AppendEntries implementation
 func (s *RaftNetworkServer) AppendEntries(ctx context.Context, req *pb.AppendEntriesRequest) (*pb.AppendEntriesResponse, error) {
 	s.appendEntriesLock.Lock()
 	defer s.appendEntriesLock.Unlock()
@@ -71,7 +73,7 @@ func (s *RaftNetworkServer) AppendEntries(ctx context.Context, req *pb.AppendEnt
 	}
 
 	s.ElectionTimeoutReset <- true
-	s.State.SetLeaderId(req.LeaderId)
+	s.State.SetLeaderID(req.LeaderId)
 
 	if req.Term > s.State.GetCurrentTerm() {
 		s.State.SetCurrentTerm(req.Term)
@@ -129,6 +131,7 @@ func (s *RaftNetworkServer) AppendEntries(ctx context.Context, req *pb.AppendEnt
 	return &pb.AppendEntriesResponse{s.State.GetCurrentTerm(), 0, true}, nil
 }
 
+// RequestVote implementation
 func (s *RaftNetworkServer) RequestVote(ctx context.Context, req *pb.RequestVoteRequest) (*pb.RequestVoteResponse, error) {
 	if s.State.Configuration.InConfiguration(req.CandidateId) == false {
 		if s.State.Configuration.MyConfigurationGood() {
@@ -166,15 +169,14 @@ func (s *RaftNetworkServer) RequestVote(ctx context.Context, req *pb.RequestVote
 }
 
 func (s *RaftNetworkServer) getLeader() *Node {
-	leaderId := s.State.GetLeaderId()
-	if leaderId != "" {
-		if s.State.Configuration.InConfiguration(leaderId) {
-			node, err := s.State.Configuration.GetNode(leaderId)
+	leaderID := s.State.GetLeaderID()
+	if leaderID != "" {
+		if s.State.Configuration.InConfiguration(leaderID) {
+			node, err := s.State.Configuration.GetNode(leaderID)
 			if err == nil {
 				return &node
-			} else {
-				return nil
 			}
+			return nil
 		}
 	}
 	return nil
@@ -240,6 +242,7 @@ func (s *RaftNetworkServer) addLogEntryLeader(entry *pb.Entry) error {
 	return nil
 }
 
+// ClientToLeaderRequest implementation
 func (s *RaftNetworkServer) ClientToLeaderRequest(ctx context.Context, req *pb.EntryRequest) (*pb.EmptyMessage, error) {
 	if s.State.Configuration.InConfiguration(req.SenderId) == false {
 		return &pb.EmptyMessage{}, errors.New("Node is not in the configuration")
@@ -254,7 +257,7 @@ func (s *RaftNetworkServer) ClientToLeaderRequest(ctx context.Context, req *pb.E
 
 //sendLeaderLogEntry forwards a client request to the leader
 func (s *RaftNetworkServer) sendLeaderLogEntry(entry *pb.Entry) error {
-	sendLogTimeout := time.After(LEADER_REQUEST_TIMEOUT)
+	sendLogTimeout := time.After(leaderRequestTimeout)
 	lastError := errors.New("timeout before client to leader request was attempted")
 	for {
 		select {
@@ -267,7 +270,7 @@ func (s *RaftNetworkServer) sendLeaderLogEntry(entry *pb.Entry) error {
 				continue
 			}
 
-			conn, err := s.Dial(leaderNode, SEND_ENTRY_TIMEOUT)
+			conn, err := s.Dial(leaderNode, SendEntryTimeout)
 			if err != nil {
 				lastError = err
 				continue
@@ -276,7 +279,7 @@ func (s *RaftNetworkServer) sendLeaderLogEntry(entry *pb.Entry) error {
 
 			if err == nil {
 				client := pb.NewRaftNetworkClient(conn)
-				_, err := client.ClientToLeaderRequest(context.Background(), &pb.EntryRequest{s.State.NodeId, entry})
+				_, err := client.ClientToLeaderRequest(context.Background(), &pb.EntryRequest{s.State.NodeID, entry})
 				if err == nil {
 					return err
 				}
@@ -310,7 +313,7 @@ func convertNodesToProto(nodes []Node) []*pb.Node {
 //getRandomElectionTimeout returns a time between ELECTION_TIMEOUT and ELECTION_TIMEOUT*2
 func getRandomElectionTimeout() time.Duration {
 	rand.Seed(time.Now().UnixNano())
-	return ELECTION_TIMEOUT + time.Duration(rand.Int63n(int64(ELECTION_TIMEOUT)))
+	return ElectionTimeout + time.Duration(rand.Int63n(int64(ElectionTimeout)))
 }
 
 func (s *RaftNetworkServer) electionTimeOut() {
@@ -338,6 +341,7 @@ func (s *RaftNetworkServer) electionTimeOut() {
 	}
 }
 
+// Dial a node
 func (s *RaftNetworkServer) Dial(node *Node, timeoutMiliseconds time.Duration) (*grpc.ClientConn, error) {
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithTimeout(timeoutMiliseconds))
@@ -363,12 +367,12 @@ func (s *RaftNetworkServer) requestPeerVote(node *Node, term uint64, voteChannel
 			return
 		}
 		Log.Info("Dialing ", node)
-		conn, err := s.Dial(node, REQUEST_VOTE_TIMEOUT)
+		conn, err := s.Dial(node, RequestVoteTimeout)
 		defer conn.Close()
 		if err == nil {
 			client := pb.NewRaftNetworkClient(conn)
 			response, err := client.RequestVote(context.Background(), &pb.RequestVoteRequest{s.State.GetCurrentTerm(),
-				s.State.NodeId,
+				s.State.NodeID,
 				s.State.Log.GetMostRecentIndex(),
 				s.State.Log.GetMostRecentTerm()})
 			Log.Info("Got response from", node)
@@ -382,7 +386,7 @@ func (s *RaftNetworkServer) requestPeerVote(node *Node, term uint64, voteChannel
 
 type voteResponse struct {
 	response *pb.RequestVoteResponse
-	NodeId   string
+	NodeID   string
 }
 
 //runElection attempts to get elected as leader for the current term
@@ -391,9 +395,9 @@ func (s *RaftNetworkServer) runElection() {
 	term := s.State.GetCurrentTerm()
 	var votesGranted []string
 
-	if s.State.GetVotedFor() == "" && s.State.Configuration.InConfiguration(s.State.NodeId) {
-		s.State.SetVotedFor(s.State.NodeId)
-		votesGranted = append(votesGranted, s.State.NodeId)
+	if s.State.GetVotedFor() == "" && s.State.Configuration.InConfiguration(s.State.NodeID) {
+		s.State.SetVotedFor(s.State.NodeID)
+		votesGranted = append(votesGranted, s.State.NodeID)
 	}
 
 	if s.State.Configuration.HasMajority(votesGranted) {
@@ -434,15 +438,15 @@ func (s *RaftNetworkServer) runElection() {
 					s.State.SetCurrentTerm(vote.response.Term)
 					s.State.SetCurrentState(FOLLOWER)
 					return
-				} else {
-					if vote.response.VoteGranted == true {
-						votesGranted = append(votesGranted, vote.NodeId)
-						Log.Info("Vote granted. Current votes :", len(votesGranted))
-						if s.State.Configuration.HasMajority(votesGranted) {
-							Log.Info("Node elected leader with", len(votesGranted), " votes")
-							s.State.SetCurrentState(LEADER)
-							return
-						}
+				}
+
+				if vote.response.VoteGranted == true {
+					votesGranted = append(votesGranted, vote.NodeID)
+					Log.Info("Vote granted. Current votes :", len(votesGranted))
+					if s.State.Configuration.HasMajority(votesGranted) {
+						Log.Info("Node elected leader with", len(votesGranted), " votes")
+						s.State.SetCurrentState(LEADER)
+						return
 					}
 				}
 			}
@@ -481,7 +485,7 @@ func (s *RaftNetworkServer) sendHeartBeat(node *Node) {
 		sendingSnapshot = true
 	}
 
-	conn, err := s.Dial(node, HEARTBEAT_TIMEOUT)
+	conn, err := s.Dial(node, HeartbeatTimeout)
 	defer conn.Close()
 	if err == nil {
 		client := pb.NewRaftNetworkClient(conn)
@@ -500,20 +504,19 @@ func (s *RaftNetworkServer) sendHeartBeat(node *Node) {
 				}
 			}
 
-			nextLogEntries, err := s.State.Log.GetLogEntries(nextIndex, MAX_APPEND_ENTRIES)
+			nextLogEntries, err := s.State.Log.GetLogEntries(nextIndex, MaxAppendEntries)
 			if err != nil {
 				if err == raftlog.ErrIndexBelowStartIndex {
 					s.State.SendSnapshot <- *node
 					return
-				} else {
-					Log.Fatal("Unable to get log entry:", err)
 				}
+				Log.Fatal("Unable to get log entry:", err)
 			}
 			numLogEntries := uint64(len(nextLogEntries))
 
 			response, err := client.AppendEntries(context.Background(), &pb.AppendEntriesRequest{
 				Term:         s.State.GetCurrentTerm(),
-				LeaderId:     s.State.NodeId,
+				LeaderId:     s.State.NodeID,
 				PrevLogIndex: nextIndex - 1,
 				PrevLogTerm:  prevLogTerm,
 				Entries:      nextLogEntries,
@@ -541,7 +544,7 @@ func (s *RaftNetworkServer) sendHeartBeat(node *Node) {
 		} else {
 			response, err := client.AppendEntries(context.Background(), &pb.AppendEntriesRequest{
 				Term:         s.State.GetCurrentTerm(),
-				LeaderId:     s.State.NodeId,
+				LeaderId:     s.State.NodeID,
 				PrevLogIndex: s.State.Log.GetMostRecentIndex(),
 				PrevLogTerm:  s.State.Log.GetMostRecentTerm(),
 				Entries:      []*pb.Entry{},
@@ -588,7 +591,7 @@ func (s *RaftNetworkServer) manageLeading() {
 				s.Wait.Add(1)
 				go s.sendHeartBeat(&peers[i])
 			}
-			timer := time.NewTimer(HEARTBEAT)
+			timer := time.NewTimer(Heartbeat)
 		leadingLoop:
 			for {
 				select {
@@ -602,7 +605,7 @@ func (s *RaftNetworkServer) manageLeading() {
 					Log.Info("Stopped leading")
 					break leadingLoop
 				case <-s.State.SendAppendEntries:
-					timer.Reset(HEARTBEAT)
+					timer.Reset(Heartbeat)
 					s.ElectionTimeoutReset <- true
 					peers = s.State.Configuration.GetPeersList()
 					for i := 0; i < len(peers); i++ {
@@ -610,7 +613,7 @@ func (s *RaftNetworkServer) manageLeading() {
 						go s.sendHeartBeat(&peers[i])
 					}
 				case <-timer.C:
-					timer.Reset(HEARTBEAT)
+					timer.Reset(Heartbeat)
 					s.ElectionTimeoutReset <- true
 					peers = s.State.Configuration.GetPeersList()
 					for i := 0; i < len(peers); i++ {
@@ -640,13 +643,13 @@ func (s *RaftNetworkServer) manageConfigurationChanges() {
 			if config.Type == pb.Configuration_CurrentConfiguration {
 				inConfig := false
 				for i := 0; i < len(config.Nodes); i++ {
-					if config.Nodes[i].NodeId == s.State.NodeId {
+					if config.Nodes[i].NodeId == s.State.NodeID {
 						inConfig = true
 						break
 					}
 				}
 				if inConfig == false {
-					Log.Info("Node not included in current configuration", s.State.NodeId)
+					Log.Info("Node not included in current configuration", s.State.NodeID)
 					s.State.SetCurrentState(FOLLOWER)
 				}
 			} else {
@@ -683,9 +686,8 @@ func (s *RaftNetworkServer) manageEntryApplication() {
 	}
 }
 
-func NewRaftNetworkServer(nodeDetails Node, pfsDirectory, raftInfoDirectory string, testConfiguration *StartConfiguration,
-	TLSEnabled, TLSSkipVerify, encrypted bool) *RaftNetworkServer {
-
+// NewRaftNetworkServer creates a new instance of the raft server
+func NewRaftNetworkServer(nodeDetails Node, pfsDirectory, raftInfoDirectory string, testConfiguration *StartConfiguration, TLSEnabled, TLSSkipVerify, encrypted bool) *RaftNetworkServer {
 	raftServer := &RaftNetworkServer{State: newRaftState(nodeDetails, pfsDirectory, raftInfoDirectory, testConfiguration)}
 	raftServer.ElectionTimeoutReset = make(chan bool, 100)
 	raftServer.Quit = make(chan bool)

@@ -19,18 +19,20 @@ import (
 	"golang.org/x/net/context"
 )
 
+// String constants
 const (
-	SnapshotDirectory        string = "snapshots"
-	CurrentSnapshotDirectory string = "currentsnapshot"
-	SnapshotMetaFileName     string = "snapshotmeta"
-	TarFileName              string = "snapshot.tar"
+	SnapshotDirectory        = "snapshots"
+	CurrentSnapshotDirectory = "currentsnapshot"
+	SnapshotMetaFileName     = "snapshotmeta"
+	TarFileName              = "snapshot.tar"
 )
 
+// Snapshot constants
 const (
-	SNAPSHOT_INTERVAL         time.Duration = 1 * time.Minute
-	SNAPSHOT_LOGSIZE          uint64        = 2 * 1024 * 1024 //2 MegaBytes
-	SNAPSHOT_CHUNK_SIZE       int64         = 1024
-	MAX_INSTALLSNAPSHOT_FAILS int           = 10
+	SnapshortInteval        time.Duration = 1 * time.Minute
+	SnapshotLogsize         uint64        = 2 * 1024 * 1024 //2 MegaBytes
+	SnapshotChunkSize       int64         = 1024
+	MaxInstallSnapshotFails int           = 10
 )
 
 // Called every time raft network server starts up
@@ -47,6 +49,7 @@ func (s *RaftNetworkServer) setupSnapshotDirectory() {
 	}
 }
 
+// SnapShotInfo contains the information about the snapshot
 type SnapShotInfo struct {
 	LastIncludedIndex uint64 `json:"lastincludedindex"`
 	LastIncludedTerm  uint64 `json:"lastincludedterm"`
@@ -74,12 +77,12 @@ func saveSnapshotMetaInformation(snapShotPath string, lastIncludedIndex, lastInc
 		SelfCreated:       selfCreated,
 	}
 
-	snapShotInfoJson, err := json.Marshal(snapShotInfo)
+	snapShotInfoJSON, err := json.Marshal(snapShotInfo)
 	if err != nil {
 		return fmt.Errorf("error saving snapshot meta information: %s", err)
 	}
 
-	err = ioutil.WriteFile(path.Join(snapShotPath, SnapshotMetaFileName), snapShotInfoJson, 0600)
+	err = ioutil.WriteFile(path.Join(snapShotPath, SnapshotMetaFileName), snapShotInfoJSON, 0600)
 	if err != nil {
 		return fmt.Errorf("error saving snapshot meta information: %s", err)
 	}
@@ -158,7 +161,7 @@ func tarSnapshot(snapshotDirectory string) error {
 func startNextSnapshotWithCurrent(currentSnapshot, nextSnapshot string) error {
 	err := unpackTarFile(path.Join(currentSnapshot, TarFileName), nextSnapshot)
 	if err != nil {
-		return fmt.Errorf("error starting new snapshot from current snapshot:", err)
+		return fmt.Errorf("error starting new snapshot from current snapshot: %v", err)
 	}
 
 	err = os.Rename(path.Join(nextSnapshot, "meta", keyman.KsmFileName+"-tar"),
@@ -323,6 +326,7 @@ func performCleanup(snapshotPath string) error {
 	return nil
 }
 
+// CreateSnapshot creates a new snapshot up to the last included index
 func (s *RaftNetworkServer) CreateSnapshot(lastIncludedIndex uint64) (err error) {
 	currentSnapshot := path.Join(s.raftInfoDirectory, SnapshotDirectory, CurrentSnapshotDirectory)
 	nextSnapshot := path.Join(s.raftInfoDirectory, SnapshotDirectory, generateNewUUID())
@@ -395,8 +399,8 @@ func (s *RaftNetworkServer) CreateSnapshot(lastIncludedIndex uint64) (err error)
 	return nil
 }
 
-//Revert the statemachine state to the snapshot state.
-//Remove all log entries
+// RevertToSnapshot revets the statemachine to the snapshot state and removes
+// all log entries.
 func (s *RaftNetworkServer) RevertToSnapshot(snapshotPath string) error {
 	s.State.ApplyEntryLock.Lock()
 	defer s.State.ApplyEntryLock.Unlock()
@@ -462,6 +466,7 @@ func (s *RaftNetworkServer) RevertToSnapshot(snapshotPath string) error {
 	return nil
 }
 
+// InstallSnapshot performs snapshot installation
 func (s *RaftNetworkServer) InstallSnapshot(ctx context.Context, req *pb.SnapshotRequest) (*pb.SnapshotResponse, error) {
 	if req.Term < s.State.GetCurrentTerm() {
 		return &pb.SnapshotResponse{s.State.GetCurrentTerm()}, nil
@@ -521,7 +526,7 @@ func (s *RaftNetworkServer) sendSnapshot(node *Node) {
 	defer s.State.DecrementSnapshotCounter()
 	defer s.State.Configuration.SetSendingSnapshot(node.NodeID, false)
 
-	conn, err := s.Dial(node, HEARTBEAT_TIMEOUT)
+	conn, err := s.Dial(node, HeartbeatTimeout)
 	if err != nil {
 		Log.Error("error sending snapshot:", err)
 		return
@@ -543,7 +548,7 @@ func (s *RaftNetworkServer) sendSnapshot(node *Node) {
 	}
 	defer snapshotFile.Close()
 
-	snapshotChunk := make([]byte, SNAPSHOT_CHUNK_SIZE)
+	snapshotChunk := make([]byte, SnapshotChunkSize)
 	snapshotFileOffset := int64(0)
 	installRequestsFailed := 0
 
@@ -593,13 +598,12 @@ func (s *RaftNetworkServer) sendSnapshot(node *Node) {
 				}
 				snapshotFileOffset = snapshotFileOffset + int64(bytesRead)
 			} else {
-				if installRequestsFailed > MAX_INSTALLSNAPSHOT_FAILS {
+				if installRequestsFailed > MaxInstallSnapshotFails {
 					Log.Error("InstallSnapshot request failed repeatedly:", err)
 					return
-				} else {
-					Log.Warn("InstallSnapshot request failed:", err)
-					installRequestsFailed++
 				}
+				Log.Warn("InstallSnapshot request failed:", err)
+				installRequestsFailed++
 			}
 		}
 	}
@@ -672,7 +676,7 @@ func (s *RaftNetworkServer) updateCurrentSnapshot() error {
 
 func (s *RaftNetworkServer) manageSnapshoting() {
 	defer s.Wait.Done()
-	snapshotTimer := time.NewTimer(SNAPSHOT_INTERVAL)
+	snapshotTimer := time.NewTimer(SnapshortInteval)
 	for {
 		select {
 		case _, ok := <-s.Quit:
@@ -683,7 +687,7 @@ func (s *RaftNetworkServer) manageSnapshoting() {
 			}
 		case <-snapshotTimer.C:
 			if s.State.GetPerformingSnapshot() == false {
-				if s.State.Log.GetLogSizeBytes() > SNAPSHOT_LOGSIZE {
+				if s.State.Log.GetLogSizeBytes() > SnapshotLogsize {
 					s.Wait.Add(1)
 					go func() {
 						defer s.Wait.Done()
@@ -694,7 +698,7 @@ func (s *RaftNetworkServer) manageSnapshoting() {
 					}()
 				}
 			}
-			snapshotTimer.Reset(SNAPSHOT_INTERVAL)
+			snapshotTimer.Reset(SnapshortInteval)
 		case <-s.State.SnapshotCounterAtZero:
 			err := s.updateCurrentSnapshot()
 			if err != nil {

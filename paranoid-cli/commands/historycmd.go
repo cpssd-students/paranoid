@@ -97,7 +97,7 @@ func configurationString(conf *pb.Configuration) string {
 
 // commandString returns the string representation of a StateMachineCommand
 func commandString(cmd *pb.StateMachineCommand) string {
-	typeStr := commandTypeString(cmd.Type)
+	typeStr := commandTypeString(raft.ActionType(cmd.Type))
 	cmd.Type = 0
 	size := len(cmd.Data)
 	if size > 0 {
@@ -123,29 +123,29 @@ func bytesString(bytes int) string {
 }
 
 // commandTypeString returns the string representation of a command log type.
-func commandTypeString(ty uint32) string {
+func commandTypeString(ty raft.ActionType) string {
 	switch ty {
-	case raft.TYPE_WRITE:
+	case raft.TypeWrite:
 		return "Write"
-	case raft.TYPE_CREAT:
+	case raft.TypeCreat:
 		return "Creat"
-	case raft.TYPE_CHMOD:
+	case raft.TypeChmod:
 		return "Chmod"
-	case raft.TYPE_TRUNCATE:
+	case raft.TypeTruncate:
 		return "Truncate"
-	case raft.TYPE_UTIMES:
+	case raft.TypeUtimes:
 		return "Utimes"
-	case raft.TYPE_RENAME:
+	case raft.TypeRename:
 		return "Rename"
-	case raft.TYPE_LINK:
+	case raft.TypeLink:
 		return "Link"
-	case raft.TYPE_SYMLINK:
+	case raft.TypeSymlink:
 		return "Symlink"
-	case raft.TYPE_UNLINK:
+	case raft.TypeUnlink:
 		return "Unlink"
-	case raft.TYPE_MKDIR:
+	case raft.TypeMkdir:
 		return "Mkdir"
-	case raft.TYPE_RMDIR:
+	case raft.TypeRmdir:
 		return "Rmdir"
 	default:
 		return "Unknown"
