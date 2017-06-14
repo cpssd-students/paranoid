@@ -3,7 +3,7 @@ package returncodes
 // Code is the basic type for all returncodes
 type Code int
 
-//Current pfsm supported return codes
+// Current libpfs supported return codes
 const (
 	OK          Code = iota
 	ENOENT           //No such file or directory.
@@ -17,30 +17,18 @@ const (
 	EUNEXPECTED      //Unforseen error
 )
 
-// String returns the code as a string
-func (c Code) String() string {
-	switch c {
-	case OK:
-		return "OK"
-	case ENOENT:
-		return "ENOENT"
-	case EACCES:
-		return "EACCES"
-	case EEXIST:
-		return "EEXIST"
-	case ENOTEMPTY:
-		return "ENOTEMPTY"
-	case EISDIR:
-		return "EISDIR"
-	case EIO:
-		return "EIO"
-	case ENOTDIR:
-		return "ENOTDIR"
-	case EBUSY:
-		return "EBUSY"
-	case EUNEXPECTED:
-		return "EUNEXPECTED"
-	default:
-		return ""
-	}
+var codes = [...]string{
+	"OK",
+	"ENOENT",
+	"EACCES",
+	"EEXIST",
+	"ENOTEMPTY",
+	"EISDIR",
+	"EIO",
+	"ENOTDIR",
+	"EBUSY",
+	"EUNEXPECTED",
 }
+
+// Strings returns a human readable representation of the codes
+func (c Code) String() string { return codes[c] }
