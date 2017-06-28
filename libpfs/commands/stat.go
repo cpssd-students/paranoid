@@ -2,13 +2,13 @@ package commands
 
 import (
 	"fmt"
-	"go/log"
 	"os"
 	"path"
 	"syscall"
 	"time"
 
 	"github.com/pp2p/paranoid/libpfs/returncodes"
+	log "github.com/pp2p/paranoid/logger"
 )
 
 // StatInfo contains the file metadata
