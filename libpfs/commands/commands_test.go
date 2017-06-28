@@ -3,7 +3,6 @@
 package commands
 
 import (
-	"flag"
 	"math/rand"
 	"os"
 	"syscall"
@@ -18,7 +17,6 @@ import (
 var testDirectory string
 
 func TestMain(m *testing.M) {
-	flag.Parse()
 	defer removeTestDir()
 
 	log.Info("Running tests with no encryption")
