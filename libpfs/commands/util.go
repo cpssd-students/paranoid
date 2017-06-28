@@ -15,7 +15,6 @@ import (
 	"github.com/pp2p/paranoid/logger"
 )
 
-// Log the data from libpfs
 var Log *logger.ParanoidLogger
 
 type inode struct {

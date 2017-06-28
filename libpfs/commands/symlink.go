@@ -10,11 +10,14 @@ import (
 	"syscall"
 
 	"github.com/pp2p/paranoid/libpfs/returncodes"
+	log "github.com/pp2p/paranoid/logger"
 )
 
 // SymlinkCommand creates a symbolic link
 func SymlinkCommand(paranoidDirectory, existingFilePath, targetFilePath string) (returnCode returncodes.Code, returnError error) {
-	Log.Info("symlink command called")
+	log.V(1).Info("symlinking %s with %s in %s",
+		existingFilePath, targetFilePath, paranoidDirectory)
+
 	targetParanoidPath := getParanoidPath(paranoidDirectory, targetFilePath)
 
 	err := GetFileSystemLock(paranoidDirectory, ExclusiveLock)
@@ -45,7 +48,6 @@ func SymlinkCommand(paranoidDirectory, existingFilePath, targetFilePath string) 
 	}
 
 	uuidString := string(uuidBytes)
-	Log.Verbose("symlink: uuid", uuidString)
 
 	err = ioutil.WriteFile(targetParanoidPath, uuidBytes, 0600)
 	if err != nil {

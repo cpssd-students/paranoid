@@ -178,7 +178,7 @@ func TestVerbosity(t *testing.T) {
 		var b bytes.Buffer
 		AddAdditionalWriter(&b)
 
-		flag.Set("v", fmt.Sprintf("%d", c.logflag))
+		flag.Set("-v", fmt.Sprintf("%d", c.logflag))
 		V(c.loglevel).Infof("c%d", i)
 
 		yes := "c%d: expected results, have none"

@@ -8,6 +8,8 @@ import (
 	"path"
 
 	"github.com/urfave/cli"
+
+	log "github.com/pp2p/paranoid/logger"
 )
 
 //AutoMount mounts a file system with the last used settings.
@@ -21,14 +23,14 @@ func AutoMount(c *cli.Context) {
 	usr, err := user.Current()
 	if err != nil {
 		fmt.Println("FATAL: Error Getting Current User")
-		Log.Fatal("Cannot get curent User:", err)
+		log.Fatalf("cannot get curent user: %v", err)
 	}
 	pfsMeta := path.Join(usr.HomeDir, ".pfs", "filesystems", args[0], "meta")
 
 	mountpoint, err := ioutil.ReadFile(path.Join(pfsMeta, "mountpoint"))
 	if err != nil {
 		fmt.Println("FATAL: PFSD Couldnt find FS mountpoint", err)
-		Log.Fatal("Could not get mountpoint", err)
+		log.Fatal("could not get mountpoint %v", err)
 	}
 
 	mountArgs := []string{args[0], string(mountpoint)}

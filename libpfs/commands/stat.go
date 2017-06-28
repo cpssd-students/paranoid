@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"go/log"
 	"os"
 	"path"
 	"syscall"
@@ -21,7 +22,7 @@ type StatInfo struct {
 
 // StatCommand returns information about a file as StatInfo object
 func StatCommand(paranoidDirectory, filePath string) (returnCode returncodes.Code, info StatInfo, returnError error) {
-	Log.Verbose("stat : given paranoidDirectory", paranoidDirectory)
+	log.V(1).Infof("stat called on %s in %s", filePath, paranoidDirectory)
 
 	err := GetFileSystemLock(paranoidDirectory, SharedLock)
 	if err != nil {
@@ -85,6 +86,5 @@ func StatCommand(paranoidDirectory, filePath string) (returnCode returncodes.Cod
 		Atime:  atime,
 		Mode:   mode}
 
-	Log.Verbose("stat : returning", statData)
 	return returncodes.OK, *statData, nil
 }

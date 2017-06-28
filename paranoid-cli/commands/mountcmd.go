@@ -15,10 +15,12 @@ import (
 	"sync"
 	"time"
 
+	"github.com/urfave/cli"
+
 	"github.com/pp2p/paranoid/libpfs/commands"
 	"github.com/pp2p/paranoid/libpfs/returncodes"
+	log "github.com/pp2p/paranoid/logger"
 	"github.com/pp2p/paranoid/pfsd/intercom"
-	"github.com/urfave/cli"
 )
 
 // Mount subcommand talks to other programs to mount the pfs filesystem.
@@ -44,71 +46,71 @@ func doMount(c *cli.Context, args []string) {
 	usr, err := user.Current()
 	if err != nil {
 		fmt.Println("FATAL: Error Getting Current User")
-		Log.Fatal("Cannot get curent User: ", err)
+		log.Fatalf("cannot get curent user: %v", err)
 	}
 	pfsDir := path.Join(usr.HomeDir, ".pfs", "filesystems", pfsName)
 
-	if _, err := os.Stat(pfsDir); os.IsNotExist(err) {
+	if _, err = os.Stat(pfsDir); os.IsNotExist(err) {
 		fmt.Println("FATAL: PFS directory does not exist")
-		Log.Fatal("PFS directory does not exist")
+		log.Fatal("PFS directory does not exist")
 	}
-	if _, err := os.Stat(path.Join(pfsDir, "contents")); os.IsNotExist(err) {
+	if _, err = os.Stat(path.Join(pfsDir, "contents")); os.IsNotExist(err) {
 		fmt.Println("FATAL: PFS directory does not include contents directory")
-		Log.Fatal("PFS directory does not include contents directory")
+		log.Fatal("PFS directory does not include contents directory")
 	}
-	if _, err := os.Stat(path.Join(pfsDir, "meta")); os.IsNotExist(err) {
+	if _, err = os.Stat(path.Join(pfsDir, "meta")); os.IsNotExist(err) {
 		fmt.Println("FATAL: PFS directory does not include meta directory")
-		Log.Fatal("PFS directory does not include meta directory")
+		log.Fatal("PFS directory does not include meta directory")
 	}
-	if _, err := os.Stat(path.Join(pfsDir, "names")); os.IsNotExist(err) {
+	if _, err = os.Stat(path.Join(pfsDir, "names")); os.IsNotExist(err) {
 		fmt.Println("FATAL: PFS directory does not include names directory")
-		Log.Fatal("PFS directory does not include names directory")
+		log.Fatal("PFS directory does not include names directory")
 	}
-	if _, err := os.Stat(path.Join(pfsDir, "inodes")); os.IsNotExist(err) {
+	if _, err = os.Stat(path.Join(pfsDir, "inodes")); os.IsNotExist(err) {
 		fmt.Println("FATAL: PFS directory does not include inodes directory")
-		Log.Fatal("PFS directory does not include inodes directory")
+		log.Fatal("PFS directory does not include inodes directory")
 	}
 
 	if pathExists(path.Join(pfsDir, "meta/", "pfsd.pid")) {
 		err = os.Remove(path.Join(pfsDir, "meta/", "pfsd.pid"))
 		if err != nil {
 			fmt.Println("FATAL: unable to remove daemon PID file")
-			Log.Fatal("Could not remove old pfsd.pid:", err)
+			log.Fatalf("Could not remove old pfsd.pid: %v", err)
 		}
 	}
 
 	attributesJSON, err := ioutil.ReadFile(path.Join(pfsDir, "meta", "attributes"))
 	if err != nil {
 		fmt.Println("FATAL: unable to read file system attributes")
-		Log.Fatal("unable to read file system attributes:", err)
+		log.Fatalf("unable to read file system attributes: %v", err)
 	}
 
 	attributes := &fileSystemAttributes{}
 	err = json.Unmarshal(attributesJSON, attributes)
 	if err != nil {
 		fmt.Println("FATAL: unable to read file system attributes")
-		Log.Fatal("unable to read file system attributes:", err)
+		log.Fatalf("unable to read file system attributes: %v", err)
 	}
 
 	if !attributes.NetworkOff {
-		_, err := net.DialTimeout("tcp", dAddr, time.Duration(5*time.Second))
+		_, err = net.DialTimeout("tcp", dAddr, time.Duration(5*time.Second))
 		if err != nil {
 			fmt.Println("FATAL: Unable to reach discovery server", err)
-			Log.Fatal("Unable to reach discovery server")
+			log.Fatalf("Unable to reach discovery server: %v", err)
 		}
 	}
 
 	poolBytes, err := ioutil.ReadFile(path.Join(pfsDir, "meta", "pool"))
 	if err != nil {
 		fmt.Println("FATAL: unable to read pool information:", err)
-		Log.Fatal("unable to read pool information:", err)
+		log.Fatalf("unable to read pool information: %v", err)
 	}
 	pool := string(poolBytes)
 
 	returncode, err := commands.MountCommand(pfsDir, dAddr, mountPoint)
 	if returncode != returncodes.OK {
-		fmt.Println("FATAL: Error running pfs mount command : ", err)
-		Log.Fatal("Error running pfs mount command : ", err)
+		fmt.Println("FATAL: Error running pfs mount command:", err)
+		log.Fatalf("Error running pfs mount command: %v", err)
 	}
 
 	pfsFlags := []string{
@@ -119,7 +121,8 @@ func doMount(c *cli.Context, args []string) {
 		fmt.Sprintf("-pool_password=%s", poolPassword),
 	}
 	if c.GlobalBool("verbose") {
-		pfsFlags = append(pfsFlags, "-v")
+		// TODO: Pass verbosity level
+		pfsFlags = append(pfsFlags, "--v=2")
 	}
 	if !attributes.NetworkOff {
 		if iface := c.String("interface"); iface != "" {
@@ -129,7 +132,7 @@ func doMount(c *cli.Context, args []string) {
 		certPath := path.Join(pfsDir, "meta", "cert.pem")
 		keyPath := path.Join(pfsDir, "meta", "key.pem")
 		if pathExists(certPath) && pathExists(keyPath) {
-			Log.Info("Starting PFSD in secure mode.")
+			log.Info("Starting PFSD in secure mode.")
 			pfsFlags = append(pfsFlags, fmt.Sprintf("-cert=%s", certPath))
 			pfsFlags = append(pfsFlags, fmt.Sprintf("-key=%s", keyPath))
 		} else {
@@ -149,7 +152,7 @@ func doMount(c *cli.Context, args []string) {
 	cmd := exec.Command("pfsd", pfsFlags...)
 	if err = cmd.Start(); err != nil {
 		fmt.Println("FATAL: Error running pfsd command :", err)
-		Log.Fatal("Error running pfsd command:", err)
+		log.Fatalf("Error running pfsd command: %v", err)
 	}
 
 	// Now that we've successfully told PFSD to start, ping it until we can confirm it is up
@@ -164,7 +167,7 @@ func doMount(c *cli.Context, args []string) {
 			select {
 			case <-after:
 				if lastConnectionError != nil {
-					Log.Error(lastConnectionError)
+					log.Error(lastConnectionError)
 				}
 				fmt.Printf("PFSD failed to start: received no response from PFSD. See %s for more information.\n",
 					path.Join(pfsDir, "meta", "logs", "pfsd.log"))

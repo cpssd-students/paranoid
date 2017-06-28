@@ -9,11 +9,13 @@ import (
 	"path"
 
 	"github.com/pp2p/paranoid/libpfs/returncodes"
+	log "github.com/pp2p/paranoid/logger"
 )
 
 // UnlinkCommand removes a filename link from an inode.
 func UnlinkCommand(paranoidDirectory, filePath string) (returnCode returncodes.Code, returnError error) {
-	Log.Info("unlink command called")
+	log.V(1).Infof("unlink called on %s in %s", filePath, paranoidDirectory)
+
 	err := GetFileSystemLock(paranoidDirectory, ExclusiveLock)
 	if err != nil {
 		return returncodes.EUNEXPECTED, err
@@ -33,8 +35,6 @@ func UnlinkCommand(paranoidDirectory, filePath string) (returnCode returncodes.C
 		return returncodes.EUNEXPECTED, err
 	}
 
-	Log.Verbose("unlink : paranoidDirectory given = " + paranoidDirectory)
-
 	// checking if file exists
 	if fileType == typeENOENT {
 		return returncodes.ENOENT, errors.New(filePath + " does not exist")
@@ -51,7 +51,6 @@ func UnlinkCommand(paranoidDirectory, filePath string) (returnCode returncodes.C
 	}
 
 	// removing filename
-	Log.Verbose("unlink : deleting file " + fileParanoidPath)
 	err = os.Remove(fileParanoidPath)
 	if err != nil {
 		return returncodes.EUNEXPECTED, fmt.Errorf("error removing file in names: %s", err)
@@ -59,14 +58,12 @@ func UnlinkCommand(paranoidDirectory, filePath string) (returnCode returncodes.C
 
 	// getting inode contents
 	inodePath := path.Join(paranoidDirectory, "inodes", string(inodeBytes))
-	Log.Verbose("unlink : reading file " + inodePath)
 	inodeContents, err := ioutil.ReadFile(inodePath)
 	if err != nil {
 		return returncodes.EUNEXPECTED, fmt.Errorf("error reading inodes contents: %s", err)
 	}
 
 	inodeData := &inode{}
-	Log.Verbose("unlink unmarshaling ", string(inodeContents))
 	err = json.Unmarshal(inodeContents, &inodeData)
 	if err != nil {
 		return returncodes.EUNEXPECTED, fmt.Errorf("error unmarshaling json: %s", err)
@@ -75,13 +72,11 @@ func UnlinkCommand(paranoidDirectory, filePath string) (returnCode returncodes.C
 	if inodeData.Count == 1 {
 		// remove inode and contents
 		contentsPath := path.Join(paranoidDirectory, "contents", string(inodeBytes))
-		Log.Verbose("unlink : removing file " + contentsPath)
 		err = os.Remove(contentsPath)
 		if err != nil {
 			return returncodes.EUNEXPECTED, fmt.Errorf("error removing contents: %s", err)
 		}
 
-		Log.Verbose("unlink : removing file " + inodePath)
 		err = os.Remove(inodePath)
 		if err != nil {
 			return returncodes.EUNEXPECTED, fmt.Errorf("error removing inode: %s", err)
@@ -89,7 +84,6 @@ func UnlinkCommand(paranoidDirectory, filePath string) (returnCode returncodes.C
 	} else {
 		// subtracting one from inode count and saving
 		inodeData.Count--
-		Log.Verbose("unlink : truncating file " + inodePath)
 		err = os.Truncate(inodePath, 0)
 		if err != nil {
 			return returncodes.EUNEXPECTED, fmt.Errorf("error truncating inode path: %s", err)
@@ -100,7 +94,6 @@ func UnlinkCommand(paranoidDirectory, filePath string) (returnCode returncodes.C
 			return returncodes.EUNEXPECTED, fmt.Errorf("error marshalling json: %s", err)
 		}
 
-		Log.Verbose("unlink : writing to file " + inodePath)
 		err = ioutil.WriteFile(inodePath, dataToWrite, 0777)
 		if err != nil {
 			return returncodes.EUNEXPECTED, fmt.Errorf("error writing to inode file: %s", err)

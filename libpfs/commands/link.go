@@ -9,15 +9,16 @@ import (
 	"path"
 
 	"github.com/pp2p/paranoid/libpfs/returncodes"
+	log "github.com/pp2p/paranoid/logger"
 )
 
 // LinkCommand creates a link of a file.
 func LinkCommand(paranoidDirectory, existingFilePath, targetFilePath string) (returnCode returncodes.Code, returnError error) {
-	Log.Info("link command called")
+	log.V(1).Info("linking %s with %s in %s",
+		existingFilePath, targetFilePath, paranoidDirectory)
+
 	existingParanoidPath := getParanoidPath(paranoidDirectory, existingFilePath)
 	targetParanoidPath := getParanoidPath(paranoidDirectory, targetFilePath)
-
-	Log.Verbose("link : given paranoidDirectory = " + paranoidDirectory)
 
 	err := GetFileSystemLock(paranoidDirectory, ExclusiveLock)
 	if err != nil {
@@ -78,7 +79,6 @@ func LinkCommand(paranoidDirectory, existingFilePath, targetFilePath string) (re
 
 	// getting contents of inode
 	inodePath := path.Join(paranoidDirectory, "inodes", string(inodeBytes))
-	Log.Verbose("link : reading file " + inodePath)
 	inodeContents, err := ioutil.ReadFile(inodePath)
 	if err != nil {
 		return returncodes.EUNEXPECTED, fmt.Errorf("error reading inode: %s", err)
@@ -92,14 +92,12 @@ func LinkCommand(paranoidDirectory, existingFilePath, targetFilePath string) (re
 
 	// itterating count and saving
 	nodeData.Count++
-	Log.Verbose("link : opening file " + inodePath)
 	openedFile, err := os.OpenFile(inodePath, os.O_WRONLY, 0600)
 	if err != nil {
 		return returncodes.EUNEXPECTED, fmt.Errorf("error opening file: %s", err)
 	}
 	defer openedFile.Close()
 
-	Log.Verbose("link : truncating file " + inodePath)
 	err = openedFile.Truncate(0)
 	if err != nil {
 		return returncodes.EUNEXPECTED, fmt.Errorf("error truncating file: %s", err)
@@ -110,14 +108,12 @@ func LinkCommand(paranoidDirectory, existingFilePath, targetFilePath string) (re
 		return returncodes.EUNEXPECTED, fmt.Errorf("error marshalling json: %s", err)
 	}
 
-	Log.Verbose("link : writing to file " + inodePath)
 	_, err = openedFile.Write(newJSONData)
 	if err != nil {
 		return returncodes.EUNEXPECTED, fmt.Errorf("error writing to inode file: %s", err)
 	}
 
 	// closing file
-	Log.Verbose("link : closing file " + inodePath)
 	err = openedFile.Close()
 	if err != nil {
 		return returncodes.EUNEXPECTED, fmt.Errorf("error closing file: %s", err)

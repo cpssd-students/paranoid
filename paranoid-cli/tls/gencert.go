@@ -15,12 +15,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/pp2p/paranoid/logger"
 )
-
-// Log is used by gencert package
-var Log *logger.ParanoidLogger
 
 // GenCertificate will generate a TLS cert and key, prompting the user
 // to enter relevant information. The resulting data will be saved to PEM
@@ -35,7 +30,7 @@ func GenCertificate(pfsDir string) error {
 	startDate := time.Now()
 	fmt.Print("Enter the length of time for which the cert will be valid, in days: ")
 	scanner.Scan()
-	if err := scanner.Err(); err != nil {
+	if err = scanner.Err(); err != nil {
 		return fmt.Errorf("could not read user input: %v", err)
 	}
 	validForString := scanner.Text()
@@ -59,7 +54,7 @@ func GenCertificate(pfsDir string) error {
 
 	fmt.Print("Enter the name of your organisation: ")
 	scanner.Scan()
-	if err := scanner.Err(); err != nil {
+	if err = scanner.Err(); err != nil {
 		return fmt.Errorf("could not read user input: %v", err)
 	}
 	organisation := scanner.Text()
@@ -80,7 +75,7 @@ func GenCertificate(pfsDir string) error {
 
 	fmt.Print("Enter a comma-separated list of hostnames and/or IP addresses this cert will validate: ")
 	scanner.Scan()
-	if err := scanner.Err(); err != nil {
+	if err = scanner.Err(); err != nil {
 		return fmt.Errorf("could not read user input: %v", err)
 	}
 	hostsString := scanner.Text()

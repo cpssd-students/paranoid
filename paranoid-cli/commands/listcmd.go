@@ -7,6 +7,8 @@ import (
 	"path"
 
 	"github.com/urfave/cli"
+
+	log "github.com/pp2p/paranoid/logger"
 )
 
 //List lists all paranoid file systems
@@ -14,13 +16,13 @@ func List(c *cli.Context) {
 	usr, err := user.Current()
 	if err != nil {
 		fmt.Println("FATAL: Error Getting Current User")
-		Log.Fatal("Cannot get curent User:", err)
+		log.Fatalf("cannot get curent user: %v", err)
 	}
 
 	files, err := ioutil.ReadDir(path.Join(usr.HomeDir, ".pfs", "filesystems"))
 	if err != nil {
 		fmt.Println("FATAL: Could not read the list of paranoid file systems.")
-		Log.Fatal("Could not get list of paranoid file systems. Error :", err)
+		log.Fatalf("Could not get list of paranoid file systems: %v", err)
 	}
 	for _, file := range files {
 		fmt.Println(file.Name())

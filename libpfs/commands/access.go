@@ -5,12 +5,12 @@ import (
 	"fmt"
 
 	"github.com/pp2p/paranoid/libpfs/returncodes"
+	log "github.com/pp2p/paranoid/logger"
 )
 
 //AccessCommand is used by fuse to check if it has access to a given file.
 func AccessCommand(paranoidDirectory, filePath string, mode uint32) (returnCode returncodes.Code, returnError error) {
-	Log.Info("access command called")
-	Log.Verbose("access : given paranoidDirectory = " + paranoidDirectory)
+	log.V(1).Info("access called on %s in %s", filePath, paranoidDirectory)
 
 	err := GetFileSystemLock(paranoidDirectory, SharedLock)
 	if err != nil {
