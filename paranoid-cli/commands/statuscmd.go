@@ -52,7 +52,7 @@ func getStatus(pfsDir string) {
 			log.Fatalf("PFS directory %s does not exist", pfsDir)
 		} else {
 			fmt.Printf("Could not stat %s: %s.", pfsDir, err)
-			log.Fatalf("Could not stat PFS directory %s:", pfsDir, err)
+			log.Fatalf("Could not stat PFS directory %s: %v", pfsDir, err)
 		}
 	}
 
