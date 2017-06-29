@@ -3,6 +3,7 @@ Paranoid
 [![GoDoc](https://godoc.org/github.com/pp2p/paranoid?status.svg)](https://godoc.org/github.com/pp2p/paranoid)
 [![CircleCI](https://circleci.com/gh/pp2p/paranoid/tree/master.svg?style=shield)](https://circleci.com/gh/pp2p/paranoid/tree/master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/pp2p/paranoid)](https://goreportcard.com/report/github.com/pp2p/paranoid)
+[![GitHub release](https://img.shields.io/github/release/pp2p/paranoid.svg)](https://github.com/pp2p/paranoid/releases)
 
 Distributed Secure Peer-to-Peer filesystem
 
