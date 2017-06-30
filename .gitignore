@@ -34,3 +34,7 @@ node_modules/
 **/bootstrap.min.css
 **/site.css
 **/jquery-2.2.2.min.js
+
+
+# Temporary workaround before discovery server is removed
+discovery-server/dnetserver/TestPool
