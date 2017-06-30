@@ -11,12 +11,10 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/pp2p/paranoid/logger"
+
+	log "github.com/pp2p/paranoid/logger"
 	pb "github.com/pp2p/paranoid/proto/raft"
 )
-
-// Log is used to log information from paranoid-cli
-var Log *logger.ParanoidLogger
 
 type fileSystemAttributes struct {
 	Encrypted    bool `json:"encrypted"`
@@ -58,7 +56,7 @@ func getRandomName() string {
 func fileSystemExists(fsname string) bool {
 	usr, err := user.Current()
 	if err != nil {
-		Log.Fatal(err)
+		log.Fatal(err)
 	}
 
 	dirpath := path.Join(usr.HomeDir, ".pfs", "filesystems", fsname)
@@ -71,7 +69,7 @@ func fileToProto(file os.FileInfo, directory string) (entry *pb.LogEntry, err er
 	filePath := path.Join(directory, file.Name())
 	fileData, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		return nil, errors.New("Failed to read logfile: " + file.Name())
+		return nil, fmt.Errorf("failed to read logfile: %s", file.Name())
 	}
 	entry = &pb.LogEntry{}
 	err = proto.Unmarshal(fileData, entry)
@@ -85,22 +83,22 @@ func getFsMeta(usr *user.User, pfsName string) (string, string, string, string) 
 	pfsDir := path.Join(usr.HomeDir, ".pfs", "filesystems", pfsName)
 	if _, err := os.Stat(pfsDir); err != nil {
 		fmt.Printf("%s does not exist. Please call 'paranoid-cli init' before running this command.", pfsDir)
-		Log.Fatal("PFS directory does not exist.")
+		log.Fatal("PFS directory does not exist.")
 	}
 
 	uuid, err := ioutil.ReadFile(path.Join(pfsDir, "meta", "uuid"))
 
 	if err != nil {
 		fmt.Println("Error Reading supplied file:")
-		Log.Fatal("Cant Reading uuid file")
+		log.Fatal("Cant Reading uuid file")
 	}
 
-	ip, err := ioutil.ReadFile(path.Join(pfsDir, "meta", "ip"))
-	port, err := ioutil.ReadFile(path.Join(pfsDir, "meta", "port"))
-	pool, err := ioutil.ReadFile(path.Join(pfsDir, "meta", "pool"))
+	ip, _ := ioutil.ReadFile(path.Join(pfsDir, "meta", "ip"))
+	port, _ := ioutil.ReadFile(path.Join(pfsDir, "meta", "port"))
+	pool, _ := ioutil.ReadFile(path.Join(pfsDir, "meta", "pool"))
 	if err != nil {
 		fmt.Println("Could not find Ip address of the file server")
-		Log.Fatal("Unable to read Ip and Port of discovery server", err)
+		log.Fatalf("Unable to read Ip and Port of discovery server: %v", err)
 	}
 	return string(ip), string(port), string(uuid), string(pool)
 }

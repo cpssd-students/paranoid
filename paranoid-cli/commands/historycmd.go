@@ -3,16 +3,17 @@ package commands
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"os/user"
 	"path"
 	"strconv"
 
+	"github.com/urfave/cli"
+
+	log "github.com/pp2p/paranoid/logger"
 	pb "github.com/pp2p/paranoid/proto/raft"
 	"github.com/pp2p/paranoid/raft"
-	"github.com/urfave/cli"
 )
 
 // History subcommand
@@ -25,7 +26,7 @@ func History(c *cli.Context) {
 
 	usr, err := user.Current()
 	if err != nil {
-		Log.Fatal(err)
+		log.Fatal(err)
 	}
 	target := args[0]
 	if fileSystemExists(target) {
@@ -51,13 +52,13 @@ func read(directory string, c *cli.Context) {
 func logsToLogfile(logDir, filePath string, c *cli.Context) {
 	files, err := ioutil.ReadDir(logDir)
 	if err != nil {
-		Log.Verbose("read dir:", logDir, "err:", err)
+		log.V(1).Errorf("failed reading directory %s: %v", logDir, err)
 		cli.ShowCommandHelp(c, "history")
 		os.Exit(1)
 	}
 	writeFile, err := os.Create(filePath)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalf("unable to create raft log file: %v", err)
 	}
 	defer writeFile.Close()
 
@@ -67,7 +68,7 @@ func logsToLogfile(logDir, filePath string, c *cli.Context) {
 		file := files[i]
 		p, err := fileToProto(file, logDir)
 		if err != nil {
-			log.Fatalln(err)
+			log.Fatalf("unable to parse binary proto: %v", err)
 		}
 
 		writeFile.WriteString(toLine(i+1, numRunesString, p))
@@ -81,18 +82,20 @@ func toLine(logNum int, pad string, p *pb.LogEntry) string {
 	marker := fmt.Sprintf("%-"+pad+"d Term: %-"+pad+"d", logNum, p.Term)
 
 	if p.Entry.Type == pb.Entry_StateMachineCommand {
-		return fmt.Sprintln(marker, "Command:", commandString(p.Entry.Command))
+		return fmt.Sprintf("%s Command: %s\n",
+			marker, commandString(p.Entry.Command))
 	} else if p.Entry.Type == pb.Entry_ConfigurationChange {
-		return fmt.Sprintln(marker, "ConfigChange:", configurationString(p.Entry.Config))
+		return fmt.Sprintf("%s ConfigChange: %s\n",
+			marker, configurationString(p.Entry.Config))
 	} else {
-		return fmt.Sprintln(marker, "Demo:", p.Entry.Demo)
+		return fmt.Sprintf("%s Demo: %v", marker, p.Entry.Demo)
 	}
 }
 
 func configurationString(conf *pb.Configuration) string {
 	typ := fmt.Sprintf("%-21s", configTypeString(conf.Type))
 	conf.Type = 0
-	return typ + fmt.Sprint(conf)
+	return fmt.Sprintf("%s%v", typ, conf)
 }
 
 // commandString returns the string representation of a StateMachineCommand
@@ -102,24 +105,18 @@ func commandString(cmd *pb.StateMachineCommand) string {
 	size := len(cmd.Data)
 	if size > 0 {
 		cmd.Data = nil
-		return fmt.Sprint(fmt.Sprintf("%-9s", typeStr), cmd, "Data: ", bytesString(size))
+		return fmt.Sprintf("%-9s %v Data: %s", typeStr, cmd, bytesString(size))
 	}
-	return fmt.Sprint(fmt.Sprintf("%-9s", typeStr), cmd)
+	return fmt.Sprintf("%-9s %v", typeStr, cmd)
 }
 
-// bytesString returns the human readable representation of a data size=
-func bytesString(bytes int) string {
-	if bytes < 1000 {
-		return fmt.Sprint(bytes, "B")
-	} else if bytes < 1000000 {
-		return fmt.Sprint(bytes/1000, "KB")
-	} else if bytes < 1000000000 {
-		return fmt.Sprint(bytes/1000000, "MB")
-	} else if bytes < 1000000000000 {
-		return fmt.Sprint(bytes/1000000000, "GB")
-	} else {
-		return fmt.Sprint(bytes/1000000000000, "TB")
+// bytesString returns the human readable representation of a data size
+// TODO: Allow values over 3GB (int32 max)
+func bytesString(size int) string {
+	p := 0
+	for ; size > 1000; size, p = size/1000, p+1 {
 	}
+	return fmt.Sprintf("%d%s", size, []string{"B", "KB", "MB", "GB", "TB"}[p])
 }
 
 // commandTypeString returns the string representation of a command log type.

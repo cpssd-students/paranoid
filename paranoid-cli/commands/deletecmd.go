@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 
 	"github.com/urfave/cli"
+
+	log "github.com/pp2p/paranoid/logger"
 )
 
 //Delete deletes a paranoid file system
@@ -21,22 +23,22 @@ func Delete(c *cli.Context) {
 	usr, err := user.Current()
 	if err != nil {
 		fmt.Println("FATAL: Error Getting Current User")
-		Log.Fatal("Cannot get curent User:", err)
+		log.Fatalf("cannot get curent user: %v", err)
 	}
 
 	pfspath, err := filepath.Abs(path.Join(usr.HomeDir, ".pfs", "filesystems", args[0]))
 	if err != nil {
 		fmt.Println("FATAL: Paranoid file system name is incorrectly formatted")
-		Log.Fatal("Given pfs-name is in incorrect format. Error : ", err)
+		log.Fatalf("given pfs-name is in incorrect format: %v", err)
 	}
 	if path.Base(pfspath) != args[0] {
 		fmt.Println("FATAL: Paranoid file system name is incorrectly formatted")
-		Log.Fatal("Given pfs-name is in incorrect format")
+		log.Fatalf("given pfs-name is in incorrect format")
 	}
 
 	err = os.RemoveAll(pfspath)
 	if err != nil {
 		fmt.Println("FATAL: Could not delete given paranoid file system.")
-		Log.Fatal("Could not delete given paranoid file system. Error :", err)
+		log.Fatalf("could not delete given paranoid file system: %v", err)
 	}
 }

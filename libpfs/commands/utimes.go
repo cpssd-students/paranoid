@@ -9,12 +9,12 @@ import (
 	"time"
 
 	"github.com/pp2p/paranoid/libpfs/returncodes"
+	log "github.com/pp2p/paranoid/logger"
 )
 
 //UtimesCommand updates the acess time and modified time of a file
 func UtimesCommand(paranoidDirectory, filePath string, atime, mtime *time.Time) (returnCode returncodes.Code, returnError error) {
-	Log.Info("utimes command called")
-	Log.Verbose("utimes : given paranoidDirectory = " + paranoidDirectory)
+	log.V(1).Infof("utimes called on %s in %s", filePath, paranoidDirectory)
 
 	err := GetFileSystemLock(paranoidDirectory, SharedLock)
 	if err != nil {

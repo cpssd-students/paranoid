@@ -10,6 +10,8 @@ import (
 	"syscall"
 
 	"github.com/urfave/cli"
+
+	log "github.com/pp2p/paranoid/logger"
 )
 
 // Restart subcommand
@@ -23,25 +25,24 @@ func Restart(c *cli.Context) {
 	usr, err := user.Current()
 	if err != nil {
 		fmt.Println("FATAL: Could not get current user")
-		Log.Fatal("Could not get current user:", err)
+		log.Fatalf("could not get current user: %v", err)
 	}
 
 	pidPath := path.Join(usr.HomeDir, ".pfs", "filesystems", args[0], "meta", "pfsd.pid")
 	_, err = os.Stat(pidPath)
 	if err != nil {
 		fmt.Println("FATAL: Could not access PID file")
-		Log.Fatal("Could not access PID file:", err)
+		log.Fatalf("Could not access PID file: %v", err)
 	}
 
 	pidByte, err := ioutil.ReadFile(pidPath)
 	if err != nil {
 		fmt.Println("FATAL: Can't read PID file")
-		Log.Fatal("Can't read PID file:", err)
+		log.Fatalf("cannot read PID file: %v", err)
 	}
-	pid, err := strconv.Atoi(string(pidByte))
-	err = syscall.Kill(pid, syscall.SIGHUP)
-	if err != nil {
+	pid, _ := strconv.Atoi(string(pidByte))
+	if err = syscall.Kill(pid, syscall.SIGHUP); err != nil {
 		fmt.Println("FATAL: Can not restart PFSD")
-		Log.Fatal("Can not restart PFSD:", err)
+		log.Fatalf("Can not restart PFSD: %v", err)
 	}
 }

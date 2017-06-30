@@ -7,11 +7,12 @@ import (
 	"path"
 
 	"github.com/pp2p/paranoid/libpfs/returncodes"
+	log "github.com/pp2p/paranoid/logger"
 )
 
 // ReadlinkCommand reads the value of the symbolic link
 func ReadlinkCommand(paranoidDirectory, filePath string) (returnCode returncodes.Code, linkContents string, returnError error) {
-	Log.Info("readlink command called")
+	log.V(1).Info("readlink called on %s in %s", filePath, paranoidDirectory)
 
 	err := GetFileSystemLock(paranoidDirectory, SharedLock)
 	if err != nil {
@@ -45,8 +46,6 @@ func ReadlinkCommand(paranoidDirectory, filePath string) (returnCode returncodes
 		return returncodes.EIO, "", fmt.Errorf("%s is a file", err)
 	}
 
-	Log.Verbose("readlink: given paranoidDirectory", paranoidDirectory)
-
 	linkInode, code, err := getFileInode(link)
 	if code != returncodes.OK || err != nil {
 		return code, "", err
@@ -74,7 +73,6 @@ func ReadlinkCommand(paranoidDirectory, filePath string) (returnCode returncodes
 	}
 
 	inodeData := &inode{}
-	Log.Verbose("readlink unmarshaling ", string(inodeContents))
 	err = json.Unmarshal(inodeContents, &inodeData)
 	if err != nil {
 		return returncodes.EUNEXPECTED, "", fmt.Errorf("error unmarshalling json: %s", err)

@@ -5,50 +5,45 @@ package commands
 import (
 	"math/rand"
 	"os"
-	"path"
 	"syscall"
 	"testing"
 	"time"
 
 	"github.com/pp2p/paranoid/libpfs/encryption"
 	"github.com/pp2p/paranoid/libpfs/returncodes"
-	"github.com/pp2p/paranoid/logger"
+	log "github.com/pp2p/paranoid/logger"
 )
 
 var testDirectory string
 
 func TestMain(m *testing.M) {
-	Log = logger.New("commandsTest", "pfsmTest", os.DevNull)
-	testDirectory = path.Join(os.TempDir(), "paranoidTest")
 	defer removeTestDir()
 
-	Log.Info("Running tests with no encryption")
+	log.Info("Running tests with no encryption")
 	encryption.Encrypted = false
 	noEncryption := m.Run()
 	if noEncryption != 0 {
 		os.Exit(noEncryption)
 	}
 
-	Log.Info("Running tests with encryption")
+	log.Info("Running tests with encryption")
 	encryption.Encrypted = true
 	encryptionKey := []byte("86F7E437FAA5A7FCE15D1DDCB9EAEAEA")
 	cipherBlock, err := encryption.GenerateAESCipherBlock(encryptionKey)
 	if err != nil {
-		Log.Fatal("Could not create cipherBlock", err)
+		log.Fatal("Could not create cipherBlock", err)
 	}
 	encryption.SetCipher(cipherBlock)
 	os.Exit(m.Run())
 }
 
 func createTestDir() {
-	err := os.RemoveAll(testDirectory)
-	if err != nil {
-		Log.Fatal("error creating test directory:", err)
+	if err := os.RemoveAll(testDirectory); err != nil {
+		log.Fatalf("error creating test directory %s: %v", testDirectory, err)
 	}
 
-	err = os.Mkdir(testDirectory, 0777)
-	if err != nil {
-		Log.Fatal("error creating test directory:", err)
+	if err := os.Mkdir(testDirectory, 0777); err != nil {
+		log.Fatalf("error creating test directory %s: %v", testDirectory, err)
 	}
 }
 
@@ -59,9 +54,8 @@ func removeTestDir() {
 func setupTestDirectory() {
 	createTestDir()
 
-	code, err := InitCommand(testDirectory)
-	if code != returncodes.OK {
-		Log.Fatal("error initing directory for testing:", err)
+	if code, err := InitCommand(testDirectory); code != returncodes.OK {
+		log.Fatal("error initing directory for testing:", err)
 	}
 }
 
@@ -70,22 +64,21 @@ func TestSimpleCommandUsage(t *testing.T) {
 
 	code, err := CreatCommand(testDirectory, "test.txt", os.FileMode(0777))
 	if code != returncodes.OK {
-		t.Error("error creating test file:", err)
+		t.Errorf("error creating test file: %v", err)
 	}
 
 	code, _, err = WriteCommand(testDirectory, "test.txt", -1, -1, []byte("BLAH #1"))
 	if code != returncodes.OK {
-		t.Error("Write did not return OK. Actual:", code, " Error:", err)
+		t.Errorf("Write did not return OK, got %s: %v", code.String(), err)
 	}
 
 	code, returnData, err := ReadCommand(testDirectory, "test.txt", -1, -1)
 	if code != returncodes.OK {
-		t.Error("Read did not return OK. Actual:", code, " Error:", err)
+		t.Errorf("Read did not return OK, got %s: %v", code.String(), err)
 	}
 
 	if string(returnData) != "BLAH #1" {
-		Log.Info("Len good : ", len("BLAH #1"), " Len bad : ", len(returnData))
-		t.Error("Output does not match BLAH #1. Actual:", string(returnData))
+		t.Errorf("Output does not match BLAH #1, got %s", string(returnData))
 	}
 }
 
@@ -94,32 +87,32 @@ func TestComplexCommandUsage(t *testing.T) {
 
 	code, err := CreatCommand(testDirectory, "test.txt", os.FileMode(0777))
 	if code != returncodes.OK {
-		t.Error("error creating test file:", err)
+		t.Errorf("error creating test file: %v", err)
 	}
 
 	code, bytesWritten, err := WriteCommand(testDirectory, "test.txt", -1, -1, []byte("START"))
 	if code != returncodes.OK {
-		t.Error("Write did not return OK. Actual:", code, " Error:", err)
+		t.Errorf("Write did not return OK, got %s: %v", code.String(), err)
 	}
 	if bytesWritten != len([]byte("START")) {
-		t.Error("Write did not return correct number of bytes Actual:", bytesWritten, "Expected:", len([]byte("START")))
+		t.Errorf("Wrote %d bytes, wanted %d", bytesWritten, len([]byte("START")))
 	}
 
 	code, returnData, err := ReadCommand(testDirectory, "test.txt", 2, 2)
 	if code != returncodes.OK {
-		t.Error("Read did not return OK. Actual:", code, " Error:", err)
+		t.Errorf("Read did not return OK, got %s: %v", code.String(), err)
 	}
 
 	if string(returnData) != "AR" {
-		t.Error("Output from partial read does not match ", string(returnData))
+		t.Errorf("expected AR from partial read, got %s", string(returnData))
 	}
 
 	code, bytesWritten, err = WriteCommand(testDirectory, "test.txt", 5, -1, []byte("END"))
 	if code != returncodes.OK {
-		t.Error("Write did not return OK Actual: ", code, " Error:", err)
+		t.Errorf("Write did not return OK, got %s: %v", code.String(), err)
 	}
 	if bytesWritten != len([]byte("END")) {
-		t.Error("Write did not return correct number of bytes Actual:", bytesWritten, "Expected:", len([]byte("END")))
+		t.Errorf("Write %d bytes, wanted %d", bytesWritten, len([]byte("END")))
 	}
 
 	code, returnData, err = ReadCommand(testDirectory, "test.txt", -1, -1)
@@ -128,16 +121,16 @@ func TestComplexCommandUsage(t *testing.T) {
 	}
 
 	if string(returnData) != "STARTEND" {
-		t.Error("Output from full read does not match STARTEND. Actual:", string(returnData))
+		t.Errorf("Full read does not match STARTEND, got %s", string(returnData))
 	}
 
 	code, files, err := ReadDirCommand(testDirectory, "")
 	if code != returncodes.OK {
-		t.Error("Read did not return OK. Actual:", code, " Error:", err)
+		t.Errorf("Read did not return OK, got %s: %v", code.String(), err)
 	}
 
 	if files[0] != "test.txt" || len(files) > 1 {
-		t.Error("Readdir got incorrect result:", files)
+		t.Errorf("Readdir got incorrect result: %v", files)
 	}
 }
 
@@ -193,7 +186,7 @@ func TestFilePermissionsCommands(t *testing.T) {
 
 	code, err = AccessCommand(testDirectory, "test.txt", 2)
 	if code != returncodes.EACCES {
-		t.Error("Access command did not return EACCES. Actual:", code)
+		t.Errorf("Access command did not return EACCES, got %s: %v", code.String(), err)
 	}
 }
 
@@ -613,7 +606,7 @@ func TestComplexReadWrite(t *testing.T) {
 	setupTestDirectory()
 
 	seed := time.Now().UnixNano()
-	Log.Info("Test seed : ", seed)
+	log.Info("Test seed: ", seed)
 	rand.Seed(seed)
 
 	code, err := CreatCommand(testDirectory, "test.txt", os.FileMode(0777))

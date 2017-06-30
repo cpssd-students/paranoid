@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/pp2p/paranoid/libpfs/returncodes"
+	log "github.com/pp2p/paranoid/logger"
 )
 
 //makeDir creates a new directory with permissions 0777 with the name newDir in parentDir.
@@ -36,12 +37,12 @@ func checkEmpty(directory string) error {
 //InitCommand creates the pvd directory sturucture
 //It also gets a UUID and stores it in the meta directory.
 func InitCommand(directory string) (returnCode returncodes.Code, returnError error) {
-	Log.Info("init command called")
+	log.V(1).Info("creating new pfs in %s", directory)
+
 	err := checkEmpty(directory)
 	if err != nil {
 		return returncodes.EUNEXPECTED, err
 	}
-	Log.Verbose("init : creating new paranoid file system in " + directory)
 
 	_, err = makeDir(directory, "names")
 	if err != nil {
@@ -79,7 +80,7 @@ func InitCommand(directory string) (returnCode returncodes.Code, returnError err
 	}
 
 	uuidString := strings.TrimSpace(string(uuid))
-	Log.Verbose("init uuid : " + uuidString)
+	log.V(2).Info("%s init UUID: %s", directory, uuidString)
 
 	err = ioutil.WriteFile(path.Join(metaDir, "uuid"), []byte(uuidString), 0600)
 	if err != nil {

@@ -7,12 +7,12 @@ import (
 	"strings"
 
 	"github.com/pp2p/paranoid/libpfs/returncodes"
+	log "github.com/pp2p/paranoid/logger"
 )
 
 //ReadDirCommand returns a list of all the files in the given paranoidDirectory
 func ReadDirCommand(paranoidDirectory, dirPath string) (returnCode returncodes.Code, fileNames []string, returnError error) {
-	Log.Info("readdir command called")
-	Log.Verbose("readdir : given paranoidDirectory = " + paranoidDirectory)
+	log.V(1).Info("readdir %s from %s", dirPath, paranoidDirectory)
 
 	err := GetFileSystemLock(paranoidDirectory, SharedLock)
 	if err != nil {

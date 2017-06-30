@@ -10,12 +10,9 @@ import (
 	"path"
 	"testing"
 	"time"
-
-	"github.com/pp2p/paranoid/logger"
 )
 
 func TestGenerateCert(t *testing.T) {
-	Log = logger.New("tlstest", "tlstest", os.DevNull)
 	testPath := path.Join(os.TempDir(), "testCertGen")
 	os.RemoveAll(testPath)
 	os.Mkdir(testPath, 0777)

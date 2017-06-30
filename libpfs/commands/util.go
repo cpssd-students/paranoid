@@ -15,7 +15,8 @@ import (
 	"github.com/pp2p/paranoid/logger"
 )
 
-// Log the data from libpfs
+// Log is an instance of old logging system.
+// TODO: Remove after migrating completely to new logging
 var Log *logger.ParanoidLogger
 
 type inode struct {

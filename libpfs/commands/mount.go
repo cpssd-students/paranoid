@@ -7,12 +7,12 @@ import (
 	"path/filepath"
 
 	"github.com/pp2p/paranoid/libpfs/returncodes"
+	log "github.com/pp2p/paranoid/logger"
 )
 
 //MountCommand is used to notify a pfs paranoidDirectory it has been mounted.
 func MountCommand(paranoidDirectory, dAddr, mountPoint string) (returnCode returncodes.Code, returnError error) {
-	Log.Info("mount command called")
-	Log.Verbose("mount : given paranoidDirectory = " + paranoidDirectory)
+	log.V(1).Info("mount %s in %s", paranoidDirectory, mountPoint)
 
 	err := ioutil.WriteFile(path.Join(paranoidDirectory, "meta", "discovery_address"), []byte(dAddr), 0600)
 	if err != nil {

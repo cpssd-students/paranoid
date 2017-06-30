@@ -10,12 +10,12 @@ import (
 
 	"github.com/pp2p/paranoid/libpfs/encryption"
 	"github.com/pp2p/paranoid/libpfs/returncodes"
+	log "github.com/pp2p/paranoid/logger"
 )
 
 //CreatCommand creates a new file with the name filePath in the pfs paranoidDirectory
 func CreatCommand(paranoidDirectory, filePath string, perms os.FileMode) (returnCode returncodes.Code, returnError error) {
-	Log.Info("creat command called")
-	Log.Verbose("creat : paranoidDirectory = " + paranoidDirectory)
+	log.V(1).Info("creat called on %s in %s", filePath, paranoidDirectory)
 
 	err := GetFileSystemLock(paranoidDirectory, ExclusiveLock)
 	if err != nil {
@@ -40,7 +40,6 @@ func CreatCommand(paranoidDirectory, filePath string, perms os.FileMode) (return
 	if fileType != typeENOENT {
 		return returncodes.EEXIST, errors.New(filePath + " already exists")
 	}
-	Log.Verbose("creat : creating file " + filePath)
 
 	uuidbytes, err := generateNewInode()
 	if err != nil {
@@ -48,7 +47,6 @@ func CreatCommand(paranoidDirectory, filePath string, perms os.FileMode) (return
 	}
 
 	uuidstring := string(uuidbytes)
-	Log.Verbose("creat : uuid = " + uuidstring)
 
 	err = ioutil.WriteFile(namepath, uuidbytes, 0600)
 	if err != nil {

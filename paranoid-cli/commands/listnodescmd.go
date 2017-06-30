@@ -9,9 +9,11 @@ import (
 	"path"
 	"path/filepath"
 
+	"github.com/urfave/cli"
+
+	log "github.com/pp2p/paranoid/logger"
 	"github.com/pp2p/paranoid/pfsd/intercom"
 	"github.com/pp2p/paranoid/raft"
-	"github.com/urfave/cli"
 )
 
 // ListNodes subcommand shows the statistics about nodes
@@ -20,7 +22,7 @@ func ListNodes(c *cli.Context) {
 	usr, err := user.Current()
 	if err != nil {
 		fmt.Println("FATAL: Unable to get information on current user:", err)
-		Log.Fatal("Could not get user information:", err)
+		log.Fatalf("could not get user information: %v", err)
 	}
 
 	// By default, list the nodes connected to each running instance.
@@ -28,7 +30,7 @@ func ListNodes(c *cli.Context) {
 		dirs, err := ioutil.ReadDir(path.Join(usr.HomeDir, ".pfs", "filesystems"))
 		if err != nil {
 			fmt.Printf("FATAL: Unable to get list of paranoid file systems. Does %s exist?", path.Join(usr.HomeDir, ".pfs"))
-			Log.Fatal("Could not get list of paranoid file systems:", err)
+			log.Fatalf("could not get list of paranoid file systems: %v", err)
 		}
 		for _, dir := range dirs {
 			dirPath := path.Join(usr.HomeDir, ".pfs", "filesystems", dir.Name())
@@ -48,10 +50,10 @@ func getNodes(pfsDir string) {
 	if _, err := os.Stat(pfsDir); err != nil {
 		if os.IsNotExist(err) {
 			fmt.Printf("%s does not exist. Please call 'paranoid-cli init' before running this command.", pfsDir)
-			Log.Fatal("PFS directory does not exist.")
+			log.Fatal("PFS directory does not exist.")
 		} else {
 			fmt.Printf("Could not stat %s. Error returned: %s.", pfsDir, err)
-			Log.Fatal("Could not stat PFS directory:", err)
+			log.Fatalf("could not stat PFS directory: %v", err)
 		}
 	}
 
@@ -61,16 +63,16 @@ func getNodes(pfsDir string) {
 	client, err := rpc.Dial("unix", socketPath)
 	if err != nil {
 		fmt.Printf("Could not connect to PFSD %s. Is it running? See %s for more information.\n", filepath.Base(pfsDir), logPath)
-		Log.Warn("Could not connect to PFSD %s at %s: %s", filepath.Base(pfsDir), socketPath, err)
+		log.Warn("Could not connect to PFSD %s at %s: %s", filepath.Base(pfsDir), socketPath, err)
 		return
 	}
 	err = client.Call("IntercomServer.ListNodes", new(intercom.EmptyMessage), &resp)
 	if err != nil {
 		if err.Error() == "Networking Disabled" {
-			fmt.Println("\n%s does not have networking enabled.")
+			fmt.Println("Networking is disabled")
 		} else {
 			fmt.Printf("Error listing nodes connected to %s. See %s for more information.\n", filepath.Base(pfsDir), logPath)
-			Log.Warn("PFSD at %s returned error: %s", filepath.Base(pfsDir), err)
+			log.Warn("PFSD at %s returned error: %s", filepath.Base(pfsDir), err)
 		}
 		return
 	}

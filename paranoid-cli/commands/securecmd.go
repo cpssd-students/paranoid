@@ -7,8 +7,10 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/pp2p/paranoid/paranoid-cli/tls"
 	"github.com/urfave/cli"
+
+	log "github.com/pp2p/paranoid/logger"
+	"github.com/pp2p/paranoid/paranoid-cli/tls"
 )
 
 // Secure subcommand
@@ -23,18 +25,18 @@ func Secure(c *cli.Context) {
 	usr, err := user.Current()
 	if err != nil {
 		fmt.Println("FATAL: Couldn't get current user")
-		Log.Fatal("Couldn't get current user:", err)
+		log.Fatalf("cannot get current user: %v", err)
 	}
 
 	homeDir := usr.HomeDir
 	pfsDir, err := filepath.Abs(path.Join(homeDir, ".pfs", "filesystems", pfsname))
 	if err != nil {
 		fmt.Println("FATAL: Could not get absolute path to paranoid filesystem.")
-		Log.Fatal("Could not get absolute path to paranoid filesystem.")
+		log.Fatalf("could not get absolute path to paranoid filesystem: %v", err)
 	}
 	if !pathExists(pfsDir) {
 		fmt.Println("FATAL: Paranoid filesystem does not exist:", pfsname)
-		Log.Fatal("Paranoid filesystem does not exist:", pfsname)
+		log.Fatalf("paranoid filesystem %s does not exist", pfsname)
 	}
 
 	certPath := path.Join(pfsDir, "meta", "cert.pem")
@@ -46,29 +48,29 @@ func Secure(c *cli.Context) {
 		if pathExists(certPath) || pathExists(keyPath) {
 			fmt.Println("FATAL: Paranoid filesystem already secured.",
 				"Run with --force to overwrite existing security files.")
-			Log.Fatal("Paranoid filesystem already secured.",
+			log.Fatal("Paranoid filesystem already secured.",
 				"Run with --force to overwrite existing security files.")
 		}
 	}
 
 	if (c.String("cert") != "") && (c.String("key") != "") {
-		Log.Info("Using existing certificate.")
+		log.Info("Using existing certificate.")
 		err = os.Link(c.String("cert"), certPath)
 		if err != nil {
 			fmt.Println("FATAL: Failed to copy cert file:", err)
-			Log.Fatal("Failed to copy cert file")
+			log.Fatalf("failed to copy cert file: %v", err)
 		}
 		err = os.Link(c.String("key"), keyPath)
 		if err != nil {
 			fmt.Println("FATAL: Failed to copy key file:", err)
-			Log.Fatal("Failed to copy key file")
+			log.Fatalf("Failed to copy key file: %v", err)
 		}
 	} else {
 		fmt.Println("Generating TLS certificate. Please follow the given instructions.")
 		err = tls.GenCertificate(pfsDir)
 		if err != nil {
 			fmt.Println("FATAL: Failed to generate certificate:", err)
-			Log.Fatal("Failed to generate certificate:", err)
+			log.Fatalf("Failed to generate certificate: %v", err)
 		}
 	}
 }

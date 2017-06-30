@@ -10,6 +10,8 @@ import (
 	"syscall"
 
 	"github.com/urfave/cli"
+
+	log "github.com/pp2p/paranoid/logger"
 )
 
 //Unmount unmounts a paranoid file system
@@ -23,24 +25,24 @@ func Unmount(c *cli.Context) {
 	usr, err := user.Current()
 	if err != nil {
 		fmt.Println("FATAL: Error Getting Current User")
-		Log.Fatal("Cannot get curent User:", err)
+		log.Fatalf("cannot get curent user: %v", err)
 	}
 
 	pidPath := path.Join(usr.HomeDir, ".pfs", "filesystems", args[0], "meta", "pfsd.pid")
-	if _, err := os.Stat(pidPath); err == nil {
-		pidByte, err := ioutil.ReadFile(pidPath)
-		if err != nil {
-			fmt.Println("FATAL: Can't read pid file")
-			Log.Fatal("Can't read pid file", err)
-		}
-		pid, err := strconv.Atoi(string(pidByte))
-		err = syscall.Kill(pid, syscall.SIGTERM)
-		if err != nil {
-			fmt.Println("FATAL: Can not kill PFSD")
-			Log.Fatal("Can not kill PFSD,", err)
-		}
-	} else {
+	if _, err = os.Stat(pidPath); err != nil {
 		fmt.Println("FATAL: Could not read pid file")
-		Log.Fatal("Could not read pid file:", err)
+		log.Fatal("Could not read pid file:", err)
+	}
+
+	pidByte, err := ioutil.ReadFile(pidPath)
+	if err != nil {
+		fmt.Println("FATAL: Can't read pid file")
+		log.Fatalf("unable to read pid file: %v", err)
+	}
+
+	pid, _ := strconv.Atoi(string(pidByte))
+	if err = syscall.Kill(pid, syscall.SIGTERM); err != nil {
+		fmt.Println("FATAL: Can not kill PFSD")
+		log.Fatalf("Can not kill PFSD: %v", err)
 	}
 }

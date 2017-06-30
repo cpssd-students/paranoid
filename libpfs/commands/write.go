@@ -8,12 +8,12 @@ import (
 
 	"github.com/pp2p/paranoid/libpfs/encryption"
 	"github.com/pp2p/paranoid/libpfs/returncodes"
+	log "github.com/pp2p/paranoid/logger"
 )
 
 //WriteCommand writes data to the given file
 func WriteCommand(paranoidDirectory, filePath string, offset, length int64, data []byte) (returnCode returncodes.Code, bytesWrote int, returnError error) {
-	Log.Info("write command called")
-	Log.Verbose("write : given paranoidDirectory =", paranoidDirectory)
+	log.V(1).Info("write to file %s in %s", filePath, paranoidDirectory)
 
 	err := GetFileSystemLock(paranoidDirectory, SharedLock)
 	if err != nil {
@@ -67,7 +67,6 @@ func WriteCommand(paranoidDirectory, filePath string, offset, length int64, data
 		}
 	}()
 
-	Log.Verbose("write : wrting to " + inodeName)
 	contentsFile, err := os.OpenFile(path.Join(paranoidDirectory, "contents", inodeName), os.O_RDWR, 0777)
 	if err != nil {
 		return returncodes.EUNEXPECTED, 0, fmt.Errorf("error opening contents file: %s", err)

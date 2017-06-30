@@ -6,11 +6,10 @@ import (
 	"os/user"
 	"path"
 
-	pfscommands "github.com/pp2p/paranoid/libpfs/commands"
-	"github.com/pp2p/paranoid/logger"
-	"github.com/pp2p/paranoid/paranoid-cli/commands"
-	"github.com/pp2p/paranoid/paranoid-cli/tls"
 	"github.com/urfave/cli"
+
+	log "github.com/pp2p/paranoid/logger"
+	"github.com/pp2p/paranoid/paranoid-cli/commands"
 )
 
 func main() {
@@ -37,12 +36,8 @@ func main() {
 		}
 	}
 
-	pfscommands.Log = logger.New("libpfs", "paranoidcli", path.Join(homeDir, ".pfs", "meta"))
-	commands.Log = logger.New("command", "paranoidcli", path.Join(homeDir, ".pfs", "meta"))
-	tls.Log = logger.New("tls", "paranoidcli", path.Join(homeDir, ".pfs", "meta"))
-	pfscommands.Log.SetOutput(logger.LOGFILE)
-	commands.Log.SetOutput(logger.LOGFILE)
-	tls.Log.SetOutput(logger.LOGFILE)
+	log.SetLogDirectory(path.Join(homeDir, ".pfs", "meta"))
+	log.SetOutput(log.LOGFILE)
 
 	app := cli.NewApp()
 	app.Name = "paranoid-cli"

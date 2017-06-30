@@ -3,13 +3,13 @@ package commands
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/user"
 	"path"
 
 	progress "github.com/cheggaaa/pb"
 	"github.com/pp2p/paranoid/libpfs/returncodes"
+	log "github.com/pp2p/paranoid/logger"
 	pb "github.com/pp2p/paranoid/proto/raft"
 	"github.com/pp2p/paranoid/raft"
 	"github.com/urfave/cli"
@@ -38,8 +38,8 @@ func Buildfs(c *cli.Context) {
 	}
 
 	if len(logs) < 1 {
-		fmt.Println("log-directory empty")
-		os.Exit(1)
+		fmt.Println("log directory is empty")
+		log.Fatal("log directory is empty")
 	}
 
 	doInit(pfsName, c.String("pool"), c.String("cert"),
@@ -48,14 +48,14 @@ func Buildfs(c *cli.Context) {
 	u, err := user.Current()
 	if err != nil {
 		fmt.Println("Couldn't get current user home directory")
-		log.Fatal(err)
+		log.Fatalf("could not get current user home directory: %v", err)
 	}
 
 	pfsPath := path.Join(u.HomeDir, ".pfs", "filesystems", pfsName)
 	err = os.MkdirAll(path.Join(pfsPath, "meta", "raft", "raft_logs"), 0700)
 	if err != nil {
 		cleanupPFS(pfsPath)
-		log.Fatalln(err)
+		log.Fatalf("could not make a raft log directory: %v", err)
 	}
 
 	bar := progress.StartNew(len(logs))
@@ -64,14 +64,15 @@ func Buildfs(c *cli.Context) {
 		if err != nil {
 			cleanupPFS(pfsPath)
 			fmt.Println("broken file in log directory: ", lg)
-			log.Fatal(err)
+			log.Fatalf("broken file in log directory %s: %v", lg, err)
 		}
 
 		if logEntry.Entry.Type == pb.Entry_StateMachineCommand {
 			er := raft.PerformLibPfsCommand(pfsPath, logEntry.Entry.Command)
 			if er.Code == returncodes.EUNEXPECTED {
 				fmt.Println("pfsLib failed on command: ", logEntry.Entry.Command)
-				log.Fatal(er.Err)
+				log.Fatalf("libpfs failed on command %s: %v",
+					logEntry.Entry.Command.String(), er.Err)
 			}
 		}
 		bar.Increment()
