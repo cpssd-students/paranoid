@@ -9,11 +9,13 @@ import (
 	"syscall"
 
 	"github.com/pp2p/paranoid/libpfs/returncodes"
+	log "github.com/pp2p/paranoid/logger"
 )
 
 // RmdirCommand removes a paranoidDirectory
 func RmdirCommand(paranoidDirectory, dirPath string) (returnCode returncodes.Code, returnError error) {
-	Log.Info("rmdir command called")
+	log.V(1).Info("rmdir %s in %s", dirPath, paranoidDirectory)
+
 	err := GetFileSystemLock(paranoidDirectory, ExclusiveLock)
 	if err != nil {
 		return returncodes.EUNEXPECTED, err

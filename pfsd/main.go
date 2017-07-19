@@ -61,10 +61,6 @@ var (
 		false,
 		"skip verification of TLS certificate chain and hostname"+
 			"- not recommended unless using self-signed certs")
-	verbose = flag.Bool(
-		"v",
-		false,
-		"Use verbose logging")
 	paranoidDirFlag = flag.String(
 		"paranoid_dir",
 		"",
@@ -357,10 +353,6 @@ func setupLogging() {
 	libpfs.Log.SetOutput(logger.STDERR | logger.LOGFILE)
 	intercom.Log.SetOutput(logger.STDERR | logger.LOGFILE)
 	globals.Log.SetOutput(logger.STDERR | logger.LOGFILE)
-
-	if *verbose {
-		libpfs.Log.SetLogLevel(logger.VERBOSE)
-	}
 }
 
 func getFileSystemAttributes() {
@@ -540,7 +532,7 @@ func main() {
 		startRPCServer(&lis, *discoveryPasswordFlag)
 	}
 	createPid("pfsd")
-	pfi.StartPfi(*verbose)
+	pfi.StartPfi(false)
 
 	intercom.RunServer(path.Join(globals.ParanoidDir, "meta"))
 

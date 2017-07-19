@@ -7,11 +7,14 @@ import (
 	"os"
 
 	"github.com/pp2p/paranoid/libpfs/returncodes"
+	log "github.com/pp2p/paranoid/logger"
 )
 
 // RenameCommand is called when renaming a file
 func RenameCommand(paranoidDirectory, oldFilePath, newFilePath string) (returnCode returncodes.Code, returnError error) {
-	Log.Info("rename command called")
+	log.V(1).Info("rename %s to %s in %s",
+		oldFilePath, newFilePath, paranoidDirectory)
+
 	oldFileParanoidPath := getParanoidPath(paranoidDirectory, oldFilePath)
 	newFileParanoidPath := getParanoidPath(paranoidDirectory, newFilePath)
 

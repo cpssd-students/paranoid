@@ -3,7 +3,7 @@ package logger
 import "flag"
 
 var (
-	vFlag = flag.Int("v", 0, "logging verbosity")
+	vFlag = flag.Int("-v", 0, "logging verbosity")
 )
 
 // V logging verbosity

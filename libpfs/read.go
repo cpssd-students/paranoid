@@ -6,16 +6,15 @@ import (
 	"io"
 	"os"
 	"path"
-	"strconv"
 
 	"github.com/pp2p/paranoid/libpfs/encryption"
 	"github.com/pp2p/paranoid/libpfs/returncodes"
+	log "github.com/pp2p/paranoid/logger"
 )
 
 //ReadCommand reads data from a file
 func ReadCommand(paranoidDirectory, filePath string, offset, length int64) (returnCode returncodes.Code, fileContents []byte, returnError error) {
-	Log.Info("read command called")
-	Log.Verbose("read : given paranoidDirectory = " + paranoidDirectory)
+	log.V(1).Info("read called on %s in %s", filePath, paranoidDirectory)
 
 	namepath := getParanoidPath(paranoidDirectory, filePath)
 
@@ -86,10 +85,7 @@ func ReadCommand(paranoidDirectory, filePath string, offset, length int64) (retu
 	}
 
 	if length != -1 {
-		Log.Verbose("read : " + strconv.FormatInt(length, 10) + " bytes starting at " + strconv.FormatInt(offset, 10))
 		maxRead = int(length)
-	} else {
-		Log.Verbose("read : from " + strconv.FormatInt(offset, 10) + " to end of file")
 	}
 
 	for {

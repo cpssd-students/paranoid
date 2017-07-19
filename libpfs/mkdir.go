@@ -9,11 +9,13 @@ import (
 	"syscall"
 
 	"github.com/pp2p/paranoid/libpfs/returncodes"
+	log "github.com/pp2p/paranoid/logger"
 )
 
 // MkdirCommand is called when making a paranoidDirectory
 func MkdirCommand(paranoidDirectory, dirPath string, mode os.FileMode) (returnCode returncodes.Code, returnError error) {
-	Log.Info("mkdir command called")
+	log.V(1).Infof("Mkdir %s in %s", dirPath, paranoidDirectory)
+
 	err := GetFileSystemLock(paranoidDirectory, ExclusiveLock)
 	if err != nil {
 		return returncodes.EUNEXPECTED, err

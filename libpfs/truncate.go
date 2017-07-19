@@ -8,12 +8,13 @@ import (
 
 	"github.com/pp2p/paranoid/libpfs/encryption"
 	"github.com/pp2p/paranoid/libpfs/returncodes"
+	log "github.com/pp2p/paranoid/logger"
 )
 
 //TruncateCommand reduces the file given to the new length
 func TruncateCommand(paranoidDirectory, filePath string, length int64) (returnCode returncodes.Code, returnError error) {
-	Log.Info("truncate command called")
-	Log.Verbose("truncate : given paranoidDirectory = " + paranoidDirectory)
+	log.V(1).Info("truncate file %s in %s to %d",
+		filePath, paranoidDirectory, length)
 
 	err := GetFileSystemLock(paranoidDirectory, SharedLock)
 	if err != nil {
@@ -64,8 +65,6 @@ func TruncateCommand(paranoidDirectory, filePath string, length int64) (returnCo
 			returnError = err
 		}
 	}()
-
-	Log.Verbose("truncate : truncating " + filePath)
 
 	contentsFile, err := os.OpenFile(path.Join(paranoidDirectory, "contents", inodeName), os.O_WRONLY, 0777)
 	if err != nil {

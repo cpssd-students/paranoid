@@ -10,6 +10,7 @@ import (
 	"syscall"
 
 	"github.com/pp2p/paranoid/libpfs/returncodes"
+	log "github.com/pp2p/paranoid/logger"
 )
 
 // PermMask is the default mask used for permissions
@@ -17,8 +18,7 @@ const PermMask = 0777
 
 //ChmodCommand is used to change the permissions of a file.
 func ChmodCommand(paranoidDirectory, filePath string, perms os.FileMode) (returnCode returncodes.Code, returnError error) {
-	Log.Info("chmod command called")
-	Log.Verbose("chmod : given paranoidDirectory = " + paranoidDirectory)
+	log.V(1).Info("chmod called on %s in %s", filePath, paranoidDirectory)
 
 	err := GetFileSystemLock(paranoidDirectory, ExclusiveLock)
 	if err != nil {
@@ -59,7 +59,7 @@ func ChmodCommand(paranoidDirectory, filePath string, perms os.FileMode) (return
 		return code, fmt.Errorf("unable to access %s: %s", filePath, err)
 	}
 
-	Log.Verbosef("chmod : changing permissions of "+inodeName+" to", perms)
+	log.V(2).Info("changing permissions of %s to %v", inodeName, perms)
 
 	inodePath := path.Join(paranoidDirectory, "inodes", inodeName)
 	inodeContents, err := ioutil.ReadFile(inodePath)
