@@ -3,15 +3,16 @@
 package pfi
 
 import (
-	"github.com/hanwen/go-fuse/fuse"
-	"github.com/hanwen/go-fuse/fuse/pathfs"
-	"github.com/pp2p/paranoid/libpfs/commands"
-	"github.com/pp2p/paranoid/logger"
-	"github.com/pp2p/paranoid/pfsd/globals"
 	"os"
 	"path"
 	"testing"
 	"time"
+
+	"github.com/hanwen/go-fuse/fuse"
+	"github.com/hanwen/go-fuse/fuse/pathfs"
+	"github.com/pp2p/paranoid/libpfs"
+	"github.com/pp2p/paranoid/logger"
+	"github.com/pp2p/paranoid/pfsd/globals"
 )
 
 func createTestDir(t *testing.T, name string) {
@@ -29,14 +30,14 @@ func removeTestDir(name string) {
 func TestMain(m *testing.M) {
 	Log = logger.New("testPackage", "testComponent", os.DevNull)
 	globals.ParanoidDir = path.Join(os.TempDir(), "pfiTestPfsDir")
-	commands.Log = logger.New("testPackage", "testComponent", os.DevNull)
+	libpfs.Log = logger.New("testPackage", "testComponent", os.DevNull)
 	os.Exit(m.Run())
 }
 
 func setuptesting(t *testing.T) {
 	removeTestDir("pfiTestPfsDir")
 	createTestDir(t, "pfiTestPfsDir")
-	_, err := commands.InitCommand(path.Join(os.TempDir(), "pfiTestPfsDir"))
+	_, err := libpfs.InitCommand(path.Join(os.TempDir(), "pfiTestPfsDir"))
 	if err != nil {
 		Log.Fatal("Error initing paranoid file system:", err)
 	}
@@ -46,7 +47,7 @@ func TestFuseFilePerms(t *testing.T) {
 	setuptesting(t)
 	defer removeTestDir("pfiTestPfsDir")
 
-	_, err := commands.CreatCommand(path.Join(os.TempDir(), "pfiTestPfsDir"), "helloworld.txt", os.FileMode(0777))
+	_, err := libpfs.CreatCommand(path.Join(os.TempDir(), "pfiTestPfsDir"), "helloworld.txt", os.FileMode(0777))
 	if err != nil {
 		t.Error("pfsm setup failed :", err)
 	}
@@ -189,7 +190,7 @@ func TestFuseLink(t *testing.T) {
 	setuptesting(t)
 	defer removeTestDir("pfiTestPfsDir")
 
-	_, err := commands.CreatCommand(path.Join(os.TempDir(), "pfiTestPfsDir"), "helloworld.txt", os.FileMode(0777))
+	_, err := libpfs.CreatCommand(path.Join(os.TempDir(), "pfiTestPfsDir"), "helloworld.txt", os.FileMode(0777))
 	if err != nil {
 		t.Error("pfsm setup failed :", err)
 	}

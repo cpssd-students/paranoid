@@ -7,7 +7,7 @@ import (
 	"github.com/hanwen/go-fuse/fuse"
 	"github.com/hanwen/go-fuse/fuse/nodefs"
 	"github.com/hanwen/go-fuse/fuse/pathfs"
-	"github.com/pp2p/paranoid/libpfs/commands"
+	"github.com/pp2p/paranoid/libpfs"
 	"github.com/pp2p/paranoid/libpfs/returncodes"
 	"github.com/pp2p/paranoid/pfsd/globals"
 )
@@ -30,7 +30,7 @@ func (fs *ParanoidFileSystem) GetAttr(name string, context *fuse.Context) (*fuse
 		}, fuse.OK
 	}
 
-	code, stats, err := commands.StatCommand(globals.ParanoidDir, name)
+	code, stats, err := libpfs.StatCommand(globals.ParanoidDir, name)
 	if code == returncodes.EUNEXPECTED {
 		Log.Fatal("Error running stat command :", err)
 	}
@@ -58,7 +58,7 @@ func (fs *ParanoidFileSystem) GetAttr(name string, context *fuse.Context) (*fuse
 func (fs *ParanoidFileSystem) OpenDir(name string, context *fuse.Context) ([]fuse.DirEntry, fuse.Status) {
 	Log.Info("OpenDir called on : " + name)
 
-	code, fileNames, err := commands.ReadDirCommand(globals.ParanoidDir, name)
+	code, fileNames, err := libpfs.ReadDirCommand(globals.ParanoidDir, name)
 	if code == returncodes.EUNEXPECTED {
 		Log.Fatal("Error running readdir command :", err)
 	}
@@ -96,7 +96,7 @@ func (fs *ParanoidFileSystem) Create(name string, flags uint32, mode uint32, con
 	if SendOverNetwork {
 		code, err = globals.RaftNetworkServer.RequestCreatCommand(name, mode)
 	} else {
-		code, err = commands.CreatCommand(globals.ParanoidDir, name, os.FileMode(mode))
+		code, err = libpfs.CreatCommand(globals.ParanoidDir, name, os.FileMode(mode))
 	}
 
 	if code == returncodes.EUNEXPECTED {
@@ -117,7 +117,7 @@ func (fs *ParanoidFileSystem) Create(name string, flags uint32, mode uint32, con
 func (fs *ParanoidFileSystem) Access(name string, mode uint32, context *fuse.Context) fuse.Status {
 	Log.Info("Access called on : " + name)
 	if name != "" {
-		code, err := commands.AccessCommand(globals.ParanoidDir, name, mode)
+		code, err := libpfs.AccessCommand(globals.ParanoidDir, name, mode)
 		if code == returncodes.EUNEXPECTED {
 			Log.Fatal("Error running access command :", err)
 		}
@@ -138,7 +138,7 @@ func (fs *ParanoidFileSystem) Rename(oldName string, newName string, context *fu
 	if SendOverNetwork {
 		code, err = globals.RaftNetworkServer.RequestRenameCommand(oldName, newName)
 	} else {
-		code, err = commands.RenameCommand(globals.ParanoidDir, oldName, newName)
+		code, err = libpfs.RenameCommand(globals.ParanoidDir, oldName, newName)
 	}
 
 	if code == returncodes.EUNEXPECTED {
@@ -159,7 +159,7 @@ func (fs *ParanoidFileSystem) Link(oldName string, newName string, context *fuse
 	if SendOverNetwork {
 		code, err = globals.RaftNetworkServer.RequestLinkCommand(oldName, newName)
 	} else {
-		code, err = commands.LinkCommand(globals.ParanoidDir, oldName, newName)
+		code, err = libpfs.LinkCommand(globals.ParanoidDir, oldName, newName)
 	}
 
 	if code == returncodes.EUNEXPECTED {
@@ -180,7 +180,7 @@ func (fs *ParanoidFileSystem) Symlink(oldName string, newName string, context *f
 	if SendOverNetwork {
 		code, err = globals.RaftNetworkServer.RequestSymlinkCommand(oldName, newName)
 	} else {
-		code, err = commands.SymlinkCommand(globals.ParanoidDir, oldName, newName)
+		code, err = libpfs.SymlinkCommand(globals.ParanoidDir, oldName, newName)
 	}
 
 	if code == returncodes.EUNEXPECTED {
@@ -196,7 +196,7 @@ func (fs *ParanoidFileSystem) Symlink(oldName string, newName string, context *f
 // Readlink to where the file is pointing to
 func (fs *ParanoidFileSystem) Readlink(name string, context *fuse.Context) (string, fuse.Status) {
 	Log.Info("Readlink called on", name)
-	code, link, err := commands.ReadlinkCommand(globals.ParanoidDir, name)
+	code, link, err := libpfs.ReadlinkCommand(globals.ParanoidDir, name)
 	if code == returncodes.EUNEXPECTED {
 		Log.Fatal("Error running readlink command :", err)
 	}
@@ -215,7 +215,7 @@ func (fs *ParanoidFileSystem) Unlink(name string, context *fuse.Context) fuse.St
 	if SendOverNetwork {
 		code, err = globals.RaftNetworkServer.RequestUnlinkCommand(name)
 	} else {
-		code, err = commands.UnlinkCommand(globals.ParanoidDir, name)
+		code, err = libpfs.UnlinkCommand(globals.ParanoidDir, name)
 	}
 
 	if code == returncodes.EUNEXPECTED {
@@ -236,7 +236,7 @@ func (fs *ParanoidFileSystem) Mkdir(name string, mode uint32, context *fuse.Cont
 	if SendOverNetwork {
 		code, err = globals.RaftNetworkServer.RequestMkdirCommand(name, mode)
 	} else {
-		code, err = commands.MkdirCommand(globals.ParanoidDir, name, os.FileMode(mode))
+		code, err = libpfs.MkdirCommand(globals.ParanoidDir, name, os.FileMode(mode))
 	}
 
 	if code == returncodes.EUNEXPECTED {
@@ -257,7 +257,7 @@ func (fs *ParanoidFileSystem) Rmdir(name string, context *fuse.Context) fuse.Sta
 	if SendOverNetwork {
 		code, err = globals.RaftNetworkServer.RequestRmdirCommand(name)
 	} else {
-		code, err = commands.RmdirCommand(globals.ParanoidDir, name)
+		code, err = libpfs.RmdirCommand(globals.ParanoidDir, name)
 	}
 
 	if code == returncodes.EUNEXPECTED {

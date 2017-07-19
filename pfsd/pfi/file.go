@@ -4,7 +4,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/pp2p/paranoid/libpfs/commands"
+	"github.com/pp2p/paranoid/libpfs"
 	"github.com/pp2p/paranoid/libpfs/returncodes"
 	"github.com/pp2p/paranoid/pfsd/globals"
 
@@ -29,7 +29,7 @@ func newParanoidFile(name string) nodefs.File {
 //Read reads a file and returns an array of bytes
 func (f *ParanoidFile) Read(buf []byte, off int64) (fuse.ReadResult, fuse.Status) {
 	Log.Info("Read called on file:", f.Name)
-	code, data, err := commands.ReadCommand(globals.ParanoidDir, f.Name, off, int64(len(buf)))
+	code, data, err := libpfs.ReadCommand(globals.ParanoidDir, f.Name, off, int64(len(buf)))
 	if code == returncodes.EUNEXPECTED {
 		Log.Fatal("Error running read command :", err)
 	}
@@ -56,7 +56,7 @@ func (f *ParanoidFile) Write(content []byte, off int64) (uint32, fuse.Status) {
 	if SendOverNetwork {
 		code, bytesWritten, err = globals.RaftNetworkServer.RequestWriteCommand(f.Name, off, int64(len(content)), content)
 	} else {
-		code, bytesWritten, err = commands.WriteCommand(globals.ParanoidDir, f.Name, off, int64(len(content)), content)
+		code, bytesWritten, err = libpfs.WriteCommand(globals.ParanoidDir, f.Name, off, int64(len(content)), content)
 	}
 
 	if code == returncodes.EUNEXPECTED {
@@ -82,7 +82,7 @@ func (f *ParanoidFile) Truncate(size uint64) fuse.Status {
 	if SendOverNetwork {
 		code, err = globals.RaftNetworkServer.RequestTruncateCommand(f.Name, int64(size))
 	} else {
-		code, err = commands.TruncateCommand(globals.ParanoidDir, f.Name, int64(size))
+		code, err = libpfs.TruncateCommand(globals.ParanoidDir, f.Name, int64(size))
 	}
 
 	if code == returncodes.EUNEXPECTED {
@@ -104,7 +104,7 @@ func (f *ParanoidFile) Utimens(atime *time.Time, mtime *time.Time) fuse.Status {
 	if SendOverNetwork {
 		code, err = globals.RaftNetworkServer.RequestUtimesCommand(f.Name, atime, mtime)
 	} else {
-		code, err = commands.UtimesCommand(globals.ParanoidDir, f.Name, atime, mtime)
+		code, err = libpfs.UtimesCommand(globals.ParanoidDir, f.Name, atime, mtime)
 	}
 
 	if code == returncodes.EUNEXPECTED {
@@ -125,7 +125,7 @@ func (f *ParanoidFile) Chmod(perms uint32) fuse.Status {
 	if SendOverNetwork {
 		code, err = globals.RaftNetworkServer.RequestChmodCommand(f.Name, perms)
 	} else {
-		code, err = commands.ChmodCommand(globals.ParanoidDir, f.Name, os.FileMode(perms))
+		code, err = libpfs.ChmodCommand(globals.ParanoidDir, f.Name, os.FileMode(perms))
 	}
 
 	if code == returncodes.EUNEXPECTED {

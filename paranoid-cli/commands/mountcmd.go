@@ -15,7 +15,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/pp2p/paranoid/libpfs/commands"
+	"github.com/pp2p/paranoid/libpfs"
 	"github.com/pp2p/paranoid/libpfs/returncodes"
 	"github.com/pp2p/paranoid/pfsd/intercom"
 	"github.com/urfave/cli"
@@ -105,7 +105,7 @@ func doMount(c *cli.Context, args []string) {
 	}
 	pool := string(poolBytes)
 
-	returncode, err := commands.MountCommand(pfsDir, dAddr, mountPoint)
+	returncode, err := libpfs.MountCommand(pfsDir, dAddr, mountPoint)
 	if returncode != returncodes.OK {
 		fmt.Println("FATAL: Error running pfs mount command : ", err)
 		Log.Fatal("Error running pfs mount command : ", err)

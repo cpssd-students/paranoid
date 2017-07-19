@@ -12,7 +12,7 @@ import (
 	"strconv"
 	"time"
 
-	libpfs "github.com/pp2p/paranoid/libpfs/commands"
+	"github.com/pp2p/paranoid/libpfs"
 	"github.com/pp2p/paranoid/libpfs/returncodes"
 	"github.com/pp2p/paranoid/pfsd/keyman"
 	pb "github.com/pp2p/paranoid/proto/raft"

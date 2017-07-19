@@ -3,23 +3,24 @@
 package keystatetest
 
 import (
-	"github.com/pp2p/paranoid/libpfs/commands"
+	"os"
+	"path"
+	"reflect"
+	"testing"
+
+	"github.com/pp2p/paranoid/libpfs"
 	"github.com/pp2p/paranoid/logger"
 	"github.com/pp2p/paranoid/pfsd/keyman"
 	pb "github.com/pp2p/paranoid/proto/raft"
 	"github.com/pp2p/paranoid/raft"
 	"github.com/pp2p/paranoid/raft/raftlog"
 	"github.com/pp2p/paranoid/raft/rafttestutil"
-	"os"
-	"path"
-	"reflect"
-	"testing"
 )
 
 func TestMain(m *testing.M) {
 	raft.Log = logger.New("rafttest", "rafttest", os.DevNull)
 	raftlog.Log = logger.New("rafttest", "rafttest", os.DevNull)
-	commands.Log = logger.New("rafttest", "rafttest", os.DevNull)
+	libpfs.Log = logger.New("rafttest", "rafttest", os.DevNull)
 	keyman.Log = logger.New("rafttest", "rafttest", os.DevNull)
 	os.MkdirAll(path.Join(os.TempDir(), "keystatetest", "meta"), 0777)
 	exitCode := m.Run()

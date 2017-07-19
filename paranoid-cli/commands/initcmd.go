@@ -9,7 +9,7 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/pp2p/paranoid/libpfs/commands"
+	"github.com/pp2p/paranoid/libpfs"
 	"github.com/pp2p/paranoid/libpfs/returncodes"
 	"github.com/pp2p/paranoid/paranoid-cli/tls"
 	"github.com/urfave/cli"
@@ -71,7 +71,7 @@ func doInit(pfsname, pool, cert, key string, unsecure, unencrypted, networkoff b
 		Log.Fatal("Error making pfs directory : ", err)
 	}
 
-	returncode, err := commands.InitCommand(directory)
+	returncode, err := libpfs.InitCommand(directory)
 	if returncode != returncodes.OK {
 		cleanupPFS(directory)
 		fmt.Println("FATAL: Error running pfs init")
