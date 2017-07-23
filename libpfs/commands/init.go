@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-	"strings"
 
 	"github.com/pp2p/paranoid/libpfs/returncodes"
 	log "github.com/pp2p/paranoid/logger"
@@ -74,12 +73,7 @@ func InitCommand(directory string) (returnCode returncodes.Code, returnError err
 		return returncodes.EUNEXPECTED, err
 	}
 
-	uuid, err := ioutil.ReadFile("/proc/sys/kernel/random/uuid")
-	if err != nil {
-		return returncodes.EUNEXPECTED, fmt.Errorf("error reading uuid: %s", err)
-	}
-
-	uuidString := strings.TrimSpace(string(uuid))
+	uuidString, err := NewUUID()
 	log.V(2).Info("%s init UUID: %s", directory, uuidString)
 
 	err = ioutil.WriteFile(path.Join(metaDir, "uuid"), []byte(uuidString), 0600)

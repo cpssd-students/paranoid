@@ -177,11 +177,11 @@ func getParanoidPath(paranoidDir, realPath string) (paranoidPath string) {
 }
 
 func generateNewInode() (inodeBytes []byte, err error) {
-	inodeBytes, err = ioutil.ReadFile("/proc/sys/kernel/random/uuid")
+	inodeString, err := NewUUID()
 	if err != nil {
 		return nil, fmt.Errorf("error generating new inode: %s", err)
 	}
-	return []byte(strings.TrimSpace(string(inodeBytes))), nil
+	return []byte(inodeString), nil
 }
 
 func getFileInode(filePath string) (inodeBytes []byte, errorCode returncodes.Code, err error) {
