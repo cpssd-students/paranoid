@@ -17,7 +17,7 @@ import (
 
 	"github.com/urfave/cli"
 
-	"github.com/pp2p/paranoid/libpfs/commands"
+	"github.com/pp2p/paranoid/libpfs"
 	"github.com/pp2p/paranoid/libpfs/returncodes"
 	log "github.com/pp2p/paranoid/logger"
 	"github.com/pp2p/paranoid/pfsd/intercom"
@@ -107,7 +107,7 @@ func doMount(c *cli.Context, args []string) {
 	}
 	pool := string(poolBytes)
 
-	returncode, err := commands.MountCommand(pfsDir, dAddr, mountPoint)
+	returncode, err := libpfs.MountCommand(pfsDir, dAddr, mountPoint)
 	if returncode != returncodes.OK {
 		fmt.Println("FATAL: Error running pfs mount command:", err)
 		log.Fatalf("Error running pfs mount command: %v", err)

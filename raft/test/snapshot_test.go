@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/pp2p/paranoid/libpfs/commands"
+	"github.com/pp2p/paranoid/libpfs"
 	"github.com/pp2p/paranoid/libpfs/returncodes"
 	"github.com/pp2p/paranoid/pfsd/keyman"
 	"github.com/pp2p/paranoid/raft"
@@ -42,7 +42,7 @@ func TestSnapshoting(t *testing.T) {
 		}
 	}()
 
-	code, err := commands.InitCommand(pfsDirectory)
+	code, err := libpfs.InitCommand(pfsDirectory)
 	if code != returncodes.OK {
 		t.Fatal("Unable to init pfsdirectroy:", err)
 	}
@@ -89,7 +89,7 @@ func TestSnapshoting(t *testing.T) {
 		t.Fatal("Error reverting to snapshot:", err)
 	}
 
-	_, data, err := commands.ReadCommand(pfsDirectory, "test.txt", -1, -1)
+	_, data, err := libpfs.ReadCommand(pfsDirectory, "test.txt", -1, -1)
 	if string(data) != "hello" {
 		t.Fatal("Error reverting snapshot. Read does not match 'hello'. Actual:", string(data))
 	}
@@ -130,12 +130,12 @@ func TestSnapshoting(t *testing.T) {
 		t.Fatal("Error reverting to snapshot:", err)
 	}
 
-	code, data, err = commands.ReadCommand(pfsDirectory, "test.txt", -1, -1)
+	code, data, err = libpfs.ReadCommand(pfsDirectory, "test.txt", -1, -1)
 	if string(data) != "hello" {
 		t.Fatal("Error reverting snapshot. Read does not match 'hello'. Actual:", string(data))
 	}
 
-	code, data, err = commands.ReadCommand(pfsDirectory, "test2.txt", -1, -1)
+	code, data, err = libpfs.ReadCommand(pfsDirectory, "test2.txt", -1, -1)
 	if string(data) != "world" {
 		t.Fatal("Error reverting snapshot. Read does not match 'world'. Actual:", string(data))
 	}

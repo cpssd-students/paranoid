@@ -14,7 +14,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/pp2p/paranoid/libpfs/commands"
+	"github.com/pp2p/paranoid/libpfs"
 	"github.com/pp2p/paranoid/libpfs/encryption"
 	"github.com/pp2p/paranoid/logger"
 	"github.com/pp2p/paranoid/pfsd/dnetclient"
@@ -338,7 +338,7 @@ func setupLogging() {
 	keyman.Log = logger.New("keyman", "pfsd", logDir)
 	raft.Log = logger.New("raft", "pfsd", logDir)
 	raftlog.Log = logger.New("raftlog", "pfsd", logDir)
-	commands.Log = logger.New("libpfs", "pfsd", logDir)
+	libpfs.Log = logger.New("libpfs", "pfsd", logDir)
 	intercom.Log = logger.New("intercom", "pfsd", logDir)
 	globals.Log = logger.New("globals", "pfsd", logDir)
 
@@ -350,10 +350,9 @@ func setupLogging() {
 	keyman.Log.SetOutput(logger.STDERR | logger.LOGFILE)
 	raft.Log.SetOutput(logger.STDERR | logger.LOGFILE)
 	raftlog.Log.SetOutput(logger.STDERR | logger.LOGFILE)
-	commands.Log.SetOutput(logger.STDERR | logger.LOGFILE)
+	libpfs.Log.SetOutput(logger.STDERR | logger.LOGFILE)
 	intercom.Log.SetOutput(logger.STDERR | logger.LOGFILE)
 	globals.Log.SetOutput(logger.STDERR | logger.LOGFILE)
-
 }
 
 func getFileSystemAttributes() {

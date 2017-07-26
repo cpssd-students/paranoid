@@ -1,6 +1,6 @@
 // +build !integration
 
-package commands
+package libpfs
 
 import (
 	"math/rand"

@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/pp2p/paranoid/libpfs/commands"
+	"github.com/pp2p/paranoid/libpfs"
 	"github.com/pp2p/paranoid/logger"
 	"github.com/pp2p/paranoid/pfsd/globals"
 )
@@ -47,7 +47,7 @@ func TestKillSignal(t *testing.T) {
 	createTestDir(t, "testksDirectory")
 	defer removeTestDir("testksDirectory")
 
-	commands.Log = logger.New("pfsdintegration", "pfsdintegration", os.DevNull)
+	libpfs.Log = logger.New("pfsdintegration", "pfsdintegration", os.DevNull)
 
 	discovery := exec.Command("discovery-server", "--port=10102", "-state=false")
 	err := discovery.Start()
@@ -61,7 +61,7 @@ func TestKillSignal(t *testing.T) {
 		}
 	}()
 
-	_, err = commands.InitCommand(path.Join(os.TempDir(), "testksDirectory"))
+	_, err = libpfs.InitCommand(path.Join(os.TempDir(), "testksDirectory"))
 	if err != nil {
 		t.Fatal(err)
 	}

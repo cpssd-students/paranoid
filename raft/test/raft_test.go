@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/pp2p/paranoid/libpfs/commands"
+	"github.com/pp2p/paranoid/libpfs"
 	"github.com/pp2p/paranoid/logger"
 	pb "github.com/pp2p/paranoid/proto/raft"
 	"github.com/pp2p/paranoid/raft"
@@ -20,7 +20,7 @@ import (
 func TestMain(m *testing.M) {
 	raft.Log = logger.New("rafttest", "rafttest", os.DevNull)
 	raftlog.Log = logger.New("rafttest", "rafttest", os.DevNull)
-	commands.Log = logger.New("rafttest", "rafttest", os.DevNull)
+	libpfs.Log = logger.New("rafttest", "rafttest", os.DevNull)
 	exitCode := m.Run()
 	os.Exit(exitCode)
 }

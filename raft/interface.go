@@ -8,7 +8,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/pp2p/paranoid/libpfs/commands"
+	"github.com/pp2p/paranoid/libpfs"
 	"github.com/pp2p/paranoid/libpfs/returncodes"
 	"github.com/pp2p/paranoid/pfsd/keyman"
 	pb "github.com/pp2p/paranoid/proto/raft"
@@ -459,16 +459,16 @@ func (s *RaftNetworkServer) ChangeNodeLocation(UUID, IP, Port string) {
 func PerformLibPfsCommand(directory string, command *pb.StateMachineCommand) *StateMachineResult {
 	switch ActionType(command.Type) {
 	case TypeWrite:
-		code, bytesWritten, err := commands.WriteCommand(directory, command.Path, int64(command.Offset), int64(command.Length), command.Data)
+		code, bytesWritten, err := libpfs.WriteCommand(directory, command.Path, int64(command.Offset), int64(command.Length), command.Data)
 		return &StateMachineResult{Code: code, Err: err, BytesWritten: bytesWritten}
 	case TypeCreat:
-		code, err := commands.CreatCommand(directory, command.Path, os.FileMode(command.Mode))
+		code, err := libpfs.CreatCommand(directory, command.Path, os.FileMode(command.Mode))
 		return &StateMachineResult{Code: code, Err: err}
 	case TypeChmod:
-		code, err := commands.ChmodCommand(directory, command.Path, os.FileMode(command.Mode))
+		code, err := libpfs.ChmodCommand(directory, command.Path, os.FileMode(command.Mode))
 		return &StateMachineResult{Code: code, Err: err}
 	case TypeTruncate:
-		code, err := commands.TruncateCommand(directory, command.Path, int64(command.Length))
+		code, err := libpfs.TruncateCommand(directory, command.Path, int64(command.Length))
 		return &StateMachineResult{Code: code, Err: err}
 	case TypeUtimes:
 		var atime *time.Time
@@ -481,25 +481,25 @@ func PerformLibPfsCommand(directory string, command *pb.StateMachineCommand) *St
 			time := time.Unix(command.ModifySeconds, command.ModifyNanoseconds)
 			mtime = &time
 		}
-		code, err := commands.UtimesCommand(directory, command.Path, atime, mtime)
+		code, err := libpfs.UtimesCommand(directory, command.Path, atime, mtime)
 		return &StateMachineResult{Code: code, Err: err}
 	case TypeRename:
-		code, err := commands.RenameCommand(directory, command.OldPath, command.NewPath)
+		code, err := libpfs.RenameCommand(directory, command.OldPath, command.NewPath)
 		return &StateMachineResult{Code: code, Err: err}
 	case TypeLink:
-		code, err := commands.LinkCommand(directory, command.OldPath, command.NewPath)
+		code, err := libpfs.LinkCommand(directory, command.OldPath, command.NewPath)
 		return &StateMachineResult{Code: code, Err: err}
 	case TypeSymlink:
-		code, err := commands.SymlinkCommand(directory, command.OldPath, command.NewPath)
+		code, err := libpfs.SymlinkCommand(directory, command.OldPath, command.NewPath)
 		return &StateMachineResult{Code: code, Err: err}
 	case TypeUnlink:
-		code, err := commands.UnlinkCommand(directory, command.Path)
+		code, err := libpfs.UnlinkCommand(directory, command.Path)
 		return &StateMachineResult{Code: code, Err: err}
 	case TypeMkdir:
-		code, err := commands.MkdirCommand(directory, command.Path, os.FileMode(command.Mode))
+		code, err := libpfs.MkdirCommand(directory, command.Path, os.FileMode(command.Mode))
 		return &StateMachineResult{Code: code, Err: err}
 	case TypeRmdir:
-		code, err := commands.RmdirCommand(directory, command.Path)
+		code, err := libpfs.RmdirCommand(directory, command.Path)
 		return &StateMachineResult{Code: code, Err: err}
 	}
 	Log.Fatal("Unrecognised command type")
