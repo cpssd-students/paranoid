@@ -11,7 +11,7 @@ jobs:
       - checkout
       - run:
           name: Install FUSE
-          command: apt update && apt install FUSE
+          command: apt update && apt install -y fuse
       - run:
           name: Get Go dependencies
           command: go get -v -u ./...
