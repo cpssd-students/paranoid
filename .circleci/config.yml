@@ -37,6 +37,9 @@ jobs:
       - attach_workspace:
           at: /go
       - run:
+          name: Create TEST_RESULTS folder
+          command: mkdir -p $TEST_RESULTS
+      - run:
           name: Test
           command: |
             trap "go-junit-report <${TEST_RESULTS}/go-test.out > ${TEST_RESULTS}/go-test-report.xml" EXIT
@@ -51,6 +54,9 @@ jobs:
     steps:
       - attach_workspace:
           at: /go
+      - run:
+          name: Create ARTIFACTS_FOLDER folder
+          command: mkdir -p $ARTIFACTS_FOLDER
       - run:
           name: Check Coverage
           command: |
