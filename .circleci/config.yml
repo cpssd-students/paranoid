@@ -1,31 +1,56 @@
+defaults: &defaults
+  working_directory: /go/src/github.com/pp2p/paranoid
+  docker:
+    - image: golang:1.9.2
+
 version: 2
 jobs:
-  build:
-    docker:
-      - image: golang:1.8.1
-    working_directory: /go/src/github.com/pp2p/paranoid
-    environment:
-      TEST_RESULTS: /tmp/test-results
-      ARTIFACTS_FOLDER: /tmp/artifacts
-      CODECLIMATE_REPO_TOKEN: f2dca1014d606354431516620eb3d4707d9080c076883314c9dee34efc55e852
+  setup:
+    <<: *defaults
     steps:
       - checkout
       - run:
           name: Install FUSE
-          command: apt update && apt install -y fuse
+          command: apt update && apt install FUSE
       - run:
           name: Get Go dependencies
-          command: go get -v ./...
+          command: go get -v -u ./...
       - run:
-          name: install go junit
+          name: Install Go JUnit
           command: go get -u github.com/jstemmer/go-junit-report
-      - run: mkdir -p $TEST_RESULTS
+      - persist_to_workspace:
+          root: .
+          paths: .
+  build:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: /go/src/github.com/pp2p/paranoid
+      - run:
+          name: Build
+          command: go build -v ./...
+  test:
+    <<: *defaults
+    environment:
+      TEST_RESULTS: /tmp/test-results
+    steps:
+      - attach_workspace:
+          at: /go/src/github.com/pp2p/paranoid
       - run:
           name: Test
           command: |
             trap "go-junit-report <${TEST_RESULTS}/go-test.out > ${TEST_RESULTS}/go-test-report.xml" EXIT
             go test -v ./... | tee ${TEST_RESULTS}/go-test.out
-      - run: mkdir -p $ARTIFACTS_FOLDER
+      - store_test_results:
+          path: /tmp/test-results
+  analyse:
+    <<: *defaults
+    environment:
+      ARTIFACTS_FOLDER: /tmp/artifacts
+      CODECLIMATE_REPO_TOKEN: f2dca1014d606354431516620eb3d4707d9080c076883314c9dee34efc55e852
+    steps:
+      - attach_workspace:
+          at: /go/src/github.com/pp2p/paranoid
       - run:
           name: Check Coverage
           command: |
@@ -41,7 +66,17 @@ jobs:
       - run:
           name: Export Coverage
           command: bash <(curl -s https://codecov.io/bash) -t 719c4b88-3c7b-4755-95ed-be4442c026ea -f $ARTIFACTS_FOLDER/cover.out
-      - store_test_results:
-          path: /tmp/test-results
       - store_artifacts:
           path: /tmp/artifacts
+
+workflows:
+  version: 2
+  test_build_analyse:
+    jobs:
+      - setup
+      - build:
+          requires: setup
+      - test:
+          requires: setup
+      - analyse:
+          requires: setup
