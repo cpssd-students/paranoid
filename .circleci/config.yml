@@ -14,7 +14,7 @@ jobs:
           command: apt update && apt install -y fuse
       - run:
           name: Get Go dependencies
-          command: go get -v -u ./...
+          command: go get -v ./...
       - run:
           name: Install Go JUnit
           command: go get -u github.com/jstemmer/go-junit-report
