@@ -25,7 +25,7 @@ jobs:
     <<: *defaults
     steps:
       - attach_workspace:
-          at: /go/src/github.com/pp2p/paranoid
+          at: /go
       - run:
           name: Build
           command: go build -v ./...
@@ -35,7 +35,7 @@ jobs:
       TEST_RESULTS: /tmp/test-results
     steps:
       - attach_workspace:
-          at: /go/src/github.com/pp2p/paranoid
+          at: /go
       - run:
           name: Test
           command: |
@@ -50,7 +50,7 @@ jobs:
       CODECLIMATE_REPO_TOKEN: f2dca1014d606354431516620eb3d4707d9080c076883314c9dee34efc55e852
     steps:
       - attach_workspace:
-          at: /go/src/github.com/pp2p/paranoid
+          at: /go
       - run:
           name: Check Coverage
           command: |
