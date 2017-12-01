@@ -19,7 +19,7 @@ jobs:
           name: Install Go JUnit
           command: go get -u github.com/jstemmer/go-junit-report
       - persist_to_workspace:
-          root: .
+          root: /go
           paths: .
   build:
     <<: *defaults
