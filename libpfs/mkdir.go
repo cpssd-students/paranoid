@@ -8,6 +8,7 @@ import (
 	"path"
 	"syscall"
 
+	"github.com/google/uuid"
 	"github.com/pp2p/paranoid/libpfs/returncodes"
 	log "github.com/pp2p/paranoid/logger"
 )
@@ -32,14 +33,10 @@ func MkdirCommand(paranoidDirectory, dirPath string, mode os.FileMode) (returnCo
 	dirParanoidPath := getParanoidPath(paranoidDirectory, dirPath)
 	dirInfoPath := path.Join(dirParanoidPath, "info")
 
-	inodeBytes, err := generateNewInode()
-	if err != nil {
-		return returncodes.EUNEXPECTED, err
-	}
+	inodeID := uuid.New().String()
 
-	inodeString := string(inodeBytes)
-	inodePath := path.Join(paranoidDirectory, "inodes", inodeString)
-	contentsPath := path.Join(paranoidDirectory, "contents", inodeString)
+	inodePath := path.Join(paranoidDirectory, "inodes", inodeID)
+	contentsPath := path.Join(paranoidDirectory, "contents", inodeID)
 
 	fileType, err := getFileType(paranoidDirectory, dirParanoidPath)
 	if err != nil {
@@ -72,7 +69,7 @@ func MkdirCommand(paranoidDirectory, dirPath string, mode os.FileMode) (returnCo
 	}
 	defer dirInfoFile.Close()
 
-	_, err = dirInfoFile.Write(inodeBytes)
+	_, err = dirInfoFile.Write([]byte(inodeID))
 	if err != nil {
 		return returncodes.EUNEXPECTED, fmt.Errorf("error writing to info file: %s", err)
 	}
@@ -85,8 +82,9 @@ func MkdirCommand(paranoidDirectory, dirPath string, mode os.FileMode) (returnCo
 
 	nodeData := &inode{
 		Mode:  mode | syscall.S_IFDIR,
-		Inode: inodeString,
-		Count: 1}
+		Inode: inodeID,
+		Count: 1,
+	}
 	jsonData, err := json.Marshal(nodeData)
 	if err != nil {
 		return returncodes.EUNEXPECTED, fmt.Errorf("error marshalling json: %s", err)
