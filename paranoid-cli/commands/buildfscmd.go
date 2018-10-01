@@ -78,5 +78,6 @@ func Buildfs(c *cli.Context) {
 		bar.Increment()
 	}
 
-	bar.FinishPrint("Done.\nYou may now mount your new filesystem: " + pfsName)
+	bar.Finish()
+	fmt.Printf("Done.\nYou may now mount your new filesystem: %s", pfsName)
 }
