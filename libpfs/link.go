@@ -8,8 +8,8 @@ import (
 	"os"
 	"path"
 
-	"github.com/pp2p/paranoid/libpfs/returncodes"
-	log "github.com/pp2p/paranoid/logger"
+	"paranoid/libpfs/returncodes"
+	log "paranoid/logger"
 )
 
 // LinkCommand creates a link of a file.

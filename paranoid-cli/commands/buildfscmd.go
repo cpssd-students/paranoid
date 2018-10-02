@@ -8,10 +8,10 @@ import (
 	"path"
 
 	progress "github.com/cheggaaa/pb"
-	"github.com/pp2p/paranoid/libpfs/returncodes"
-	log "github.com/pp2p/paranoid/logger"
-	pb "github.com/pp2p/paranoid/proto/raft"
-	"github.com/pp2p/paranoid/raft"
+	"paranoid/libpfs/returncodes"
+	log "paranoid/logger"
+	pb "paranoid/proto/raft"
+	"paranoid/raft"
 	"github.com/urfave/cli"
 )
 

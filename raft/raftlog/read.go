@@ -9,8 +9,8 @@ import (
 	"strconv"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/pp2p/paranoid/libpfs/encryption"
-	pb "github.com/pp2p/paranoid/proto/raft"
+	"paranoid/libpfs/encryption"
+	pb "paranoid/proto/raft"
 )
 
 // GetLogEntryUnsafe returns an unsafe log entry

@@ -4,9 +4,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/pp2p/paranoid/libpfs"
-	"github.com/pp2p/paranoid/libpfs/returncodes"
-	"github.com/pp2p/paranoid/pfsd/globals"
+	"paranoid/libpfs"
+	"paranoid/libpfs/returncodes"
+	"paranoid/pfsd/globals"
 
 	"github.com/hanwen/go-fuse/fuse"
 	"github.com/hanwen/go-fuse/fuse/nodefs"

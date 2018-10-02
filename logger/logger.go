@@ -55,7 +55,7 @@ const (
 
 const (
 	// Package of the project
-	Package = "github.com/pp2p/paranoid/"
+	Package = "paranoid/"
 	timeFmt = "2006-01-02T15:04.05"
 )
 

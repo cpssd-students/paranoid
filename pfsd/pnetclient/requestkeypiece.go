@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/pp2p/paranoid/pfsd/globals"
-	"github.com/pp2p/paranoid/pfsd/keyman"
-	pb "github.com/pp2p/paranoid/proto/paranoidnetwork"
+	"paranoid/pfsd/globals"
+	"paranoid/pfsd/keyman"
+	pb "paranoid/proto/paranoidnetwork"
 	"golang.org/x/net/context"
 )
 

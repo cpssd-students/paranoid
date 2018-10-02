@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pp2p/paranoid/raft"
+	"paranoid/raft"
 )
 
 // GenerateNewUUID creates a new UUID

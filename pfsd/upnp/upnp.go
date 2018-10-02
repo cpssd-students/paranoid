@@ -9,8 +9,8 @@ import (
 	"sync"
 
 	"github.com/huin/goupnp/dcps/internetgateway1"
-	"github.com/pp2p/paranoid/logger"
-	"github.com/pp2p/paranoid/pfsd/globals"
+	"paranoid/logger"
+	"paranoid/pfsd/globals"
 )
 
 var (

@@ -6,8 +6,8 @@ import (
 	"path"
 	"strings"
 
-	"github.com/pp2p/paranoid/libpfs/returncodes"
-	log "github.com/pp2p/paranoid/logger"
+	"paranoid/libpfs/returncodes"
+	log "paranoid/logger"
 )
 
 //ReadDirCommand returns a list of all the files in the given paranoidDirectory

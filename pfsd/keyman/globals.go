@@ -1,7 +1,7 @@
 package keyman
 
 import (
-	"github.com/pp2p/paranoid/logger"
+	"paranoid/logger"
 )
 
 // Log the messages from keyman

@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/kardianos/osext"
-	"github.com/pp2p/paranoid/pfsd/globals"
-	"github.com/pp2p/paranoid/pfsd/upnp"
+	"paranoid/pfsd/globals"
+	"paranoid/pfsd/upnp"
 	"os"
 	"os/signal"
 	"path"

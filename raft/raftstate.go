@@ -8,9 +8,9 @@ import (
 	"path"
 	"sync"
 
-	"github.com/pp2p/paranoid/pfsd/keyman"
-	pb "github.com/pp2p/paranoid/proto/raft"
-	"github.com/pp2p/paranoid/raft/raftlog"
+	"paranoid/pfsd/keyman"
+	pb "paranoid/proto/raft"
+	"paranoid/raft/raftlog"
 )
 
 // NodeType provides information about the type of node

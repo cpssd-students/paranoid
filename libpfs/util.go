@@ -10,9 +10,9 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/pp2p/paranoid/libpfs/encryption"
-	"github.com/pp2p/paranoid/libpfs/returncodes"
-	"github.com/pp2p/paranoid/logger"
+	"paranoid/libpfs/encryption"
+	"paranoid/libpfs/returncodes"
+	"paranoid/logger"
 )
 
 // Log is an instance of old logging system.

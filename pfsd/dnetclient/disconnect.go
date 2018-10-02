@@ -3,8 +3,8 @@ package dnetclient
 import (
 	"errors"
 
-	"github.com/pp2p/paranoid/pfsd/globals"
-	pb "github.com/pp2p/paranoid/proto/discoverynetwork"
+	"paranoid/pfsd/globals"
+	pb "paranoid/proto/discoverynetwork"
 	"golang.org/x/net/context"
 )
 

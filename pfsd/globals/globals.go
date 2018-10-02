@@ -11,9 +11,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/pp2p/paranoid/logger"
-	"github.com/pp2p/paranoid/pfsd/keyman"
-	"github.com/pp2p/paranoid/raft"
+	"paranoid/logger"
+	"paranoid/pfsd/keyman"
+	"paranoid/raft"
 	"golang.org/x/crypto/bcrypt"
 )
 

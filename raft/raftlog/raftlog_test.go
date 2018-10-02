@@ -8,8 +8,8 @@ import (
 	"path"
 	"testing"
 
-	"github.com/pp2p/paranoid/logger"
-	pb "github.com/pp2p/paranoid/proto/raft"
+	"paranoid/logger"
+	pb "paranoid/proto/raft"
 )
 
 var (

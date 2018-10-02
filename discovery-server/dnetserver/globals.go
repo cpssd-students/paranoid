@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/pp2p/paranoid/logger"
-	pb "github.com/pp2p/paranoid/proto/discoverynetwork"
+	"paranoid/logger"
+	pb "paranoid/proto/discoverynetwork"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"

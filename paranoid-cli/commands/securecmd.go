@@ -9,8 +9,8 @@ import (
 
 	"github.com/urfave/cli"
 
-	log "github.com/pp2p/paranoid/logger"
-	"github.com/pp2p/paranoid/paranoid-cli/tls"
+	log "paranoid/logger"
+	"paranoid/paranoid-cli/tls"
 )
 
 // Secure subcommand
