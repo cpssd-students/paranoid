@@ -2,8 +2,8 @@ version: 2
 jobs:
   build:
     docker:
-      - image: golang:1.8.1
-    working_directory: /go/src/github.com/pp2p/paranoid
+      - image: golang:1.11
+    working_directory: /paranoid
     environment:
       TEST_RESULTS: /tmp/test-results
       ARTIFACTS_FOLDER: /tmp/artifacts

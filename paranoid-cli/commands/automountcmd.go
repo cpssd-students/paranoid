@@ -30,7 +30,7 @@ func AutoMount(c *cli.Context) {
 	mountpoint, err := ioutil.ReadFile(path.Join(pfsMeta, "mountpoint"))
 	if err != nil {
 		fmt.Println("FATAL: PFSD Couldnt find FS mountpoint", err)
-		log.Fatal("could not get mountpoint %v", err)
+		log.Fatalf("could not get mountpoint %v", err)
 	}
 
 	mountArgs := []string{args[0], string(mountpoint)}
