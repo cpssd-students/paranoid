@@ -8,7 +8,6 @@ require (
 	github.com/kardianos/osext v0.0.0-20170510131534-ae77be60afb1
 	github.com/mattn/go-colorable v0.0.9 // indirect
 	github.com/mattn/go-isatty v0.0.4 // indirect
-	github.com/pp2p/paranoid v0.0.0-20181002222802-f6d558508884
 	github.com/urfave/cli v1.20.0
 	golang.org/x/crypto v0.0.0-20181001203147-e3636079e1a4
 	golang.org/x/net v0.0.0-20180926154720-4dfa2610cdf3
