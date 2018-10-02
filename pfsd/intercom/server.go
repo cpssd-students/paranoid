@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/pp2p/paranoid/pfsd/globals"
-	"github.com/pp2p/paranoid/raft"
+	"paranoid/pfsd/globals"
+	"paranoid/raft"
 )
 
 // Message constants

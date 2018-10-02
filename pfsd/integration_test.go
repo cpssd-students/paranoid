@@ -13,9 +13,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/pp2p/paranoid/libpfs"
-	"github.com/pp2p/paranoid/logger"
-	"github.com/pp2p/paranoid/pfsd/globals"
+	"paranoid/libpfs"
+	"paranoid/logger"
+	"paranoid/pfsd/globals"
 )
 
 func createTestDir(t *testing.T, name string) {

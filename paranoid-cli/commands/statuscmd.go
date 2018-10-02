@@ -11,8 +11,8 @@ import (
 
 	"github.com/urfave/cli"
 
-	log "github.com/pp2p/paranoid/logger"
-	"github.com/pp2p/paranoid/pfsd/intercom"
+	log "paranoid/logger"
+	"paranoid/pfsd/intercom"
 )
 
 // Status displays statistics for the specified PFSD instances.

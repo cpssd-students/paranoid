@@ -3,7 +3,7 @@
 package keyman
 
 import (
-	"github.com/pp2p/paranoid/logger"
+	"paranoid/logger"
 	"os"
 	"testing"
 )

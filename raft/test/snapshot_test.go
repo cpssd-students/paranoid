@@ -8,11 +8,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/pp2p/paranoid/libpfs"
-	"github.com/pp2p/paranoid/libpfs/returncodes"
-	"github.com/pp2p/paranoid/pfsd/keyman"
-	"github.com/pp2p/paranoid/raft"
-	"github.com/pp2p/paranoid/raft/rafttestutil"
+	"paranoid/libpfs"
+	"paranoid/libpfs/returncodes"
+	"paranoid/pfsd/keyman"
+	"paranoid/raft"
+	"paranoid/raft/rafttestutil"
 )
 
 func TestSnapshoting(t *testing.T) {

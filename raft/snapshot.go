@@ -12,10 +12,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/pp2p/paranoid/libpfs"
-	"github.com/pp2p/paranoid/libpfs/returncodes"
-	"github.com/pp2p/paranoid/pfsd/keyman"
-	pb "github.com/pp2p/paranoid/proto/raft"
+	"paranoid/libpfs"
+	"paranoid/libpfs/returncodes"
+	"paranoid/pfsd/keyman"
+	pb "paranoid/proto/raft"
 	"golang.org/x/net/context"
 )
 

@@ -1,9 +1,9 @@
 package pnetclient
 
 import (
-	"github.com/pp2p/paranoid/pfsd/globals"
-	"github.com/pp2p/paranoid/pfsd/upnp"
-	pb "github.com/pp2p/paranoid/proto/paranoidnetwork"
+	"paranoid/pfsd/globals"
+	"paranoid/pfsd/upnp"
+	pb "paranoid/proto/paranoidnetwork"
 	"golang.org/x/net/context"
 )
 

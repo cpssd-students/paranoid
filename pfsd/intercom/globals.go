@@ -1,7 +1,7 @@
 package intercom
 
 import (
-	"github.com/pp2p/paranoid/logger"
+	"paranoid/logger"
 )
 
 // Log used to log messages from intercom

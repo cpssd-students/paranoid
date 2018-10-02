@@ -12,11 +12,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/pp2p/paranoid/logger"
-	pb "github.com/pp2p/paranoid/proto/raft"
-	"github.com/pp2p/paranoid/raft"
-	"github.com/pp2p/paranoid/raft/raftlog"
-	"github.com/pp2p/paranoid/raft/rafttestutil"
+	"paranoid/logger"
+	pb "paranoid/proto/raft"
+	"paranoid/raft"
+	"paranoid/raft/raftlog"
+	"paranoid/raft/rafttestutil"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/grpclog"
 )

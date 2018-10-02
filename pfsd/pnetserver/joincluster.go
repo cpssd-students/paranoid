@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/pp2p/paranoid/pfsd/globals"
-	pb "github.com/pp2p/paranoid/proto/paranoidnetwork"
-	"github.com/pp2p/paranoid/raft"
+	"paranoid/pfsd/globals"
+	pb "paranoid/proto/paranoidnetwork"
+	"paranoid/raft"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/net/context"
 )

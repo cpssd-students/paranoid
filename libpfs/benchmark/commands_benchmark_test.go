@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/pp2p/paranoid/libpfs"
-	"github.com/pp2p/paranoid/libpfs/returncodes"
-	"github.com/pp2p/paranoid/logger"
+	. "paranoid/libpfs"
+	"paranoid/libpfs/returncodes"
+	"paranoid/logger"
 )
 
 var testDirectory string

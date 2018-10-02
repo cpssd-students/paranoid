@@ -17,10 +17,10 @@ import (
 
 	"github.com/urfave/cli"
 
-	"github.com/pp2p/paranoid/libpfs"
-	"github.com/pp2p/paranoid/libpfs/returncodes"
-	log "github.com/pp2p/paranoid/logger"
-	"github.com/pp2p/paranoid/pfsd/intercom"
+	"paranoid/libpfs"
+	"paranoid/libpfs/returncodes"
+	log "paranoid/logger"
+	"paranoid/pfsd/intercom"
 )
 
 // Mount subcommand talks to other programs to mount the pfs filesystem.

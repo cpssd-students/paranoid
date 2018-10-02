@@ -7,10 +7,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/pp2p/paranoid/libpfs/encryption"
-	"github.com/pp2p/paranoid/pfsd/globals"
-	"github.com/pp2p/paranoid/pfsd/keyman"
-	"github.com/pp2p/paranoid/pfsd/pnetclient"
+	"paranoid/libpfs/encryption"
+	"paranoid/pfsd/globals"
+	"paranoid/pfsd/keyman"
+	"paranoid/pfsd/pnetclient"
 )
 
 const unlockQueryInterval time.Duration = time.Second * 10

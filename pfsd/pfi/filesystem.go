@@ -7,9 +7,9 @@ import (
 	"github.com/hanwen/go-fuse/fuse"
 	"github.com/hanwen/go-fuse/fuse/nodefs"
 	"github.com/hanwen/go-fuse/fuse/pathfs"
-	"github.com/pp2p/paranoid/libpfs"
-	"github.com/pp2p/paranoid/libpfs/returncodes"
-	"github.com/pp2p/paranoid/pfsd/globals"
+	"paranoid/libpfs"
+	"paranoid/libpfs/returncodes"
+	"paranoid/pfsd/globals"
 )
 
 //ParanoidFileSystem is the struct which holds all

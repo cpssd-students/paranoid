@@ -10,9 +10,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/pp2p/paranoid/discovery-server/dnetserver"
-	"github.com/pp2p/paranoid/logger"
-	pb "github.com/pp2p/paranoid/proto/discoverynetwork"
+	"paranoid/discovery-server/dnetserver"
+	"paranoid/logger"
+	pb "paranoid/proto/discoverynetwork"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )

@@ -9,7 +9,7 @@ import (
 
 	"github.com/urfave/cli"
 
-	log "github.com/pp2p/paranoid/logger"
+	log "paranoid/logger"
 )
 
 //Delete deletes a paranoid file system

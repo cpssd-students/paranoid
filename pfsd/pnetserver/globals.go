@@ -3,7 +3,7 @@
 package pnetserver
 
 import (
-	"github.com/pp2p/paranoid/logger"
+	"paranoid/logger"
 )
 
 // ParanoidServer implements the paranoidnetwork gRPC server

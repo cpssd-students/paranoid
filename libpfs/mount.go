@@ -6,8 +6,8 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/pp2p/paranoid/libpfs/returncodes"
-	log "github.com/pp2p/paranoid/logger"
+	"paranoid/libpfs/returncodes"
+	log "paranoid/logger"
 )
 
 //MountCommand is used to notify a pfs paranoidDirectory it has been mounted.

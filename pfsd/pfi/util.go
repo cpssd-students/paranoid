@@ -4,8 +4,8 @@ import (
 	"syscall"
 
 	"github.com/hanwen/go-fuse/fuse"
-	"github.com/pp2p/paranoid/libpfs/returncodes"
-	"github.com/pp2p/paranoid/logger"
+	"paranoid/libpfs/returncodes"
+	"paranoid/logger"
 )
 
 var (

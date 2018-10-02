@@ -3,8 +3,8 @@ package pfi
 import (
 	"path"
 
-	"github.com/pp2p/paranoid/logger"
-	"github.com/pp2p/paranoid/pfsd/globals"
+	"paranoid/logger"
+	"paranoid/pfsd/globals"
 
 	"github.com/hanwen/go-fuse/fuse/nodefs"
 	"github.com/hanwen/go-fuse/fuse/pathfs"

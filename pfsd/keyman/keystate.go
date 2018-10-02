@@ -9,7 +9,7 @@ import (
 	"path"
 	"sync"
 
-	pb "github.com/pp2p/paranoid/proto/raft"
+	pb "paranoid/proto/raft"
 )
 
 // KsmFileName stores the name of the file used to store the key state (duh)

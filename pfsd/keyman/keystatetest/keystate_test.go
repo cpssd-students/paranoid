@@ -8,13 +8,13 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/pp2p/paranoid/libpfs"
-	"github.com/pp2p/paranoid/logger"
-	"github.com/pp2p/paranoid/pfsd/keyman"
-	pb "github.com/pp2p/paranoid/proto/raft"
-	"github.com/pp2p/paranoid/raft"
-	"github.com/pp2p/paranoid/raft/raftlog"
-	"github.com/pp2p/paranoid/raft/rafttestutil"
+	"paranoid/libpfs"
+	"paranoid/logger"
+	"paranoid/pfsd/keyman"
+	pb "paranoid/proto/raft"
+	"paranoid/raft"
+	"paranoid/raft/raftlog"
+	"paranoid/raft/rafttestutil"
 )
 
 func TestMain(m *testing.M) {

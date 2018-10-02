@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"testing"
 
-	. "github.com/pp2p/paranoid/discovery-server/dnetserver"
-	"github.com/pp2p/paranoid/logger"
-	pb "github.com/pp2p/paranoid/proto/discoverynetwork"
+	. "paranoid/discovery-server/dnetserver"
+	"paranoid/logger"
+	pb "paranoid/proto/discoverynetwork"
 )
 
 func TestMain(m *testing.M) {

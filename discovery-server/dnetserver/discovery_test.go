@@ -9,8 +9,8 @@ import (
 	"path"
 	"testing"
 
-	"github.com/pp2p/paranoid/logger"
-	pb "github.com/pp2p/paranoid/proto/discoverynetwork"
+	"paranoid/logger"
+	pb "paranoid/proto/discoverynetwork"
 )
 
 func TestMain(m *testing.M) {

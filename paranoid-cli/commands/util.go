@@ -12,8 +12,8 @@ import (
 
 	"github.com/golang/protobuf/proto"
 
-	log "github.com/pp2p/paranoid/logger"
-	pb "github.com/pp2p/paranoid/proto/raft"
+	log "paranoid/logger"
+	pb "paranoid/proto/raft"
 )
 
 type fileSystemAttributes struct {
