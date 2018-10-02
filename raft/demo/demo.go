@@ -12,6 +12,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/pp2p/paranoid/logger"
 	pb "github.com/pp2p/paranoid/proto/raft"
 	"github.com/pp2p/paranoid/raft"
@@ -77,7 +78,7 @@ func manageNode(raftServer *raft.RaftNetworkServer) {
 			log.Println(raftServer.State.NodeID, "requesting that", randomNumber, "be added to the log")
 			_, err := raftServer.RequestAddLogEntry(&pb.Entry{
 				Type: pb.Entry_Demo,
-				Uuid: rafttestutil.GenerateNewUUID(),
+				Uuid: uuid.New().String(),
 				Demo: &pb.DemoCommand{uint64(randomNumber)},
 			})
 			if err == nil {

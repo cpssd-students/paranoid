@@ -9,12 +9,15 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
+
 	"github.com/pp2p/paranoid/libpfs"
 	"github.com/pp2p/paranoid/logger"
-	pb "github.com/pp2p/paranoid/proto/raft"
 	"github.com/pp2p/paranoid/raft"
 	"github.com/pp2p/paranoid/raft/raftlog"
 	"github.com/pp2p/paranoid/raft/rafttestutil"
+
+	pb "github.com/pp2p/paranoid/proto/raft"
 )
 
 func TestMain(m *testing.M) {
@@ -154,7 +157,7 @@ func TestRaftLogReplication(t *testing.T) {
 
 	_, err := node1RaftServer.RequestAddLogEntry(&pb.Entry{
 		Type: pb.Entry_Demo,
-		Uuid: rafttestutil.GenerateNewUUID(),
+		Uuid: uuid.New().String(),
 		Demo: &pb.DemoCommand{10},
 	})
 	cluster := []*raft.RaftNetworkServer{node1RaftServer, node2RaftServer, node3RaftServer}
@@ -203,7 +206,7 @@ func TestRaftPersistentState(t *testing.T) {
 
 	_, err := node1RaftServer.RequestAddLogEntry(&pb.Entry{
 		Type: pb.Entry_Demo,
-		Uuid: rafttestutil.GenerateNewUUID(),
+		Uuid: uuid.New().String(),
 		Demo: &pb.DemoCommand{10},
 	})
 	if err != nil {
@@ -302,7 +305,7 @@ func TestRaftConfigurationChange(t *testing.T) {
 
 	_, err := node1RaftServer.RequestAddLogEntry(&pb.Entry{
 		Type: pb.Entry_Demo,
-		Uuid: rafttestutil.GenerateNewUUID(),
+		Uuid: uuid.New().String(),
 		Demo: &pb.DemoCommand{10},
 	})
 	if err != nil {
@@ -361,7 +364,7 @@ func TestRaftConfigurationChange(t *testing.T) {
 	if node1RaftServer.State.NodeID != leader.State.NodeID {
 		_, err := node1RaftServer.RequestAddLogEntry(&pb.Entry{
 			Type: pb.Entry_Demo,
-			Uuid: rafttestutil.GenerateNewUUID(),
+			Uuid: uuid.New().String(),
 			Demo: &pb.DemoCommand{1337},
 		})
 		if err != nil {
@@ -370,7 +373,7 @@ func TestRaftConfigurationChange(t *testing.T) {
 	} else {
 		_, err := node2RaftServer.RequestAddLogEntry(&pb.Entry{
 			Type: pb.Entry_Demo,
-			Uuid: rafttestutil.GenerateNewUUID(),
+			Uuid: uuid.New().String(),
 			Demo: &pb.DemoCommand{1337},
 		})
 		if err != nil {
@@ -400,7 +403,7 @@ func TestStartNodeOutOfConfiguration(t *testing.T) {
 
 	_, err := node1RaftServer.RequestAddLogEntry(&pb.Entry{
 		Type: pb.Entry_Demo,
-		Uuid: rafttestutil.GenerateNewUUID(),
+		Uuid: uuid.New().String(),
 		Demo: &pb.DemoCommand{10},
 	})
 	if err == nil {

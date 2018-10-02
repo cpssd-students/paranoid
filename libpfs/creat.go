@@ -8,6 +8,7 @@ import (
 	"os"
 	"path"
 
+	"github.com/google/uuid"
 	"github.com/pp2p/paranoid/libpfs/encryption"
 	"github.com/pp2p/paranoid/libpfs/returncodes"
 	log "github.com/pp2p/paranoid/logger"
@@ -41,33 +42,29 @@ func CreatCommand(paranoidDirectory, filePath string, perms os.FileMode) (return
 		return returncodes.EEXIST, errors.New(filePath + " already exists")
 	}
 
-	uuidbytes, err := generateNewInode()
-	if err != nil {
-		return returncodes.EUNEXPECTED, err
-	}
+	inodeID := uuid.New().String()
 
-	uuidstring := string(uuidbytes)
-
-	err = ioutil.WriteFile(namepath, uuidbytes, 0600)
+	err = ioutil.WriteFile(namepath, []byte(inodeID), 0600)
 	if err != nil {
 		return returncodes.EUNEXPECTED, errors.New("error writing name file")
 	}
 
 	nodeData := &inode{
 		Mode:  perms,
-		Inode: uuidstring,
-		Count: 1}
+		Inode: inodeID,
+		Count: 1,
+	}
 	jsonData, err := json.Marshal(nodeData)
 	if err != nil {
 		return returncodes.EUNEXPECTED, fmt.Errorf("error marshalling json: %s", err)
 	}
 
-	err = ioutil.WriteFile(path.Join(paranoidDirectory, "inodes", uuidstring), jsonData, 0600)
+	err = ioutil.WriteFile(path.Join(paranoidDirectory, "inodes", inodeID), jsonData, 0600)
 	if err != nil {
 		return returncodes.EUNEXPECTED, fmt.Errorf("error writing inodes file: %s", err)
 	}
 
-	contentsFile, err := os.Create(path.Join(paranoidDirectory, "contents", uuidstring))
+	contentsFile, err := os.Create(path.Join(paranoidDirectory, "contents", inodeID))
 	if err != nil {
 		return returncodes.EUNEXPECTED, fmt.Errorf("error creating contents file: %s", err)
 	}
