@@ -15,6 +15,7 @@ import (
 	"paranoid/pfsd/keyman"
 	pb "paranoid/proto/raft"
 	"paranoid/raft/raftlog"
+
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -64,12 +65,19 @@ func (s *RaftNetworkServer) AppendEntries(ctx context.Context, req *pb.AppendEnt
 
 	if s.State.Configuration.InConfiguration(req.LeaderId) == false {
 		if s.State.Configuration.MyConfigurationGood() {
-			return &pb.AppendEntriesResponse{s.State.GetCurrentTerm(), 0, false}, nil
+			return &pb.AppendEntriesResponse{
+				Term:    s.State.GetCurrentTerm(),
+				Success: false,
+			}, nil
 		}
 	}
 
 	if req.Term < s.State.GetCurrentTerm() {
-		return &pb.AppendEntriesResponse{s.State.GetCurrentTerm(), 0, false}, nil
+		return &pb.AppendEntriesResponse{
+			Term:      s.State.GetCurrentTerm(),
+			NextIndex: 0,
+			Success:   false,
+		}, nil
 	}
 
 	s.ElectionTimeoutReset <- true
@@ -82,21 +90,37 @@ func (s *RaftNetworkServer) AppendEntries(ctx context.Context, req *pb.AppendEnt
 
 	if req.PrevLogIndex != 0 {
 		if s.State.Log.GetMostRecentIndex() < req.PrevLogIndex {
-			return &pb.AppendEntriesResponse{s.State.GetCurrentTerm(), s.State.Log.GetMostRecentIndex() + 1, false}, nil
+			return &pb.AppendEntriesResponse{
+				Term:      s.State.GetCurrentTerm(),
+				NextIndex: s.State.Log.GetMostRecentIndex() + 1,
+				Success:   false,
+			}, nil
 		}
 		preLogEntry, err := s.State.Log.GetLogEntry(req.PrevLogIndex)
 		if err != nil && err != raftlog.ErrIndexBelowStartIndex {
 			Log.Fatal("Unable to get log entry:", err)
 		} else if err == raftlog.ErrIndexBelowStartIndex {
 			if req.PrevLogIndex != s.State.Log.GetMostRecentIndex() {
-				return &pb.AppendEntriesResponse{s.State.GetCurrentTerm(), 0, false}, nil
+				return &pb.AppendEntriesResponse{
+					Term:      s.State.GetCurrentTerm(),
+					NextIndex: 0,
+					Success:   false,
+				}, nil
 			}
 			if req.PrevLogTerm != s.State.Log.GetMostRecentTerm() {
-				return &pb.AppendEntriesResponse{s.State.GetCurrentTerm(), 0, false}, nil
+				return &pb.AppendEntriesResponse{
+					Term:      s.State.GetCurrentTerm(),
+					NextIndex: 0,
+					Success:   false,
+				}, nil
 			}
 		} else if err == nil {
 			if preLogEntry.Term != req.PrevLogTerm {
-				return &pb.AppendEntriesResponse{s.State.GetCurrentTerm(), 0, false}, nil
+				return &pb.AppendEntriesResponse{
+					Term:      s.State.GetCurrentTerm(),
+					NextIndex: 0,
+					Success:   false,
+				}, nil
 			}
 		}
 	}
@@ -128,23 +152,35 @@ func (s *RaftNetworkServer) AppendEntries(ctx context.Context, req *pb.AppendEnt
 		}
 	}
 
-	return &pb.AppendEntriesResponse{s.State.GetCurrentTerm(), 0, true}, nil
+	return &pb.AppendEntriesResponse{
+		Term:      s.State.GetCurrentTerm(),
+		NextIndex: 0,
+		Success:   true,
+	}, nil
 }
 
 // RequestVote implementation
 func (s *RaftNetworkServer) RequestVote(ctx context.Context, req *pb.RequestVoteRequest) (*pb.RequestVoteResponse, error) {
 	if s.State.Configuration.InConfiguration(req.CandidateId) == false {
 		if s.State.Configuration.MyConfigurationGood() {
-			return &pb.RequestVoteResponse{s.State.GetCurrentTerm(), false}, nil
+			return &pb.RequestVoteResponse{
+				Term:        s.State.GetCurrentTerm(),
+				VoteGranted: false,
+			}, nil
 		}
 	}
 
 	if req.Term < s.State.GetCurrentTerm() {
-		return &pb.RequestVoteResponse{s.State.GetCurrentTerm(), false}, nil
+		return &pb.RequestVoteResponse{
+			Term:        s.State.GetCurrentTerm(),
+			VoteGranted: false,
+		}, nil
 	}
 
 	if s.State.GetCurrentState() != CANDIDATE {
-		return &pb.RequestVoteResponse{s.State.GetCurrentTerm(), false}, nil
+		return &pb.RequestVoteResponse{
+			Term: s.State.GetCurrentTerm(), VoteGranted: false,
+		}, nil
 	}
 
 	if req.Term > s.State.GetCurrentTerm() {
@@ -153,19 +189,31 @@ func (s *RaftNetworkServer) RequestVote(ctx context.Context, req *pb.RequestVote
 	}
 
 	if req.LastLogTerm < s.State.Log.GetMostRecentTerm() {
-		return &pb.RequestVoteResponse{s.State.GetCurrentTerm(), false}, nil
+		return &pb.RequestVoteResponse{
+			Term:        s.State.GetCurrentTerm(),
+			VoteGranted: false,
+		}, nil
 	} else if req.LastLogTerm == s.State.Log.GetMostRecentTerm() {
 		if req.LastLogIndex < s.State.Log.GetMostRecentIndex() {
-			return &pb.RequestVoteResponse{s.State.GetCurrentTerm(), false}, nil
+			return &pb.RequestVoteResponse{
+				Term:        s.State.GetCurrentTerm(),
+				VoteGranted: false,
+			}, nil
 		}
 	}
 
 	if s.State.GetVotedFor() == "" || s.State.GetVotedFor() == req.CandidateId {
 		s.State.SetVotedFor(req.CandidateId)
-		return &pb.RequestVoteResponse{s.State.GetCurrentTerm(), true}, nil
+		return &pb.RequestVoteResponse{
+			Term:        s.State.GetCurrentTerm(),
+			VoteGranted: true,
+		}, nil
 	}
 
-	return &pb.RequestVoteResponse{s.State.GetCurrentTerm(), false}, nil
+	return &pb.RequestVoteResponse{
+		Term:        s.State.GetCurrentTerm(),
+		VoteGranted: false,
+	}, nil
 }
 
 func (s *RaftNetworkServer) getLeader() *Node {
@@ -196,7 +244,10 @@ func protoNodesToNodes(protoNodes []*pb.Node) []Node {
 }
 
 func (s *RaftNetworkServer) appendLogEntry(entry *pb.Entry) {
-	_, err := s.State.Log.AppendEntry(&pb.LogEntry{s.State.GetCurrentTerm(), entry})
+	_, err := s.State.Log.AppendEntry(&pb.LogEntry{
+		Term:  s.State.GetCurrentTerm(),
+		Entry: entry,
+	})
 	if err != nil {
 		Log.Error("failed to append log entry:", err)
 		return
@@ -279,7 +330,10 @@ func (s *RaftNetworkServer) sendLeaderLogEntry(entry *pb.Entry) error {
 
 			if err == nil {
 				client := pb.NewRaftNetworkClient(conn)
-				_, err := client.ClientToLeaderRequest(context.Background(), &pb.EntryRequest{s.State.NodeID, entry})
+				_, err := client.ClientToLeaderRequest(context.Background(), &pb.EntryRequest{
+					SenderId: s.State.NodeID,
+					Entry:    entry,
+				})
 				if err == nil {
 					return err
 				}
@@ -371,10 +425,12 @@ func (s *RaftNetworkServer) requestPeerVote(node *Node, term uint64, voteChannel
 		defer conn.Close()
 		if err == nil {
 			client := pb.NewRaftNetworkClient(conn)
-			response, err := client.RequestVote(context.Background(), &pb.RequestVoteRequest{s.State.GetCurrentTerm(),
-				s.State.NodeID,
-				s.State.Log.GetMostRecentIndex(),
-				s.State.Log.GetMostRecentTerm()})
+			response, err := client.RequestVote(context.Background(), &pb.RequestVoteRequest{
+				Term:         s.State.GetCurrentTerm(),
+				CandidateId:  s.State.NodeID,
+				LastLogIndex: s.State.Log.GetMostRecentIndex(),
+				LastLogTerm:  s.State.Log.GetMostRecentTerm(),
+			})
 			Log.Info("Got response from", node)
 			if err == nil {
 				voteChannel <- &voteResponse{response, node.NodeID}

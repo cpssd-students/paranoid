@@ -7,6 +7,7 @@ import (
 	"paranoid/pfsd/keyman"
 	pb "paranoid/proto/paranoidnetwork"
 	raftpb "paranoid/proto/raft"
+
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -53,7 +54,7 @@ func (s *ParanoidServer) SendKeyPiece(ctx context.Context, req *pb.KeyPieceSend)
 			return &pb.SendKeyPieceResponse{}, grpc.Errorf(codes.FailedPrecondition, "failed to commit to Raft: %s", err)
 		}
 	} else {
-		return &pb.SendKeyPieceResponse{true}, nil
+		return &pb.SendKeyPieceResponse{ClientMustCommit: true}, nil
 	}
 	return &pb.SendKeyPieceResponse{}, nil
 }

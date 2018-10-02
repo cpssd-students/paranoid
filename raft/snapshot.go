@@ -16,6 +16,7 @@ import (
 	"paranoid/libpfs/returncodes"
 	"paranoid/pfsd/keyman"
 	pb "paranoid/proto/raft"
+
 	"golang.org/x/net/context"
 )
 
@@ -420,7 +421,7 @@ func (s *RaftNetworkServer) RevertToSnapshot(snapshotPath string) error {
 	defer func() {
 		err := libpfs.UnLockFileSystem(s.State.pfsDirectory)
 		if err != nil {
-			Log.Fatal("error reverting to snapshot: %s", err)
+			Log.Fatalf("error reverting to snapshot: %s", err)
 		}
 	}()
 
@@ -469,7 +470,7 @@ func (s *RaftNetworkServer) RevertToSnapshot(snapshotPath string) error {
 // InstallSnapshot performs snapshot installation
 func (s *RaftNetworkServer) InstallSnapshot(ctx context.Context, req *pb.SnapshotRequest) (*pb.SnapshotResponse, error) {
 	if req.Term < s.State.GetCurrentTerm() {
-		return &pb.SnapshotResponse{s.State.GetCurrentTerm()}, nil
+		return &pb.SnapshotResponse{Term: s.State.GetCurrentTerm()}, nil
 	}
 
 	snapshotPath := path.Join(s.raftInfoDirectory, SnapshotDirectory, req.LeaderId+strconv.FormatUint(req.LastIncludedIndex, 10))
@@ -477,19 +478,19 @@ func (s *RaftNetworkServer) InstallSnapshot(ctx context.Context, req *pb.Snapsho
 		err := os.RemoveAll(snapshotPath)
 		if err != nil {
 			Log.Error("Error receiving snapshot:", err)
-			return &pb.SnapshotResponse{s.State.GetCurrentTerm()}, err
+			return &pb.SnapshotResponse{Term: s.State.GetCurrentTerm()}, err
 		}
 
 		err = os.Mkdir(snapshotPath, 0700)
 		if err != nil {
 			Log.Error("Error receiving snapshot:", err)
-			return &pb.SnapshotResponse{s.State.GetCurrentTerm()}, err
+			return &pb.SnapshotResponse{Term: s.State.GetCurrentTerm()}, err
 		}
 
 		snapshotFile, err := os.Create(path.Join(snapshotPath, TarFileName))
 		if err != nil {
 			Log.Error("Error receiving snapshot:", err)
-			return &pb.SnapshotResponse{s.State.GetCurrentTerm()}, err
+			return &pb.SnapshotResponse{Term: s.State.GetCurrentTerm()}, err
 		}
 		snapshotFile.Close()
 	}
@@ -497,28 +498,29 @@ func (s *RaftNetworkServer) InstallSnapshot(ctx context.Context, req *pb.Snapsho
 	snapshotFile, err := os.OpenFile(path.Join(snapshotPath, TarFileName), os.O_WRONLY, 0600)
 	if err != nil {
 		Log.Error("Error receiving snapshot:", err)
-		return &pb.SnapshotResponse{s.State.GetCurrentTerm()}, err
+		return &pb.SnapshotResponse{Term: s.State.GetCurrentTerm()}, err
 	}
 	defer snapshotFile.Close()
 
 	bytesWritten, err := snapshotFile.WriteAt(req.Data, int64(req.Offset))
 	if err != nil {
 		Log.Error("Error receiving snapshot:", err)
-		return &pb.SnapshotResponse{s.State.GetCurrentTerm()}, err
+		return &pb.SnapshotResponse{Term: s.State.GetCurrentTerm()}, err
 	}
 	if bytesWritten != len(req.Data) {
 		Log.Error("Error receiving snapshot: incorrect number of bytes written to snapshot file")
-		return &pb.SnapshotResponse{s.State.GetCurrentTerm()}, errors.New("incorrect number of bytes written to snapshot file")
+		return &pb.SnapshotResponse{Term: s.State.GetCurrentTerm()},
+			errors.New("incorrect number of bytes written to snapshot file")
 	}
 
 	if req.Done == false {
-		return &pb.SnapshotResponse{s.State.GetCurrentTerm()}, nil
+		return &pb.SnapshotResponse{Term: s.State.GetCurrentTerm()}, nil
 	}
 
 	saveSnapshotMetaInformation(snapshotPath, req.LastIncludedIndex, req.LastIncludedTerm, false)
 	s.State.NewSnapshotCreated <- true
 
-	return &pb.SnapshotResponse{s.State.GetCurrentTerm()}, nil
+	return &pb.SnapshotResponse{Term: s.State.GetCurrentTerm()}, nil
 }
 
 func (s *RaftNetworkServer) sendSnapshot(node *Node) {
@@ -709,7 +711,7 @@ func (s *RaftNetworkServer) manageSnapshoting() {
 			if s.State.GetSnapshotCounterValue() == 0 {
 				err := s.updateCurrentSnapshot()
 				if err != nil {
-					Log.Error("manage snapshoting: %s", err)
+					Log.Errorf("manage snapshoting: %s", err)
 				}
 			}
 		case node := <-s.State.SendSnapshot:

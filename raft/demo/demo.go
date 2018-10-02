@@ -17,6 +17,7 @@ import (
 	"paranoid/raft"
 	"paranoid/raft/raftlog"
 	"paranoid/raft/rafttestutil"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/grpclog"
 )
@@ -78,7 +79,7 @@ func manageNode(raftServer *raft.RaftNetworkServer) {
 			_, err := raftServer.RequestAddLogEntry(&pb.Entry{
 				Type: pb.Entry_Demo,
 				Uuid: rafttestutil.GenerateNewUUID(),
-				Demo: &pb.DemoCommand{uint64(randomNumber)},
+				Demo: &pb.DemoCommand{Number: uint64(randomNumber)},
 			})
 			if err == nil {
 				log.Println(raftServer.State.NodeID, "successfully added", randomNumber, "to the log")
