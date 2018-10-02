@@ -5,6 +5,7 @@ import (
 	"io"
 
 	pb "paranoid/proto/discoverynetwork"
+
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -82,7 +83,10 @@ func (s *DiscoveryServer) Join(ctx context.Context, req *pb.JoinRequest) (*pb.Jo
 	}
 
 	nodes := getNodes(req.Pool, req.Node.Uuid)
-	response := pb.JoinResponse{RenewInterval.Nanoseconds() / 1000 / 1000, nodes}
+	response := pb.JoinResponse{
+		ResetInterval: RenewInterval.Nanoseconds() / 1000 / 1000,
+		Nodes:         nodes,
+	}
 
 	Pools[req.Pool].Info.Nodes[req.Node.Uuid] = req.Node
 	Log.Infof("Join: Node %s (%s:%s) joined \n", req.Node.Uuid, req.Node.Ip, req.Node.Port)
