@@ -13,7 +13,7 @@ import (
 )
 
 //ParanoidFileSystem is the struct which holds all
-//the custom filesystem functions pp2p provides
+//the custom filesystem functions cpssd-students provides
 type ParanoidFileSystem struct {
 	pathfs.FileSystem
 }
