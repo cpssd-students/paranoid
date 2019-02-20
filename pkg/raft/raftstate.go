@@ -24,7 +24,7 @@ const (
 	INACTIVE
 )
 
-// Constants used by raftstate
+// Constants used by State
 const (
 	PersistentStateFileName string = "persistentStateFile"
 	LogDirectory            string = "raft_logs"
@@ -42,8 +42,8 @@ func (n Node) String() string {
 	return fmt.Sprintf("%s:%s", n.IP, n.Port)
 }
 
-// RaftState information
-type RaftState struct {
+// State information
+type State struct {
 	//Used for testing purposes
 	specialNumber uint64
 
@@ -84,14 +84,14 @@ type RaftState struct {
 }
 
 // GetCurrentTerm returns the current term
-func (s *RaftState) GetCurrentTerm() uint64 {
+func (s *State) GetCurrentTerm() uint64 {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
 	return s.currentTerm
 }
 
 // SetCurrentTerm sets the current term
-func (s *RaftState) SetCurrentTerm(x uint64) {
+func (s *State) SetCurrentTerm(x uint64) {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
 
@@ -100,15 +100,15 @@ func (s *RaftState) SetCurrentTerm(x uint64) {
 	s.savePersistentState()
 }
 
-// GetCurrentState of the RaftState
-func (s *RaftState) GetCurrentState() NodeType {
+// GetCurrentState of the State
+func (s *State) GetCurrentState() NodeType {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
 	return s.currentState
 }
 
-// SetCurrentState of the RaftState
-func (s *RaftState) SetCurrentState(x NodeType) {
+// SetCurrentState of the State
+func (s *State) SetCurrentState(x NodeType) {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
 
@@ -125,22 +125,22 @@ func (s *RaftState) SetCurrentState(x NodeType) {
 	}
 }
 
-// GetPerformingSnapshot from the RaftState
-func (s *RaftState) GetPerformingSnapshot() bool {
+// GetPerformingSnapshot from the State
+func (s *State) GetPerformingSnapshot() bool {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
 	return s.performingSnapshot
 }
 
-// SetPerformingSnapshot of the RaftState
-func (s *RaftState) SetPerformingSnapshot(x bool) {
+// SetPerformingSnapshot of the State
+func (s *State) SetPerformingSnapshot(x bool) {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
 	s.performingSnapshot = x
 }
 
 // IncrementSnapshotCounter updates the counter
-func (s *RaftState) IncrementSnapshotCounter() {
+func (s *State) IncrementSnapshotCounter() {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
 	s.snapshotCounter++
@@ -148,7 +148,7 @@ func (s *RaftState) IncrementSnapshotCounter() {
 
 // DecrementSnapshotCounter reduces the snapshot counter. If the snapshotCounter
 // reaches 0, SnapshotCounterAtZero is notified
-func (s *RaftState) DecrementSnapshotCounter() {
+func (s *State) DecrementSnapshotCounter() {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
 	s.snapshotCounter--
@@ -158,21 +158,21 @@ func (s *RaftState) DecrementSnapshotCounter() {
 }
 
 // GetSnapshotCounterValue returns the current snapshot counter
-func (s *RaftState) GetSnapshotCounterValue() int {
+func (s *State) GetSnapshotCounterValue() int {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
 	return s.snapshotCounter
 }
 
 // GetCommitIndex returns the current commit index
-func (s *RaftState) GetCommitIndex() uint64 {
+func (s *State) GetCommitIndex() uint64 {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
 	return s.commitIndex
 }
 
 // SetCommitIndex sets the current commit index to a given value
-func (s *RaftState) SetCommitIndex(x uint64) {
+func (s *State) SetCommitIndex(x uint64) {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
 	s.commitIndex = x
@@ -181,35 +181,35 @@ func (s *RaftState) SetCommitIndex(x uint64) {
 }
 
 //setCommitIndexUnsafe must only be used when the stateChangeLock has already been locked
-func (s *RaftState) setCommitIndexUnsafe(x uint64) {
+func (s *State) setCommitIndexUnsafe(x uint64) {
 	s.commitIndex = x
 	s.SendAppendEntries <- true
 	s.ApplyEntries <- true
 }
 
 // SetWaitingForApplied set the value
-func (s *RaftState) SetWaitingForApplied(x bool) {
+func (s *State) SetWaitingForApplied(x bool) {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
 	s.waitingForApplied = x
 }
 
 // GetWaitingForApplied sets the value
-func (s *RaftState) GetWaitingForApplied() bool {
+func (s *State) GetWaitingForApplied() bool {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
 	return s.waitingForApplied
 }
 
 // GetVotedFor returns the voted for
-func (s *RaftState) GetVotedFor() string {
+func (s *State) GetVotedFor() string {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
 	return s.votedFor
 }
 
 // SetVotedFor sets the voted for
-func (s *RaftState) SetVotedFor(x string) {
+func (s *State) SetVotedFor(x string) {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
 	s.votedFor = x
@@ -217,7 +217,7 @@ func (s *RaftState) SetVotedFor(x string) {
 }
 
 // GetLeaderID returns the ID of the leader
-func (s *RaftState) GetLeaderID() string {
+func (s *State) GetLeaderID() string {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
 	return s.leaderID
@@ -225,7 +225,7 @@ func (s *RaftState) GetLeaderID() string {
 
 // setLeaderIDUnsafe must only be used when the stateChangeLock has already been
 // locked
-func (s *RaftState) setLeaderIDUnsafe(x string) {
+func (s *State) setLeaderIDUnsafe(x string) {
 	if s.leaderID == "" {
 		s.LeaderElected <- true
 	}
@@ -233,7 +233,7 @@ func (s *RaftState) setLeaderIDUnsafe(x string) {
 }
 
 // SetLeaderID sets the ID of the leader
-func (s *RaftState) SetLeaderID(x string) {
+func (s *State) SetLeaderID(x string) {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
 
@@ -244,14 +244,14 @@ func (s *RaftState) SetLeaderID(x string) {
 }
 
 // GetLastApplied returns the last applied
-func (s *RaftState) GetLastApplied() uint64 {
+func (s *State) GetLastApplied() uint64 {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
 	return s.lastApplied
 }
 
 // SetLastApplied sets the last applied and saves the state
-func (s *RaftState) SetLastApplied(x uint64) {
+func (s *State) SetLastApplied(x uint64) {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
 	s.lastApplied = x
@@ -260,13 +260,13 @@ func (s *RaftState) SetLastApplied(x uint64) {
 
 // setLastAppliedUnsafe must only be used when the stateChangeLock has already
 // been locked
-func (s *RaftState) setLastAppliedUnsafe(x uint64) {
+func (s *State) setLastAppliedUnsafe(x uint64) {
 	s.lastApplied = x
 	s.savePersistentState()
 }
 
 // SetSpecialNumber sets the number and saves the state
-func (s *RaftState) SetSpecialNumber(x uint64) {
+func (s *State) SetSpecialNumber(x uint64) {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
 	s.specialNumber = x
@@ -274,13 +274,13 @@ func (s *RaftState) SetSpecialNumber(x uint64) {
 }
 
 // GetSpecialNumber from the raft state
-func (s *RaftState) GetSpecialNumber() uint64 {
+func (s *State) GetSpecialNumber() uint64 {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
 	return s.specialNumber
 }
 
-func (s *RaftState) applyLogEntry(logEntry *pb.LogEntry) *StateMachineResult {
+func (s *State) applyLogEntry(logEntry *pb.LogEntry) *StateMachineResult {
 	switch logEntry.Entry.Type {
 	case pb.Entry_Demo:
 		demoCommand := logEntry.Entry.GetDemo()
@@ -315,7 +315,7 @@ func (s *RaftState) applyLogEntry(logEntry *pb.LogEntry) *StateMachineResult {
 }
 
 //ApplyLogEntries applys all log entries that have been committed but not yet applied
-func (s *RaftState) ApplyLogEntries() {
+func (s *State) ApplyLogEntries() {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
 	s.ApplyEntryLock.Lock()
@@ -339,7 +339,7 @@ func (s *RaftState) ApplyLogEntries() {
 	}
 }
 
-func (s *RaftState) calculateNewCommitIndex() {
+func (s *State) calculateNewCommitIndex() {
 	s.stateChangeLock.Lock()
 	defer s.stateChangeLock.Unlock()
 
@@ -356,7 +356,7 @@ type persistentState struct {
 	LastApplied   uint64 `json:"lastapplied"`
 }
 
-func (s *RaftState) savePersistentState() {
+func (s *State) savePersistentState() {
 	s.persistentStateLock.Lock()
 	defer s.persistentStateLock.Unlock()
 
@@ -405,11 +405,11 @@ func getPersistentState(persistentStateFile string) *persistentState {
 	return perState
 }
 
-func newRaftState(myNodeDetails Node, pfsDirectory, raftInfoDirectory string, testConfiguration *StartConfiguration) *RaftState {
+func newState(myNodeDetails Node, pfsDirectory, raftInfoDirectory string, testConfiguration *StartConfiguration) *State {
 	persistentState := getPersistentState(path.Join(raftInfoDirectory, PersistentStateFileName))
-	var raftState *RaftState
+	var state *State
 	if persistentState == nil {
-		raftState = &RaftState{
+		state = &State{
 			specialNumber:      0,
 			pfsDirectory:       pfsDirectory,
 			NodeID:             myNodeDetails.NodeID,
@@ -425,7 +425,7 @@ func newRaftState(myNodeDetails Node, pfsDirectory, raftInfoDirectory string, te
 			raftInfoDirectory:  raftInfoDirectory,
 		}
 	} else {
-		raftState = &RaftState{
+		state = &State{
 			specialNumber:      persistentState.SpecialNumber,
 			pfsDirectory:       pfsDirectory,
 			NodeID:             myNodeDetails.NodeID,
@@ -442,16 +442,16 @@ func newRaftState(myNodeDetails Node, pfsDirectory, raftInfoDirectory string, te
 		}
 	}
 
-	raftState.StartElection = make(chan bool, 100)
-	raftState.StartLeading = make(chan bool, 100)
-	raftState.StopLeading = make(chan bool, 100)
-	raftState.SendAppendEntries = make(chan bool, 100)
-	raftState.ApplyEntries = make(chan bool, 100)
-	raftState.LeaderElected = make(chan bool, 1)
-	raftState.EntryApplied = make(chan *EntryAppliedInfo, 100)
-	raftState.NewSnapshotCreated = make(chan bool, 100)
-	raftState.SnapshotCounterAtZero = make(chan bool, 100)
-	raftState.SendSnapshot = make(chan Node, 100)
-	raftState.ConfigurationApplied = make(chan *pb.Configuration, 100)
-	return raftState
+	state.StartElection = make(chan bool, 100)
+	state.StartLeading = make(chan bool, 100)
+	state.StopLeading = make(chan bool, 100)
+	state.SendAppendEntries = make(chan bool, 100)
+	state.ApplyEntries = make(chan bool, 100)
+	state.LeaderElected = make(chan bool, 1)
+	state.EntryApplied = make(chan *EntryAppliedInfo, 100)
+	state.NewSnapshotCreated = make(chan bool, 100)
+	state.SnapshotCounterAtZero = make(chan bool, 100)
+	state.SendSnapshot = make(chan Node, 100)
+	state.ConfigurationApplied = make(chan *pb.Configuration, 100)
+	return state
 }

@@ -6,11 +6,13 @@ import (
 	"sync"
 	"time"
 
-	"paranoid/pkg/logger"
-	pb "paranoid/pkg/proto/discoverynetwork"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+
+	"paranoid/pkg/logger"
+
+	pb "paranoid/pkg/proto/discoverynetwork"
 )
 
 // Log used by discovery-server

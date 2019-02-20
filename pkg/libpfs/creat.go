@@ -15,7 +15,7 @@ import (
 
 //CreatCommand creates a new file with the name filePath in the pfs paranoidDirectory
 func CreatCommand(paranoidDirectory, filePath string, perms os.FileMode) (returnCode returncodes.Code, returnError error) {
-	log.V(1).Info("creat called on %s in %s", filePath, paranoidDirectory)
+	log.V(1).Infof("creat called on %s in %s", filePath, paranoidDirectory)
 
 	err := GetFileSystemLock(paranoidDirectory, ExclusiveLock)
 	if err != nil {

@@ -14,7 +14,7 @@ import (
 
 //ReadCommand reads data from a file
 func ReadCommand(paranoidDirectory, filePath string, offset, length int64) (returnCode returncodes.Code, fileContents []byte, returnError error) {
-	log.V(1).Info("read called on %s in %s", filePath, paranoidDirectory)
+	log.V(1).Infof("read called on %s in %s", filePath, paranoidDirectory)
 
 	namepath := getParanoidPath(paranoidDirectory, filePath)
 

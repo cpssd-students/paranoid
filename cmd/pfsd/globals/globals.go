@@ -47,7 +47,7 @@ type FileSystemAttributes struct {
 }
 
 // RaftNetworkServer is an instance of the network server
-var RaftNetworkServer *raft.RaftNetworkServer
+var RaftNetworkServer *raft.NetworkServer
 
 // ParanoidDir is the location of the stored encrypted data
 var ParanoidDir string
@@ -242,8 +242,8 @@ func (ks KeyPieceStore) SaveToDisk() error {
 	piecePath := path.Join(ParanoidDir, "meta", "pieces-new")
 	file, err := os.Create(piecePath)
 	if err != nil {
-		Log.Errorf("Unable to open %s for storing pieces: %s", piecePath, file)
-		return fmt.Errorf("Unable to open %s for storing pieces: %s", piecePath, file)
+		Log.Errorf("Unable to open %s for storing pieces: %s", piecePath, file.Name())
+		return fmt.Errorf("Unable to open %s for storing pieces: %s", piecePath, file.Name())
 	}
 	defer file.Close()
 	enc := gob.NewEncoder(file)

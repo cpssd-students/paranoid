@@ -12,7 +12,7 @@ import (
 
 // RenameCommand is called when renaming a file
 func RenameCommand(paranoidDirectory, oldFilePath, newFilePath string) (returnCode returncodes.Code, returnError error) {
-	log.V(1).Info("rename %s to %s in %s",
+	log.V(1).Infof("rename %s to %s in %s",
 		oldFilePath, newFilePath, paranoidDirectory)
 
 	oldFileParanoidPath := getParanoidPath(paranoidDirectory, oldFilePath)

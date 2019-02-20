@@ -18,7 +18,7 @@ const PermMask = 0777
 
 //ChmodCommand is used to change the permissions of a file.
 func ChmodCommand(paranoidDirectory, filePath string, perms os.FileMode) (returnCode returncodes.Code, returnError error) {
-	log.V(1).Info("chmod called on %s in %s", filePath, paranoidDirectory)
+	log.V(1).Infof("chmod called on %s in %s", filePath, paranoidDirectory)
 
 	err := GetFileSystemLock(paranoidDirectory, ExclusiveLock)
 	if err != nil {
@@ -59,7 +59,7 @@ func ChmodCommand(paranoidDirectory, filePath string, perms os.FileMode) (return
 		return code, fmt.Errorf("unable to access %s: %s", filePath, err)
 	}
 
-	log.V(2).Info("changing permissions of %s to %v", inodeName, perms)
+	log.V(2).Infof("changing permissions of %s to %v", inodeName, perms)
 
 	inodePath := path.Join(paranoidDirectory, "inodes", inodeName)
 	inodeContents, err := ioutil.ReadFile(inodePath)

@@ -47,7 +47,7 @@ func TestSnapshoting(t *testing.T) {
 		t.Fatal("Unable to init pfsdirectroy:", err)
 	}
 
-	var raftServer *raft.RaftNetworkServer
+	var raftServer *raft.NetworkServer
 	defer rafttestutil.RemoveRaftDirectory(raftDirectory, raftServer)
 	raftServer, srv := raft.StartRaft(lis, node, pfsDirectory, raftDirectory, &raft.StartConfiguration{Peers: []raft.Node{}})
 	defer srv.Stop()

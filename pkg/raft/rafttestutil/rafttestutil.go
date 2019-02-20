@@ -51,7 +51,7 @@ func CloseListener(lis *net.Listener) {
 }
 
 // StopRaftServer stops the given raft server
-func StopRaftServer(raftServer *raft.RaftNetworkServer) {
+func StopRaftServer(raftServer *raft.NetworkServer) {
 	if raftServer.QuitChannelClosed == false {
 		close(raftServer.Quit)
 	}
@@ -68,7 +68,7 @@ func CreateRaftDirectory(raftDirectory string) string {
 }
 
 // RemoveRaftDirectory removes the raft directory when the server is finished
-func RemoveRaftDirectory(raftDirectory string, raftServer *raft.RaftNetworkServer) {
+func RemoveRaftDirectory(raftDirectory string, raftServer *raft.NetworkServer) {
 	if raftServer != nil {
 		//Need to wait for server to shut down or the file could be removed while in use
 		raftServer.Wait.Wait()
@@ -78,12 +78,12 @@ func RemoveRaftDirectory(raftDirectory string, raftServer *raft.RaftNetworkServe
 }
 
 // IsLeader checks if the local raft server is the raft leader
-func IsLeader(server *raft.RaftNetworkServer) bool {
+func IsLeader(server *raft.NetworkServer) bool {
 	return server.State.GetCurrentState() == raft.LEADER
 }
 
 // GetLeader from a list of servers
-func GetLeader(cluster []*raft.RaftNetworkServer) *raft.RaftNetworkServer {
+func GetLeader(cluster []*raft.NetworkServer) *raft.NetworkServer {
 	highestTerm := uint64(0)
 	highestIndex := -1
 	for i := 0; i < len(cluster); i++ {
@@ -103,8 +103,8 @@ func GetLeader(cluster []*raft.RaftNetworkServer) *raft.RaftNetworkServer {
 
 // GetLeaderTimeout gets a leader, if the leader is not found it tires again
 // after the timeout
-func GetLeaderTimeout(cluster []*raft.RaftNetworkServer, timeoutSeconds int) *raft.RaftNetworkServer {
-	var leader *raft.RaftNetworkServer
+func GetLeaderTimeout(cluster []*raft.NetworkServer, timeoutSeconds int) *raft.NetworkServer {
+	var leader *raft.NetworkServer
 	leader = GetLeader(cluster)
 	if leader != nil {
 		return leader

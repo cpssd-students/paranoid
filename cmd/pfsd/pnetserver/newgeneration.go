@@ -3,6 +3,7 @@ package pnetserver
 import (
 	"paranoid/cmd/pfsd/globals"
 	pb "paranoid/pkg/proto/paranoidnetwork"
+
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -22,7 +23,7 @@ func (s *ParanoidServer) NewGeneration(ctx context.Context, req *pb.NewGeneratio
 			append(globals.PoolPasswordSalt, []byte(req.PoolPassword)...))
 		if err != nil {
 			return &pb.NewGenerationResponse{}, grpc.Errorf(codes.InvalidArgument,
-				"unable to request new generation: password error:", err)
+				"unable to request new generation: password error: %v", err)
 		}
 	}
 

@@ -10,11 +10,13 @@ import (
 	"syscall"
 	"time"
 
-	"paranoid/cmd/discovery-server/dnetserver"
-	"paranoid/pkg/logger"
-	pb "paranoid/pkg/proto/discoverynetwork"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+
+	"paranoid/cmd/discovery-server/dnetserver"
+	"paranoid/pkg/logger"
+
+	pb "paranoid/pkg/proto/discoverynetwork"
 )
 
 const (

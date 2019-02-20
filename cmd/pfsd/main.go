@@ -143,7 +143,7 @@ func startRPCServer(lis *net.Listener, password string) {
 	//First node to join a given cluster
 	if len(globals.Nodes.GetAll()) == 0 {
 		log.Info("Performing first node setup")
-		globals.RaftNetworkServer = raft.NewRaftNetworkServer(
+		globals.RaftNetworkServer = raft.NewNetworkServer(
 			nodeDetails,
 			globals.ParanoidDir,
 			path.Join(globals.ParanoidDir, "meta", "raft"),
@@ -178,7 +178,7 @@ func startRPCServer(lis *net.Listener, password string) {
 			})
 		}
 	} else {
-		globals.RaftNetworkServer = raft.NewRaftNetworkServer(
+		globals.RaftNetworkServer = raft.NewNetworkServer(
 			nodeDetails,
 			globals.ParanoidDir,
 			path.Join(globals.ParanoidDir, "meta", "raft"),

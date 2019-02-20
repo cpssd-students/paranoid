@@ -12,7 +12,7 @@ import (
 
 // ReadlinkCommand reads the value of the symbolic link
 func ReadlinkCommand(paranoidDirectory, filePath string) (returnCode returncodes.Code, linkContents string, returnError error) {
-	log.V(1).Info("readlink called on %s in %s", filePath, paranoidDirectory)
+	log.V(1).Infof("readlink called on %s in %s", filePath, paranoidDirectory)
 
 	err := GetFileSystemLock(paranoidDirectory, SharedLock)
 	if err != nil {

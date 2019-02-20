@@ -63,7 +63,7 @@ func getNodes(pfsDir string) {
 	client, err := rpc.Dial("unix", socketPath)
 	if err != nil {
 		fmt.Printf("Could not connect to PFSD %s. Is it running? See %s for more information.\n", filepath.Base(pfsDir), logPath)
-		log.Warn("Could not connect to PFSD %s at %s: %s", filepath.Base(pfsDir), socketPath, err)
+		log.Warnf("Could not connect to PFSD %s at %s: %v", filepath.Base(pfsDir), socketPath, err)
 		return
 	}
 	err = client.Call("IntercomServer.ListNodes", new(intercom.EmptyMessage), &resp)
@@ -72,7 +72,7 @@ func getNodes(pfsDir string) {
 			fmt.Println("Networking is disabled")
 		} else {
 			fmt.Printf("Error listing nodes connected to %s. See %s for more information.\n", filepath.Base(pfsDir), logPath)
-			log.Warn("PFSD at %s returned error: %s", filepath.Base(pfsDir), err)
+			log.Warnf("PFSD at %s returned error: %v", filepath.Base(pfsDir), err)
 		}
 		return
 	}

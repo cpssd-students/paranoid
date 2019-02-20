@@ -38,7 +38,7 @@ const (
 
 // Called every time raft network server starts up
 // Makes sure snapshot directory exists and we have access to it
-func (s *RaftNetworkServer) setupSnapshotDirectory() {
+func (s *NetworkServer) setupSnapshotDirectory() {
 	_, err := os.Stat(path.Join(s.raftInfoDirectory, SnapshotDirectory))
 	if os.IsNotExist(err) {
 		err := os.Mkdir(path.Join(s.raftInfoDirectory, SnapshotDirectory), 0700)
@@ -193,7 +193,7 @@ func copyFile(originalPath, copyPath string) error {
 	return nil
 }
 
-func (s *RaftNetworkServer) startNextSnapshot(nextSnapshot string) error {
+func (s *NetworkServer) startNextSnapshot(nextSnapshot string) error {
 	err := os.Mkdir(path.Join(nextSnapshot, "contents"), 0700)
 	if err != nil {
 		return fmt.Errorf("error starting next snapshot: %s", err)
@@ -227,7 +227,7 @@ func (s *RaftNetworkServer) startNextSnapshot(nextSnapshot string) error {
 	return nil
 }
 
-func (s *RaftNetworkServer) applyLogUpdates(snapshotDirectory string, startIndex, endIndex uint64) (lastIncludedTerm uint64, err error) {
+func (s *NetworkServer) applyLogUpdates(snapshotDirectory string, startIndex, endIndex uint64) (lastIncludedTerm uint64, err error) {
 	snapshotConfig := newConfiguration(snapshotDirectory, nil, s.nodeDetails, false)
 	var snapshotKeyMachine *keyman.KeyStateMachine
 	_, err = os.Stat(path.Join(snapshotDirectory, "meta", keyman.KsmFileName))
@@ -328,7 +328,7 @@ func performCleanup(snapshotPath string) error {
 }
 
 // CreateSnapshot creates a new snapshot up to the last included index
-func (s *RaftNetworkServer) CreateSnapshot(lastIncludedIndex uint64) (err error) {
+func (s *NetworkServer) CreateSnapshot(lastIncludedIndex uint64) (err error) {
 	currentSnapshot := path.Join(s.raftInfoDirectory, SnapshotDirectory, CurrentSnapshotDirectory)
 	nextSnapshot := path.Join(s.raftInfoDirectory, SnapshotDirectory, generateNewUUID())
 
@@ -402,7 +402,7 @@ func (s *RaftNetworkServer) CreateSnapshot(lastIncludedIndex uint64) (err error)
 
 // RevertToSnapshot revets the statemachine to the snapshot state and removes
 // all log entries.
-func (s *RaftNetworkServer) RevertToSnapshot(snapshotPath string) error {
+func (s *NetworkServer) RevertToSnapshot(snapshotPath string) error {
 	s.State.ApplyEntryLock.Lock()
 	defer s.State.ApplyEntryLock.Unlock()
 
@@ -468,7 +468,7 @@ func (s *RaftNetworkServer) RevertToSnapshot(snapshotPath string) error {
 }
 
 // InstallSnapshot performs snapshot installation
-func (s *RaftNetworkServer) InstallSnapshot(ctx context.Context, req *pb.SnapshotRequest) (*pb.SnapshotResponse, error) {
+func (s *NetworkServer) InstallSnapshot(ctx context.Context, req *pb.SnapshotRequest) (*pb.SnapshotResponse, error) {
 	if req.Term < s.State.GetCurrentTerm() {
 		return &pb.SnapshotResponse{Term: s.State.GetCurrentTerm()}, nil
 	}
@@ -523,7 +523,7 @@ func (s *RaftNetworkServer) InstallSnapshot(ctx context.Context, req *pb.Snapsho
 	return &pb.SnapshotResponse{Term: s.State.GetCurrentTerm()}, nil
 }
 
-func (s *RaftNetworkServer) sendSnapshot(node *Node) {
+func (s *NetworkServer) sendSnapshot(node *Node) {
 	defer s.Wait.Done()
 	defer s.State.DecrementSnapshotCounter()
 	defer s.State.Configuration.SetSendingSnapshot(node.NodeID, false)
@@ -612,7 +612,7 @@ func (s *RaftNetworkServer) sendSnapshot(node *Node) {
 }
 
 //Update the current snapshot to the most recent snapshot available and remove all incomplete snapshots
-func (s *RaftNetworkServer) updateCurrentSnapshot() error {
+func (s *NetworkServer) updateCurrentSnapshot() error {
 	snapshots, err := ioutil.ReadDir(path.Join(s.raftInfoDirectory, SnapshotDirectory))
 	if err != nil {
 		return fmt.Errorf("unable to update current snapshot: %s", err)
@@ -676,7 +676,7 @@ func (s *RaftNetworkServer) updateCurrentSnapshot() error {
 	return nil
 }
 
-func (s *RaftNetworkServer) manageSnapshoting() {
+func (s *NetworkServer) manageSnapshoting() {
 	defer s.Wait.Done()
 	snapshotTimer := time.NewTimer(SnapshortInteval)
 	for {

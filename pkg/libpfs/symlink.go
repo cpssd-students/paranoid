@@ -15,7 +15,7 @@ import (
 
 // SymlinkCommand creates a symbolic link
 func SymlinkCommand(paranoidDirectory, existingFilePath, targetFilePath string) (returnCode returncodes.Code, returnError error) {
-	log.V(1).Info("symlinking %s with %s in %s",
+	log.V(1).Infof("symlinking %s with %s in %s",
 		existingFilePath, targetFilePath, paranoidDirectory)
 
 	targetParanoidPath := getParanoidPath(paranoidDirectory, targetFilePath)
