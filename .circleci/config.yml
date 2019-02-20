@@ -1,68 +1,27 @@
 defaults: &defaults
-  working_directory: /paranoid
-  docker:
-  - image: golang:1.11
 
 version: 2
 jobs:
-  setup:
-    <<: *defaults
+  build:
+    working_directory: ~/paranoid
+    docker:
+    - image: circleci/golang:1.11
     steps:
     - checkout
     - restore_cache:
         keys:
-        - vendored
-    - run: go mod vendor
-    - save_cache:
-        key: vendored
-        paths:
-        - /paranoid/vendor
-    - persist_to_workspace:
-        root: /paranoid
-        paths: .
-  build:
-    <<: *defaults
-    steps:
-    - attach_workspace:
-        at: /paranoid
+        - go-mod-{{ checksum "go.sum" }}
+    - run: go get ./...
     - run: go build ./...
-  test:
-    <<: *defaults
-    environment:
-      TEST_RESULTS: /tmp/test-results
-    steps:
-    - attach_workspace:
-        at: /paranoid
-    - run: go get -u github.com/jstemmer/go-junit-report
-    - run: mkdir -p $TEST_RESULTS
-    - run: go test -race -v ./... | go-junit-report > ${TEST_RESULTS}/go-test-report.xml
+    - run: mkdir -p /tmp/cover /tmp/test-results
+    - run: gotestsum --junitfile /tmp/test-results/unit-tests.xml
     - store_test_results:
         path: /tmp/test-results
-  analyse:
-    <<: *defaults
-    enviroment:
-      ARTIFACTS_FOLDER: /tmp/artifacts
-      CODECLIMATE_REPO_TOKEN: f2dca1014d606354431516620eb3d4707d9080c076883314c9dee34efc55e852
-    steps:
-    - attach_workspace:
-        at: /paranoid
-    - run: mkdir -p /tmp/artifacts
-    - run: go test -coverprofile=${ARTIFACTS_FOLDER}/cover.out -covermode=atomic ./... || true
-    - run: bash <(curl -s https://codecov.io/bash) -t 719c4b88-3c7b-4755-95ed-be4442c026ea -f ${ARTIFACTS_FOLDER}/cover.out
+    - run: go test -coverprofile=/tmp/cover/cover.out -covermode=atomic ./... || true
+    - run: bash <(curl -s https://codecov.io/bash) -t 719c4b88-3c7b-4755-95ed-be4442c026ea -f /tmp/cover/cover.out
+    - save_cache:
+        key: go-mod-{{ checksum "go.sum" }}
+        paths:
+          - "/go/pkg/mod"
     - store_artifacts:
         path: /tmp/artifacts
-
-workflows:
-  version: 2
-  test_build_analyse:
-    jobs:
-    - setup
-    - build:
-        requires:
-        - setup
-    - test:
-        requires:
-        - setup
-    - analyse:
-        requires:
-        - setup
