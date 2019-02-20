@@ -14,7 +14,7 @@ import (
 
 // LinkCommand creates a link of a file.
 func LinkCommand(paranoidDirectory, existingFilePath, targetFilePath string) (returnCode returncodes.Code, returnError error) {
-	log.V(1).Info("linking %s with %s in %s",
+	log.V(1).Infof("linking %s with %s in %s",
 		existingFilePath, targetFilePath, paranoidDirectory)
 
 	existingParanoidPath := getParanoidPath(paranoidDirectory, existingFilePath)

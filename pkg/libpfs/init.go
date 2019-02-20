@@ -37,7 +37,7 @@ func checkEmpty(directory string) error {
 //InitCommand creates the pvd directory sturucture
 //It also gets a UUID and stores it in the meta directory.
 func InitCommand(directory string) (returnCode returncodes.Code, returnError error) {
-	log.V(1).Info("creating new pfs in %s", directory)
+	log.V(1).Infof("creating new pfs in %s", directory)
 
 	err := checkEmpty(directory)
 	if err != nil {
@@ -80,7 +80,7 @@ func InitCommand(directory string) (returnCode returncodes.Code, returnError err
 	}
 
 	uuidString := strings.TrimSpace(string(uuid))
-	log.V(2).Info("%s init UUID: %s", directory, uuidString)
+	log.V(2).Infof("%s init UUID: %s", directory, uuidString)
 
 	err = ioutil.WriteFile(path.Join(metaDir, "uuid"), []byte(uuidString), 0600)
 	if err != nil {

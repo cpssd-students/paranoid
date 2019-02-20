@@ -7,6 +7,7 @@ import (
 	"paranoid/cmd/pfsd/globals"
 	pb "paranoid/pkg/proto/paranoidnetwork"
 	"paranoid/pkg/raft"
+
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/net/context"
 )
@@ -30,7 +31,7 @@ func (s *ParanoidServer) JoinCluster(ctx context.Context, req *pb.JoinClusterReq
 		CommonName: req.CommonName,
 		NodeID:     req.Uuid,
 	}
-	Log.Infof("Got Ping from Node:", node)
+	Log.Infof("Got Ping from Node %v", node)
 	err := globals.RaftNetworkServer.RequestAddNodeToConfiguration(node)
 	if err != nil {
 		return &pb.EmptyMessage{}, fmt.Errorf("unable to add node to raft cluster: %v", err)

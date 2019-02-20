@@ -4,12 +4,12 @@ import (
 	"crypto/rand"
 	"io"
 
-	pb "paranoid/pkg/proto/discoverynetwork"
-
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+
+	pb "paranoid/pkg/proto/discoverynetwork"
 )
 
 const (

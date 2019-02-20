@@ -38,9 +38,9 @@ const MaxAppendEntries uint64 = 100
 // Log for raft
 var Log *logger.ParanoidLogger
 
-// RaftNetworkServer implements the raft protobuf server interface
-type RaftNetworkServer struct {
-	State *RaftState
+// NetworkServer implements the raft protobuf server interface
+type NetworkServer struct {
+	State *State
 	Wait  sync.WaitGroup
 
 	nodeDetails       Node
@@ -59,7 +59,7 @@ type RaftNetworkServer struct {
 }
 
 // AppendEntries implementation
-func (s *RaftNetworkServer) AppendEntries(ctx context.Context, req *pb.AppendEntriesRequest) (*pb.AppendEntriesResponse, error) {
+func (s *NetworkServer) AppendEntries(ctx context.Context, req *pb.AppendEntriesRequest) (*pb.AppendEntriesResponse, error) {
 	s.appendEntriesLock.Lock()
 	defer s.appendEntriesLock.Unlock()
 
@@ -160,7 +160,7 @@ func (s *RaftNetworkServer) AppendEntries(ctx context.Context, req *pb.AppendEnt
 }
 
 // RequestVote implementation
-func (s *RaftNetworkServer) RequestVote(ctx context.Context, req *pb.RequestVoteRequest) (*pb.RequestVoteResponse, error) {
+func (s *NetworkServer) RequestVote(ctx context.Context, req *pb.RequestVoteRequest) (*pb.RequestVoteResponse, error) {
 	if s.State.Configuration.InConfiguration(req.CandidateId) == false {
 		if s.State.Configuration.MyConfigurationGood() {
 			return &pb.RequestVoteResponse{
@@ -216,7 +216,7 @@ func (s *RaftNetworkServer) RequestVote(ctx context.Context, req *pb.RequestVote
 	}, nil
 }
 
-func (s *RaftNetworkServer) getLeader() *Node {
+func (s *NetworkServer) getLeader() *Node {
 	leaderID := s.State.GetLeaderID()
 	if leaderID != "" {
 		if s.State.Configuration.InConfiguration(leaderID) {
@@ -243,7 +243,7 @@ func protoNodesToNodes(protoNodes []*pb.Node) []Node {
 	return nodes
 }
 
-func (s *RaftNetworkServer) appendLogEntry(entry *pb.Entry) {
+func (s *NetworkServer) appendLogEntry(entry *pb.Entry) {
 	_, err := s.State.Log.AppendEntry(&pb.LogEntry{
 		Term:  s.State.GetCurrentTerm(),
 		Entry: entry,
@@ -266,7 +266,7 @@ func (s *RaftNetworkServer) appendLogEntry(entry *pb.Entry) {
 	}
 }
 
-func (s *RaftNetworkServer) addLogEntryLeader(entry *pb.Entry) error {
+func (s *NetworkServer) addLogEntryLeader(entry *pb.Entry) error {
 	if entry.Type == pb.Entry_ConfigurationChange {
 		config := entry.GetConfig()
 		if config != nil {
@@ -277,7 +277,7 @@ func (s *RaftNetworkServer) addLogEntryLeader(entry *pb.Entry) error {
 				if s.Encrypted {
 					for _, v := range config.GetNodes() {
 						if !keyman.StateMachine.NodeInGeneration(keyman.StateMachine.GetCurrentGeneration(), v.NodeId) {
-							return fmt.Errorf("node %s not in current generation (%s)",
+							return fmt.Errorf("node %s not in current generation (%d)",
 								v.NodeId, keyman.StateMachine.GetCurrentGeneration())
 						}
 					}
@@ -294,7 +294,7 @@ func (s *RaftNetworkServer) addLogEntryLeader(entry *pb.Entry) error {
 }
 
 // ClientToLeaderRequest implementation
-func (s *RaftNetworkServer) ClientToLeaderRequest(ctx context.Context, req *pb.EntryRequest) (*pb.EmptyMessage, error) {
+func (s *NetworkServer) ClientToLeaderRequest(ctx context.Context, req *pb.EntryRequest) (*pb.EmptyMessage, error) {
 	if s.State.Configuration.InConfiguration(req.SenderId) == false {
 		return &pb.EmptyMessage{}, errors.New("Node is not in the configuration")
 	}
@@ -307,7 +307,7 @@ func (s *RaftNetworkServer) ClientToLeaderRequest(ctx context.Context, req *pb.E
 }
 
 //sendLeaderLogEntry forwards a client request to the leader
-func (s *RaftNetworkServer) sendLeaderLogEntry(entry *pb.Entry) error {
+func (s *NetworkServer) sendLeaderLogEntry(entry *pb.Entry) error {
 	sendLogTimeout := time.After(leaderRequestTimeout)
 	lastError := errors.New("timeout before client to leader request was attempted")
 	for {
@@ -370,7 +370,7 @@ func getRandomElectionTimeout() time.Duration {
 	return ElectionTimeout + time.Duration(rand.Int63n(int64(ElectionTimeout)))
 }
 
-func (s *RaftNetworkServer) electionTimeOut() {
+func (s *NetworkServer) electionTimeOut() {
 	timer := time.NewTimer(getRandomElectionTimeout())
 	defer s.Wait.Done()
 	defer timer.Stop()
@@ -396,7 +396,7 @@ func (s *RaftNetworkServer) electionTimeOut() {
 }
 
 // Dial a node
-func (s *RaftNetworkServer) Dial(node *Node, timeoutMiliseconds time.Duration) (*grpc.ClientConn, error) {
+func (s *NetworkServer) Dial(node *Node, timeoutMiliseconds time.Duration) (*grpc.ClientConn, error) {
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithTimeout(timeoutMiliseconds))
 	if s.TLSEnabled {
@@ -413,7 +413,7 @@ func (s *RaftNetworkServer) Dial(node *Node, timeoutMiliseconds time.Duration) (
 	return conn, err
 }
 
-func (s *RaftNetworkServer) requestPeerVote(node *Node, term uint64, voteChannel chan *voteResponse) {
+func (s *NetworkServer) requestPeerVote(node *Node, term uint64, voteChannel chan *voteResponse) {
 	defer s.Wait.Done()
 	for {
 		if term != s.State.GetCurrentTerm() || s.State.GetCurrentState() != CANDIDATE {
@@ -446,7 +446,7 @@ type voteResponse struct {
 }
 
 //runElection attempts to get elected as leader for the current term
-func (s *RaftNetworkServer) runElection() {
+func (s *NetworkServer) runElection() {
 	defer s.Wait.Done()
 	term := s.State.GetCurrentTerm()
 	var votesGranted []string
@@ -513,7 +513,7 @@ func (s *RaftNetworkServer) runElection() {
 	}
 }
 
-func (s *RaftNetworkServer) manageElections() {
+func (s *NetworkServer) manageElections() {
 	defer s.Wait.Done()
 	for {
 		select {
@@ -531,7 +531,7 @@ func (s *RaftNetworkServer) manageElections() {
 }
 
 //sendHeartBeat is used when we are the leader to both replicate log entries and prevent other nodes from timing out
-func (s *RaftNetworkServer) sendHeartBeat(node *Node) {
+func (s *NetworkServer) sendHeartBeat(node *Node) {
 	defer s.Wait.Done()
 	nextIndex := s.State.Configuration.GetNextIndex(node.NodeID)
 	sendingSnapshot := s.State.Configuration.GetSendingSnapshot(node.NodeID)
@@ -625,7 +625,7 @@ func (s *RaftNetworkServer) sendHeartBeat(node *Node) {
 	}
 }
 
-func (s *RaftNetworkServer) manageLeading() {
+func (s *NetworkServer) manageLeading() {
 	defer s.Wait.Done()
 	for {
 		select {
@@ -684,7 +684,7 @@ func (s *RaftNetworkServer) manageLeading() {
 
 //manageConfigurationChanges performs necessary actions when a configuration has been applied.
 //Such as stepping down or creating a new configuration change request
-func (s *RaftNetworkServer) manageConfigurationChanges() {
+func (s *NetworkServer) manageConfigurationChanges() {
 	defer s.Wait.Done()
 	for {
 		select {
@@ -726,7 +726,7 @@ func (s *RaftNetworkServer) manageConfigurationChanges() {
 	}
 }
 
-func (s *RaftNetworkServer) manageEntryApplication() {
+func (s *NetworkServer) manageEntryApplication() {
 	defer s.Wait.Done()
 	for {
 		select {
@@ -742,9 +742,9 @@ func (s *RaftNetworkServer) manageEntryApplication() {
 	}
 }
 
-// NewRaftNetworkServer creates a new instance of the raft server
-func NewRaftNetworkServer(nodeDetails Node, pfsDirectory, raftInfoDirectory string, testConfiguration *StartConfiguration, TLSEnabled, TLSSkipVerify, encrypted bool) *RaftNetworkServer {
-	raftServer := &RaftNetworkServer{State: newRaftState(nodeDetails, pfsDirectory, raftInfoDirectory, testConfiguration)}
+// NewNetworkServer creates a new instance of the raft server
+func NewNetworkServer(nodeDetails Node, pfsDirectory, raftInfoDirectory string, testConfiguration *StartConfiguration, TLSEnabled, TLSSkipVerify, encrypted bool) *NetworkServer {
+	raftServer := &NetworkServer{State: newState(nodeDetails, pfsDirectory, raftInfoDirectory, testConfiguration)}
 	raftServer.ElectionTimeoutReset = make(chan bool, 100)
 	raftServer.Quit = make(chan bool)
 	raftServer.QuitChannelClosed = false

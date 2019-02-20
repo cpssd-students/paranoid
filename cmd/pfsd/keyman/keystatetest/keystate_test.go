@@ -8,9 +8,9 @@ import (
 	"reflect"
 	"testing"
 
+	"paranoid/cmd/pfsd/keyman"
 	"paranoid/pkg/libpfs"
 	"paranoid/pkg/logger"
-	"paranoid/cmd/pfsd/keyman"
 	pb "paranoid/pkg/proto/raft"
 	"paranoid/pkg/raft"
 	"paranoid/pkg/raft/raftlog"
@@ -40,7 +40,7 @@ func TestKeyStateUpdate(t *testing.T) {
 	raft.Log.Info("Node setup complete.")
 
 	nodeRaftDirectory := rafttestutil.CreateRaftDirectory(path.Join(os.TempDir(), "keystatetest", "node"))
-	var nodeRaftServer *raft.RaftNetworkServer
+	var nodeRaftServer *raft.NetworkServer
 	defer rafttestutil.RemoveRaftDirectory(nodeRaftDirectory, nodeRaftServer)
 	nodeRaftServer, nodesrv := raft.StartRaft(nodeLis, node, "", nodeRaftDirectory, &raft.StartConfiguration{Peers: []raft.Node{}})
 	defer nodesrv.Stop()
@@ -80,10 +80,10 @@ func TestKeyStateUpdate(t *testing.T) {
 	// Delete the Events channel because we don't care about it.
 	keyman.StateMachine.Events = nil
 	testMachine.Events = nil
-	if !reflect.DeepEqual(*keyman.StateMachine, *testMachine) {
+	if !reflect.DeepEqual(keyman.StateMachine, testMachine) {
 		t.Log("Decoded and encoded KSM's do not match.")
-		t.Log("Expected:", *keyman.StateMachine)
-		t.Log("Got:", *testMachine)
+		t.Log("Expected:", keyman.StateMachine)
+		t.Log("Got:", testMachine)
 		t.Fail()
 	}
 }

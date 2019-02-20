@@ -13,7 +13,7 @@ import (
 
 //TruncateCommand reduces the file given to the new length
 func TruncateCommand(paranoidDirectory, filePath string, length int64) (returnCode returncodes.Code, returnError error) {
-	log.V(1).Info("truncate file %s in %s to %d",
+	log.V(1).Infof("truncate file %s in %s to %d",
 		filePath, paranoidDirectory, length)
 
 	err := GetFileSystemLock(paranoidDirectory, SharedLock)

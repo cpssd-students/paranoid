@@ -1,10 +1,11 @@
 package dnetserver
 
 import (
-	pb "paranoid/pkg/proto/discoverynetwork"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+
+	pb "paranoid/pkg/proto/discoverynetwork"
 )
 
 // Disconnect method for Discovery Server
@@ -28,7 +29,7 @@ func (s *DiscoveryServer) Disconnect(ctx context.Context, req *pb.DisconnectRequ
 	if _, ok := Pools[req.Pool].Info.Nodes[req.Node.Uuid]; ok {
 		delete(Pools[req.Pool].Info.Nodes, req.Node.Uuid)
 		saveState(req.Pool)
-		Log.Info("Disconnect: Node %s (%s:%s) disconnected", req.Node.Uuid, req.Node.Ip, req.Node.Port)
+		Log.Infof("Disconnect: Node %s (%s:%s) disconnected", req.Node.Uuid, req.Node.Ip, req.Node.Port)
 		return &pb.EmptyMessage{}, nil
 	}
 

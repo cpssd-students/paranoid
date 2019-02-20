@@ -7,10 +7,10 @@ import (
 	"sync"
 	"time"
 
-	"paranoid/pkg/libpfs/encryption"
 	"paranoid/cmd/pfsd/globals"
 	"paranoid/cmd/pfsd/keyman"
 	"paranoid/cmd/pfsd/pnetclient"
+	"paranoid/pkg/libpfs/encryption"
 )
 
 const unlockQueryInterval time.Duration = time.Second * 10
@@ -129,7 +129,7 @@ func LoadPieces() {
 			log.Debugf("KeyPiece GOB file %s does not exist.", piecePath)
 			return
 		}
-		log.Fatalf("Unable to open %s for reading pieces: %s", piecePath, file)
+		log.Fatalf("Unable to open %s for reading pieces: %s", piecePath, file.Name())
 	}
 	defer file.Close()
 	dec := gob.NewDecoder(file)

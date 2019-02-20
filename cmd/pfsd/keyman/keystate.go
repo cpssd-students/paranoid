@@ -371,7 +371,7 @@ func (ksm *KeyStateMachine) OwnerComplete(ownerID string, generation int64) erro
 }
 
 // Count all of the keys grouped by owner and make sure they meet a minimum.
-func (ksm KeyStateMachine) canUpdateGeneration(generation int64) bool {
+func (ksm *KeyStateMachine) canUpdateGeneration(generation int64) bool {
 	// Map of UUIDs (as string) to int
 	owners := make(map[string]int)
 	for _, v := range ksm.Generations[generation].Nodes {

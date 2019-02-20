@@ -3,6 +3,7 @@ package pnetserver
 import (
 	"paranoid/cmd/pfsd/globals"
 	pb "paranoid/pkg/proto/paranoidnetwork"
+
 	"golang.org/x/net/context"
 )
 
@@ -14,7 +15,7 @@ func (s *ParanoidServer) Ping(ctx context.Context, req *pb.Node) (*pb.EmptyMessa
 		CommonName: req.CommonName,
 		UUID:       req.Uuid,
 	}
-	Log.Infof("Got Ping from Node:", node)
+	Log.Infof("Got Ping from %v", node)
 	globals.Nodes.Add(node)
 	globals.RaftNetworkServer.ChangeNodeLocation(req.Uuid, req.Ip, req.Port)
 	return &pb.EmptyMessage{}, nil

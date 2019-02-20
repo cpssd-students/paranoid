@@ -57,11 +57,11 @@ type EntryAppliedInfo struct {
 //StartRaft server given a listener, node information a directory to store information
 //Only used for testing purposes
 func StartRaft(lis *net.Listener, nodeDetails Node, pfsDirectory, raftInfoDirectory string,
-	startConfiguration *StartConfiguration) (*RaftNetworkServer, *grpc.Server) {
+	startConfiguration *StartConfiguration) (*NetworkServer, *grpc.Server) {
 
 	var opts []grpc.ServerOption
 	srv := grpc.NewServer(opts...)
-	raftServer := NewRaftNetworkServer(nodeDetails, pfsDirectory, raftInfoDirectory, startConfiguration, false, false, false)
+	raftServer := NewNetworkServer(nodeDetails, pfsDirectory, raftInfoDirectory, startConfiguration, false, false, false)
 	pb.RegisterRaftNetworkServer(srv, raftServer)
 	raftServer.Wait.Add(1)
 	go func() {
@@ -77,7 +77,7 @@ func StartRaft(lis *net.Listener, nodeDetails Node, pfsDirectory, raftInfoDirect
 // RequestAddLogEntry from a client. If the mode is not the leader, it must
 // follow the request to the leader. Only returns once the request has been
 // committed to the State machine
-func (s *RaftNetworkServer) RequestAddLogEntry(entry *pb.Entry) (*StateMachineResult, error) {
+func (s *NetworkServer) RequestAddLogEntry(entry *pb.Entry) (*StateMachineResult, error) {
 	s.addEntryLock.Lock()
 	defer s.addEntryLock.Unlock()
 	currentState := s.State.GetCurrentState()
@@ -157,11 +157,11 @@ func (s *RaftNetworkServer) RequestAddLogEntry(entry *pb.Entry) (*StateMachineRe
 			}
 		}
 	}
-	return nil, errors.New("waited too long to commit Log entry")
+	// return nil, errors.New("waited too long to commit Log entry")
 }
 
 // RequestKeyStateUpdate requests and update
-func (s *RaftNetworkServer) RequestKeyStateUpdate(owner, holder *pb.Node, generation int64) error {
+func (s *NetworkServer) RequestKeyStateUpdate(owner, holder *pb.Node, generation int64) error {
 	entry := &pb.Entry{
 		Type: pb.Entry_KeyStateCommand,
 		Uuid: generateNewUUID(),
@@ -181,7 +181,7 @@ func (s *RaftNetworkServer) RequestKeyStateUpdate(owner, holder *pb.Node, genera
 }
 
 // RequestNewGeneration retrns a number, a list of peer nodes, and an error.
-func (s *RaftNetworkServer) RequestNewGeneration(newNode string) (int, []string, error) {
+func (s *NetworkServer) RequestNewGeneration(newNode string) (int, []string, error) {
 	entry := &pb.Entry{
 		Type: pb.Entry_KeyStateCommand,
 		Uuid: generateNewUUID(),
@@ -199,7 +199,7 @@ func (s *RaftNetworkServer) RequestNewGeneration(newNode string) (int, []string,
 }
 
 // RequestOwnerComplete of the node
-func (s *RaftNetworkServer) RequestOwnerComplete(nodeID string, generation int64) error {
+func (s *NetworkServer) RequestOwnerComplete(nodeID string, generation int64) error {
 	entry := &pb.Entry{
 		Type: pb.Entry_KeyStateCommand,
 		Uuid: generateNewUUID(),
@@ -218,7 +218,7 @@ func (s *RaftNetworkServer) RequestOwnerComplete(nodeID string, generation int64
 }
 
 // RequestWriteCommand performs a write
-func (s *RaftNetworkServer) RequestWriteCommand(filePath string, offset, length int64, data []byte) (returnCode returncodes.Code, bytesWrote int, returnError error) {
+func (s *NetworkServer) RequestWriteCommand(filePath string, offset, length int64, data []byte) (returnCode returncodes.Code, bytesWrote int, returnError error) {
 	entry := &pb.Entry{
 		Type: pb.Entry_StateMachineCommand,
 		Uuid: generateNewUUID(),
@@ -238,7 +238,7 @@ func (s *RaftNetworkServer) RequestWriteCommand(filePath string, offset, length 
 }
 
 // RequestCreatCommand performs the Creat command
-func (s *RaftNetworkServer) RequestCreatCommand(filePath string, mode uint32) (returnCode returncodes.Code, returnError error) {
+func (s *NetworkServer) RequestCreatCommand(filePath string, mode uint32) (returnCode returncodes.Code, returnError error) {
 	entry := &pb.Entry{
 		Type: pb.Entry_StateMachineCommand,
 		Uuid: generateNewUUID(),
@@ -256,7 +256,7 @@ func (s *RaftNetworkServer) RequestCreatCommand(filePath string, mode uint32) (r
 }
 
 // RequestChmodCommand performs the Chmod command
-func (s *RaftNetworkServer) RequestChmodCommand(filePath string, mode uint32) (returnCode returncodes.Code, returnError error) {
+func (s *NetworkServer) RequestChmodCommand(filePath string, mode uint32) (returnCode returncodes.Code, returnError error) {
 	entry := &pb.Entry{
 		Type: pb.Entry_StateMachineCommand,
 		Uuid: generateNewUUID(),
@@ -274,7 +274,7 @@ func (s *RaftNetworkServer) RequestChmodCommand(filePath string, mode uint32) (r
 }
 
 // RequestTruncateCommand performs the Truncate command
-func (s *RaftNetworkServer) RequestTruncateCommand(filePath string, length int64) (returnCode returncodes.Code, returnError error) {
+func (s *NetworkServer) RequestTruncateCommand(filePath string, length int64) (returnCode returncodes.Code, returnError error) {
 	entry := &pb.Entry{
 		Type: pb.Entry_StateMachineCommand,
 		Uuid: generateNewUUID(),
@@ -299,7 +299,7 @@ func splitTime(t *time.Time) (int64, int64) {
 }
 
 // RequestUtimesCommand performs the Utimes command
-func (s *RaftNetworkServer) RequestUtimesCommand(filePath string, atime, mtime *time.Time) (returnCode returncodes.Code, returnError error) {
+func (s *NetworkServer) RequestUtimesCommand(filePath string, atime, mtime *time.Time) (returnCode returncodes.Code, returnError error) {
 	accessSeconds, accessNanoSeconds := splitTime(atime)
 	modifySeconds, modifyNanoSeconds := splitTime(mtime)
 
@@ -323,7 +323,7 @@ func (s *RaftNetworkServer) RequestUtimesCommand(filePath string, atime, mtime *
 }
 
 // RequestRenameCommand performs the rename command
-func (s *RaftNetworkServer) RequestRenameCommand(oldPath, newPath string) (returnCode returncodes.Code, returnError error) {
+func (s *NetworkServer) RequestRenameCommand(oldPath, newPath string) (returnCode returncodes.Code, returnError error) {
 	entry := &pb.Entry{
 		Type: pb.Entry_StateMachineCommand,
 		Uuid: generateNewUUID(),
@@ -341,7 +341,7 @@ func (s *RaftNetworkServer) RequestRenameCommand(oldPath, newPath string) (retur
 }
 
 // RequestLinkCommand performs the link command
-func (s *RaftNetworkServer) RequestLinkCommand(oldPath, newPath string) (returnCode returncodes.Code, returnError error) {
+func (s *NetworkServer) RequestLinkCommand(oldPath, newPath string) (returnCode returncodes.Code, returnError error) {
 	entry := &pb.Entry{
 		Type: pb.Entry_StateMachineCommand,
 		Uuid: generateNewUUID(),
@@ -359,7 +359,7 @@ func (s *RaftNetworkServer) RequestLinkCommand(oldPath, newPath string) (returnC
 }
 
 // RequestSymlinkCommand performs the symlink command
-func (s *RaftNetworkServer) RequestSymlinkCommand(oldPath, newPath string) (returnCode returncodes.Code, returnError error) {
+func (s *NetworkServer) RequestSymlinkCommand(oldPath, newPath string) (returnCode returncodes.Code, returnError error) {
 	entry := &pb.Entry{
 		Type: pb.Entry_StateMachineCommand,
 		Uuid: generateNewUUID(),
@@ -377,7 +377,7 @@ func (s *RaftNetworkServer) RequestSymlinkCommand(oldPath, newPath string) (retu
 }
 
 // RequestUnlinkCommand performs the unlink command
-func (s *RaftNetworkServer) RequestUnlinkCommand(filePath string) (returnCode returncodes.Code, returnError error) {
+func (s *NetworkServer) RequestUnlinkCommand(filePath string) (returnCode returncodes.Code, returnError error) {
 	entry := &pb.Entry{
 		Type: pb.Entry_StateMachineCommand,
 		Uuid: generateNewUUID(),
@@ -394,7 +394,7 @@ func (s *RaftNetworkServer) RequestUnlinkCommand(filePath string) (returnCode re
 }
 
 // RequestMkdirCommand performs the mkdir command
-func (s *RaftNetworkServer) RequestMkdirCommand(filePath string, mode uint32) (returnCode returncodes.Code, returnError error) {
+func (s *NetworkServer) RequestMkdirCommand(filePath string, mode uint32) (returnCode returncodes.Code, returnError error) {
 	entry := &pb.Entry{
 		Type: pb.Entry_StateMachineCommand,
 		Uuid: generateNewUUID(),
@@ -412,7 +412,7 @@ func (s *RaftNetworkServer) RequestMkdirCommand(filePath string, mode uint32) (r
 }
 
 // RequestRmdirCommand performs the rmdir command
-func (s *RaftNetworkServer) RequestRmdirCommand(filePath string) (returnCode returncodes.Code, returnError error) {
+func (s *NetworkServer) RequestRmdirCommand(filePath string) (returnCode returncodes.Code, returnError error) {
 	entry := &pb.Entry{
 		Type: pb.Entry_StateMachineCommand,
 		Uuid: generateNewUUID(),
@@ -429,7 +429,7 @@ func (s *RaftNetworkServer) RequestRmdirCommand(filePath string) (returnCode ret
 }
 
 // RequestChangeConfiguration performs a change in Configuration
-func (s *RaftNetworkServer) RequestChangeConfiguration(nodes []Node) error {
+func (s *NetworkServer) RequestChangeConfiguration(nodes []Node) error {
 	Log.Info("Configuration change requested:", nodes)
 	entry := &pb.Entry{
 		Type: pb.Entry_ConfigurationChange,
@@ -444,7 +444,7 @@ func (s *RaftNetworkServer) RequestChangeConfiguration(nodes []Node) error {
 }
 
 // RequestAddNodeToConfiguration adds a node to configuration
-func (s *RaftNetworkServer) RequestAddNodeToConfiguration(node Node) error {
+func (s *NetworkServer) RequestAddNodeToConfiguration(node Node) error {
 	if s.State.Configuration.InConfiguration(node.NodeID) {
 		return nil
 	}
@@ -453,7 +453,7 @@ func (s *RaftNetworkServer) RequestAddNodeToConfiguration(node Node) error {
 }
 
 //ChangeNodeLocation changes the IP and Port of a given node
-func (s *RaftNetworkServer) ChangeNodeLocation(UUID, IP, Port string) {
+func (s *NetworkServer) ChangeNodeLocation(UUID, IP, Port string) {
 	s.State.Configuration.ChangeNodeLocation(UUID, IP, Port)
 }
 
@@ -531,6 +531,6 @@ func PerformKSMCommand(sateMachine *keyman.KeyStateMachine, keyCommand *pb.KeySt
 			Err: err,
 		}
 	}
-	Log.Fatal("Unrecognised command type: %s", keyCommand.Type)
+	Log.Fatalf("Unrecognised command type: %s", keyCommand.Type)
 	return nil
 }
