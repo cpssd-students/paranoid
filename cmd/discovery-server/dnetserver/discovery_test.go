@@ -1,3 +1,5 @@
+// +build deprecated
+
 // +build !integration
 
 package dnetserver

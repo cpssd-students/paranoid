@@ -37,4 +37,4 @@ node_modules/
 
 
 # Temporary workaround before discovery server is removed
-discovery-server/dnetserver/TestPool
+cmd/discovery-server/dnetserver/TestPool
