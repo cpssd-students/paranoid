@@ -4,6 +4,8 @@ syntax = "proto3";
 
 package raft;
 
+option go_package = "paranoid/proto/raft;raft";
+
 service RaftNetwork {
     rpc AppendEntries (AppendEntriesRequest) returns (AppendEntriesResponse) {}
     rpc RequestVote (RequestVoteRequest) returns (RequestVoteResponse) {}

@@ -4,6 +4,8 @@ syntax = "proto3";
 
 package paranoid;
 
+option go_package = "paranoid/proto/paranoidnetwork;paranoidnetwork";
+
 service ParanoidNetwork {
     // Utility calls
 

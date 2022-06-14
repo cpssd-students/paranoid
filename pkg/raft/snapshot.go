@@ -15,7 +15,7 @@ import (
 	"paranoid/cmd/pfsd/keyman"
 	"paranoid/pkg/libpfs"
 	"paranoid/pkg/libpfs/returncodes"
-	pb "paranoid/pkg/proto/raft"
+	pb "paranoid/proto/raft"
 
 	"golang.org/x/net/context"
 )

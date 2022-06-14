@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package discoverynetwork;
 
+option go_package = "paranoid/proto/discoverynetwork";
+
 service DiscoveryNetwork {
   // Discovery Calls
   rpc Join (JoinRequest) returns (JoinResponse) {}

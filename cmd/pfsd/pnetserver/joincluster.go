@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"paranoid/cmd/pfsd/globals"
-	pb "paranoid/pkg/proto/paranoidnetwork"
 	"paranoid/pkg/raft"
+	pb "paranoid/proto/paranoidnetwork"
 
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/net/context"

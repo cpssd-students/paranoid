@@ -3,11 +3,11 @@ package pnetclient
 import (
 	"errors"
 
-	"golang.org/x/net/context"
+	"context"
 
 	"paranoid/cmd/pfsd/globals"
 
-	pb "paranoid/pkg/proto/paranoidnetwork"
+	pb "paranoid/proto/paranoidnetwork"
 )
 
 //JoinCluster is used to request to join a raft cluster

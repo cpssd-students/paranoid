@@ -9,7 +9,7 @@ import (
 
 	. "paranoid/cmd/discovery-server/dnetserver"
 	"paranoid/pkg/logger"
-	pb "paranoid/pkg/proto/discoverynetwork"
+	pb "paranoid/proto/discoverynetwork"
 )
 
 func TestMain(m *testing.M) {

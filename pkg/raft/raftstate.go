@@ -9,8 +9,8 @@ import (
 	"sync"
 
 	"paranoid/cmd/pfsd/keyman"
-	pb "paranoid/pkg/proto/raft"
 	"paranoid/pkg/raft/raftlog"
+	pb "paranoid/proto/raft"
 )
 
 // NodeType provides information about the type of node

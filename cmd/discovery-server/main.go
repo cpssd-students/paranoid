@@ -16,7 +16,7 @@ import (
 	"paranoid/cmd/discovery-server/dnetserver"
 	"paranoid/pkg/logger"
 
-	pb "paranoid/pkg/proto/discoverynetwork"
+	pb "paranoid/proto/discoverynetwork"
 )
 
 const (

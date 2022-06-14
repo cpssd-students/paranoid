@@ -14,9 +14,6 @@ import (
 	"sync"
 	"time"
 
-	"paranoid/pkg/libpfs"
-	"paranoid/pkg/libpfs/encryption"
-	"paranoid/pkg/logger"
 	"paranoid/cmd/pfsd/dnetclient"
 	"paranoid/cmd/pfsd/globals"
 	"paranoid/cmd/pfsd/intercom"
@@ -25,10 +22,14 @@ import (
 	"paranoid/cmd/pfsd/pnetclient"
 	"paranoid/cmd/pfsd/pnetserver"
 	"paranoid/cmd/pfsd/upnp"
-	pb "paranoid/pkg/proto/paranoidnetwork"
-	rpb "paranoid/pkg/proto/raft"
+	"paranoid/pkg/libpfs"
+	"paranoid/pkg/libpfs/encryption"
+	"paranoid/pkg/logger"
 	"paranoid/pkg/raft"
 	"paranoid/pkg/raft/raftlog"
+	pb "paranoid/proto/paranoidnetwork"
+	rpb "paranoid/proto/raft"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )

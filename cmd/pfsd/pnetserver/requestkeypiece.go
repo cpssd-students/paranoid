@@ -2,7 +2,8 @@ package pnetserver
 
 import (
 	"paranoid/cmd/pfsd/globals"
-	pb "paranoid/pkg/proto/paranoidnetwork"
+	pb "paranoid/proto/paranoidnetwork"
+
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"

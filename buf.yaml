@@ -1,0 +1,9 @@
+version: v1
+breaking:
+  use:
+    - FILE
+lint:
+  ignore:
+    - PACKAGE_VERSION_SUFFIX
+    - PACKAGE_VERSION_PREFIX
+    - PACKAGE_DIRECTORY_MATCH

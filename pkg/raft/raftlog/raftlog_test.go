@@ -1,3 +1,4 @@
+//go:build !integration
 // +build !integration
 
 package raftlog
@@ -9,7 +10,7 @@ import (
 	"testing"
 
 	"paranoid/pkg/logger"
-	pb "paranoid/pkg/proto/raft"
+	pb "paranoid/proto/raft"
 )
 
 var (

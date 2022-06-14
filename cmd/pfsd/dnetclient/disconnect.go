@@ -7,7 +7,7 @@ import (
 
 	"paranoid/cmd/pfsd/globals"
 
-	pb "paranoid/pkg/proto/discoverynetwork"
+	pb "paranoid/proto/discoverynetwork"
 )
 
 // Disconnect function used to disconnect from the server

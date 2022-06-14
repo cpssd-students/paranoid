@@ -13,8 +13,8 @@ import (
 
 	"paranoid/cmd/pfsd/keyman"
 	"paranoid/pkg/logger"
-	pb "paranoid/pkg/proto/raft"
 	"paranoid/pkg/raft/raftlog"
+	pb "paranoid/proto/raft"
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -40,6 +40,8 @@ var Log *logger.ParanoidLogger
 
 // NetworkServer implements the raft protobuf server interface
 type NetworkServer struct {
+	pb.UnimplementedRaftNetworkServer
+
 	State *State
 	Wait  sync.WaitGroup
 

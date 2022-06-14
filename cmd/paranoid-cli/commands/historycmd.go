@@ -12,8 +12,8 @@ import (
 	"github.com/urfave/cli"
 
 	log "paranoid/pkg/logger"
-	pb "paranoid/pkg/proto/raft"
 	"paranoid/pkg/raft"
+	pb "paranoid/proto/raft"
 )
 
 // History subcommand

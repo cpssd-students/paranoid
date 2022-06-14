@@ -5,8 +5,8 @@ import (
 
 	"paranoid/cmd/pfsd/globals"
 	"paranoid/cmd/pfsd/keyman"
-	pb "paranoid/pkg/proto/paranoidnetwork"
-	raftpb "paranoid/pkg/proto/raft"
+	pb "paranoid/proto/paranoidnetwork"
+	raftpb "paranoid/proto/raft"
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"

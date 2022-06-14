@@ -13,7 +13,7 @@ import (
 	"github.com/golang/protobuf/proto"
 
 	log "paranoid/pkg/logger"
-	pb "paranoid/pkg/proto/raft"
+	pb "paranoid/proto/raft"
 )
 
 type fileSystemAttributes struct {

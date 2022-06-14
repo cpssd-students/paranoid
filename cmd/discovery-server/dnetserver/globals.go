@@ -12,14 +12,16 @@ import (
 
 	"paranoid/pkg/logger"
 
-	pb "paranoid/pkg/proto/discoverynetwork"
+	pb "paranoid/proto/discoverynetwork"
 )
 
 // Log used by discovery-server
 var Log *logger.ParanoidLogger
 
 // DiscoveryServer struct
-type DiscoveryServer struct{}
+type DiscoveryServer struct {
+	pb.UnimplementedDiscoveryNetworkServer
+}
 
 // PoolInfo struct to hold the pool data
 type PoolInfo struct {

@@ -3,7 +3,7 @@ package pnetclient
 import (
 	"errors"
 	"paranoid/cmd/pfsd/globals"
-	pb "paranoid/pkg/proto/paranoidnetwork"
+	pb "paranoid/proto/paranoidnetwork"
 
 	"golang.org/x/net/context"
 )

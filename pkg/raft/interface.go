@@ -14,7 +14,7 @@ import (
 	"paranoid/pkg/libpfs"
 	"paranoid/pkg/libpfs/returncodes"
 
-	pb "paranoid/pkg/proto/raft"
+	pb "paranoid/proto/raft"
 )
 
 // ActionType is the base type of the different action

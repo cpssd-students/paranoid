@@ -1,3 +1,4 @@
+//go:build !integration
 // +build !integration
 
 package test
@@ -11,10 +12,10 @@ import (
 
 	"paranoid/pkg/libpfs"
 	"paranoid/pkg/logger"
-	pb "paranoid/pkg/proto/raft"
 	"paranoid/pkg/raft"
 	"paranoid/pkg/raft/raftlog"
 	"paranoid/pkg/raft/rafttestutil"
+	pb "paranoid/proto/raft"
 )
 
 func TestMain(m *testing.M) {

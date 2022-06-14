@@ -1,6 +1,5 @@
-// +build deprecated
-
-// +build !integration
+//go:build deprecated && !integration
+// +build deprecated,!integration
 
 package dnetserver
 
@@ -12,7 +11,7 @@ import (
 	"testing"
 
 	"paranoid/pkg/logger"
-	pb "paranoid/pkg/proto/discoverynetwork"
+	pb "paranoid/proto/discoverynetwork"
 )
 
 func TestMain(m *testing.M) {
