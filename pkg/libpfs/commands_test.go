@@ -1,6 +1,3 @@
-//go:build !integration
-// +build !integration
-
 package libpfs
 
 import (
@@ -11,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"paranoid/pkg/libpfs/encryption"
-	"paranoid/pkg/libpfs/returncodes"
+	"github.com/cpssd-students/paranoid/pkg/libpfs/encryption"
+	"github.com/cpssd-students/paranoid/pkg/libpfs/returncodes"
 )
 
 var testDirectory string
@@ -537,7 +534,7 @@ func TestComplexDirectoryUsage(t *testing.T) {
 	}
 
 	// remove directory with contents inside
-	code, err = RmdirCommand(testDirectory, "documents/work_docs")
+	code, _ = RmdirCommand(testDirectory, "documents/work_docs")
 	if code == returncodes.OK {
 		t.Error("Rmdir returned ok when it should have returned ENOTEMPTY")
 	}
@@ -566,12 +563,12 @@ func TestComplexDirectoryUsage(t *testing.T) {
 	}
 
 	// writing and reading from a directory
-	code, _, err = WriteCommand(testDirectory, "documents", -1, -1, []byte("Should not work"))
+	code, _, _ = WriteCommand(testDirectory, "documents", -1, -1, []byte("Should not work"))
 	if code == returncodes.OK {
 		t.Error("Succeeded to write to a directory")
 	}
 
-	code, _, err = ReadCommand(testDirectory, "documents", -1, -1)
+	code, _, _ = ReadCommand(testDirectory, "documents", -1, -1)
 	if code == returncodes.OK {
 		t.Error("Succeeded to read from a directory")
 	}
@@ -607,7 +604,7 @@ func TestComplexReadWrite(t *testing.T) {
 	setupTestDirectory()
 
 	seed := time.Now().UnixNano()
-	t.Logf("Test seed %s", seed)
+	t.Logf("Test seed %d", seed)
 	rand.Seed(seed)
 
 	code, err := CreatCommand(testDirectory, "test.txt", os.FileMode(0777))

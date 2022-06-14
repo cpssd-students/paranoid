@@ -71,7 +71,10 @@ func fileToProto(file os.FileInfo, directory string) (entry *pb.LogEntry, err er
 	if err != nil {
 		return nil, fmt.Errorf("failed to read logfile: %s", file.Name())
 	}
-	entry = &pb.LogEntry{}
+	entry = &pb.LogEntry{
+		Term:  0,
+		Entry: nil,
+	}
 	err = proto.Unmarshal(fileData, entry)
 	if err != nil {
 		return nil, errors.New("Failed to Unmarshal file data")

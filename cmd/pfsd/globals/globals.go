@@ -69,7 +69,7 @@ var ResetInterval time.Duration
 var DiscoveryAddr string
 
 // Nodes instance which controls all the information about other pfsd instances
-var Nodes = nodes{m: make(map[string]Node)}
+var Nodes = nodes{m: make(map[string]Node), lock: sync.Mutex{}}
 
 // NetworkOff if the network should not be used
 // TODO: Rename it to NetworkActive

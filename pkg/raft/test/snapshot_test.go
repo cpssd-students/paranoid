@@ -1,5 +1,3 @@
-// +build !integration
-
 package test
 
 import (
@@ -8,11 +6,11 @@ import (
 	"testing"
 	"time"
 
-	"paranoid/cmd/pfsd/keyman"
-	"paranoid/pkg/libpfs"
-	"paranoid/pkg/libpfs/returncodes"
-	"paranoid/pkg/raft"
-	"paranoid/pkg/raft/rafttestutil"
+	"github.com/cpssd-students/paranoid/cmd/pfsd/keyman"
+	"github.com/cpssd-students/paranoid/pkg/libpfs"
+	"github.com/cpssd-students/paranoid/pkg/libpfs/returncodes"
+	"github.com/cpssd-students/paranoid/pkg/raft"
+	"github.com/cpssd-students/paranoid/pkg/raft/rafttestutil"
 )
 
 func TestSnapshoting(t *testing.T) {
@@ -21,23 +19,22 @@ func TestSnapshoting(t *testing.T) {
 	}
 	t.Parallel()
 
-	raft.Log.Info("Testing snapshoting")
+	t.Log("Testing snapshoting")
 	lis, node1Port := rafttestutil.StartListener()
 	defer rafttestutil.CloseListener(lis)
 	node := rafttestutil.SetUpNode("node", "localhost", node1Port, "_")
-	raft.Log.Info("Listeners set up")
+	t.Log("Listeners set up")
 
 	raftDirectory := rafttestutil.CreateRaftDirectory(path.Join(os.TempDir(), "snapshottest", "node"))
 	pfsDirectory := path.Join(os.TempDir(), "snapshottestpfs")
-	err := os.RemoveAll(pfsDirectory)
-	err = os.Mkdir(pfsDirectory, 0700)
-	if err != nil {
+	_ = os.RemoveAll(pfsDirectory)
+
+	if err := os.Mkdir(pfsDirectory, 0700); err != nil {
 		t.Fatal("Unable to make pfsdirectory:", err)
 	}
 	keyman.StateMachine = keyman.NewKSM(pfsDirectory)
 	defer func() {
-		err = os.RemoveAll(pfsDirectory)
-		if err != nil {
+		if err := os.RemoveAll(pfsDirectory); err != nil {
 			t.Fatal("Error removing pfsdirectory:", err)
 		}
 	}()
@@ -63,7 +60,7 @@ func TestSnapshoting(t *testing.T) {
 		t.Fatal("Error performing write command:", err)
 	}
 
-	raft.Log.Info("Taking first snapshot")
+	t.Log("Taking first snapshot")
 	err = raftServer.CreateSnapshot(raftServer.State.Log.GetMostRecentIndex())
 	if err != nil {
 		t.Fatal("Error taking snapshot:", err)
@@ -80,17 +77,16 @@ func TestSnapshoting(t *testing.T) {
 			break
 		}
 		//Sleep to give time for the snapshot management goroutine to update the current snapshot
-		time.Sleep(1)
+		time.Sleep(1 * time.Millisecond)
 	}
 
-	raft.Log.Info("Reverting to snapshot")
+	t.Log("Reverting to snapshot")
 	err = raftServer.RevertToSnapshot(path.Join(raftDirectory, raft.SnapshotDirectory, raft.CurrentSnapshotDirectory))
 	if err != nil {
 		t.Fatal("Error reverting to snapshot:", err)
 	}
 
-	_, data, err := libpfs.ReadCommand(pfsDirectory, "test.txt", -1, -1)
-	if string(data) != "hello" {
+	if _, data, _ := libpfs.ReadCommand(pfsDirectory, "test.txt", -1, -1); string(data) != "hello" {
 		t.Fatal("Error reverting snapshot. Read does not match 'hello'. Actual:", string(data))
 	}
 
@@ -104,7 +100,7 @@ func TestSnapshoting(t *testing.T) {
 		t.Fatal("Error performing write command:", err)
 	}
 
-	raft.Log.Info("Taking second snapshot")
+	t.Log("Taking second snapshot")
 	err = raftServer.CreateSnapshot(raftServer.State.Log.GetMostRecentIndex())
 	if err != nil {
 		t.Fatal("Error taking snapshot:", err)
@@ -121,22 +117,20 @@ func TestSnapshoting(t *testing.T) {
 			break
 		}
 		//Sleep to give time for the snapshot management goroutine to update the current snapshot
-		time.Sleep(1)
+		time.Sleep(1 * time.Millisecond)
 	}
 
-	raft.Log.Info("Reverting to snapshot")
+	t.Log("Reverting to snapshot")
 	err = raftServer.RevertToSnapshot(path.Join(raftDirectory, raft.SnapshotDirectory, raft.CurrentSnapshotDirectory))
 	if err != nil {
 		t.Fatal("Error reverting to snapshot:", err)
 	}
 
-	code, data, err = libpfs.ReadCommand(pfsDirectory, "test.txt", -1, -1)
-	if string(data) != "hello" {
+	if _, data, _ := libpfs.ReadCommand(pfsDirectory, "test.txt", -1, -1); string(data) != "hello" {
 		t.Fatal("Error reverting snapshot. Read does not match 'hello'. Actual:", string(data))
 	}
 
-	code, data, err = libpfs.ReadCommand(pfsDirectory, "test2.txt", -1, -1)
-	if string(data) != "world" {
+	if _, data, _ := libpfs.ReadCommand(pfsDirectory, "test2.txt", -1, -1); string(data) != "world" {
 		t.Fatal("Error reverting snapshot. Read does not match 'world'. Actual:", string(data))
 	}
 }

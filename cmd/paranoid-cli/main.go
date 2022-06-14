@@ -41,8 +41,9 @@ func main() {
 	app.Version = "0.4.1"
 	app.Flags = []cli.Flag{
 		cli.BoolFlag{
-			Name:  "verbose",
-			Usage: "enable verbose loging",
+			Name:   "verbose",
+			Usage:  "enable verbose loging",
+			EnvVar: "", // We don't want any for now.
 		},
 	}
 	app.Commands = []cli.Command{

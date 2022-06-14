@@ -5,11 +5,6 @@ linters:
     # We never ensured the line lenght, this means that some of our code
     # has very long lines. 
     - lll
-    # Disable few linters from the metalinter preset
-    - gocritic
-    - golint
   enable:
     - exportloopref
-    - exhaustruct
-  presets:
-    - bugs
+  presets: []

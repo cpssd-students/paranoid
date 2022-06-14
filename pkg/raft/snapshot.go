@@ -623,6 +623,8 @@ func (s *NetworkServer) updateCurrentSnapshot() error {
 	if err != nil {
 		currentSnapshotMeta = &SnapShotInfo{
 			LastIncludedIndex: 0,
+			LastIncludedTerm:  0,
+			SelfCreated:       false,
 		}
 	}
 

@@ -14,7 +14,7 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	os.MkdirAll(path.Join(os.TempDir(), "keystatetest", "meta"), 0777)
+	_ = os.MkdirAll(path.Join(os.TempDir(), "keystatetest", "meta"), 0777)
 	exitCode := m.Run()
 	os.Exit(exitCode)
 }

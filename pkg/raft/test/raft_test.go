@@ -10,21 +10,10 @@ import (
 	"testing"
 	"time"
 
-	"paranoid/pkg/libpfs"
-	"paranoid/pkg/logger"
-	"paranoid/pkg/raft"
-	"paranoid/pkg/raft/raftlog"
-	"paranoid/pkg/raft/rafttestutil"
-	pb "paranoid/proto/raft"
+	"github.com/cpssd-students/paranoid/pkg/raft"
+	"github.com/cpssd-students/paranoid/pkg/raft/rafttestutil"
+	pb "github.com/cpssd-students/paranoid/proto/raft"
 )
-
-func TestMain(m *testing.M) {
-	raft.Log = logger.New("rafttest", "rafttest", os.DevNull)
-	raftlog.Log = logger.New("rafttest", "rafttest", os.DevNull)
-	libpfs.Log = logger.New("rafttest", "rafttest", os.DevNull)
-	exitCode := m.Run()
-	os.Exit(exitCode)
-}
 
 func TestRaftElection(t *testing.T) {
 	if testing.Short() {
@@ -32,7 +21,7 @@ func TestRaftElection(t *testing.T) {
 	}
 	t.Parallel()
 
-	raft.Log.Info("Testing leader eleciton")
+	t.Log("Testing leader eleciton")
 	node1Lis, node1Port := rafttestutil.StartListener()
 	defer rafttestutil.CloseListener(node1Lis)
 	node1 := rafttestutil.SetUpNode("node1", "localhost", node1Port, "_")
@@ -42,7 +31,7 @@ func TestRaftElection(t *testing.T) {
 	node3Lis, node3Port := rafttestutil.StartListener()
 	defer rafttestutil.CloseListener(node3Lis)
 	node3 := rafttestutil.SetUpNode("node3", "localhost", node3Port, "_")
-	raft.Log.Info("Listeners set up")
+	t.Log("Listeners set up")
 
 	node1RaftDirectory := rafttestutil.CreateRaftDirectory(path.Join(os.TempDir(), "rafttest1", "node1"))
 	var node1RaftServer *raft.NetworkServer
@@ -67,7 +56,7 @@ func TestRaftElection(t *testing.T) {
 
 	cluster := []*raft.NetworkServer{node1RaftServer, node2RaftServer, node3RaftServer}
 
-	raft.Log.Info("Searching for leader")
+	t.Log("Searching for leader")
 	leader := rafttestutil.GetLeaderTimeout(cluster, 25)
 	if leader != nil {
 		t.Log(leader.State.NodeID, "selected as leader for term", leader.State.GetCurrentTerm())
@@ -120,7 +109,7 @@ func TestRaftLogReplication(t *testing.T) {
 	}
 	t.Parallel()
 
-	raft.Log.Info("Testing log replication")
+	t.Log("Testing log replication")
 	node1Lis, node1Port := rafttestutil.StartListener()
 	defer rafttestutil.CloseListener(node1Lis)
 	node1 := rafttestutil.SetUpNode("node1", "localhost", node1Port, "_")
@@ -130,7 +119,7 @@ func TestRaftLogReplication(t *testing.T) {
 	node3Lis, node3Port := rafttestutil.StartListener()
 	defer rafttestutil.CloseListener(node3Lis)
 	node3 := rafttestutil.SetUpNode("node3", "localhost", node3Port, "_")
-	raft.Log.Info("Listeners set up")
+	t.Log("Listeners set up")
 
 	node1RaftDirectory := rafttestutil.CreateRaftDirectory(path.Join(os.TempDir(), "rafttest2", "node1"))
 	var node1RaftServer *raft.NetworkServer
@@ -163,23 +152,21 @@ func TestRaftLogReplication(t *testing.T) {
 
 	if err != nil {
 		if leader != nil {
-			raft.Log.Info("most recent index :", node1RaftServer.State.Log.GetMostRecentIndex())
-			raft.Log.Info("most recent leader index:", leader.State.Log.GetMostRecentIndex())
-			raft.Log.Info("commit index:", leader.State.GetCommitIndex())
-			raft.Log.Info("leader commit:", leader.State.GetCommitIndex())
+			t.Logf("most recent index: %d", node1RaftServer.State.Log.GetMostRecentIndex())
+			t.Logf("most recent leader index: %d", leader.State.Log.GetMostRecentIndex())
+			t.Logf("commit index: %d", leader.State.GetCommitIndex())
+			t.Logf("leader commit: %d", leader.State.GetCommitIndex())
 		}
 		t.Fatal("Failed to replicate entry,", err)
 	}
-	err = verifySpecialNumber(node1RaftServer, 10, 0)
-	if err != nil {
+
+	if err = verifySpecialNumber(node1RaftServer, 10, 0); err != nil {
 		t.Fatal(err)
 	}
-	err = verifySpecialNumber(node2RaftServer, 10, 10)
-	if err != nil {
+	if err = verifySpecialNumber(node2RaftServer, 10, 10); err != nil {
 		t.Fatal(err)
 	}
-	err = verifySpecialNumber(node3RaftServer, 10, 10)
-	if err != nil {
+	if err = verifySpecialNumber(node3RaftServer, 10, 10); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -190,7 +177,7 @@ func TestRaftPersistentState(t *testing.T) {
 	}
 	t.Parallel()
 
-	raft.Log.Info("Testing persistent State")
+	t.Log("Testing persistent State")
 	node1Lis, node1Port := rafttestutil.StartListener()
 	node1 := rafttestutil.SetUpNode("node1", "localhost", node1Port, "_")
 	defer rafttestutil.CloseListener(node1Lis)
@@ -223,11 +210,11 @@ func TestRaftPersistentState(t *testing.T) {
 	time.Sleep(1 * time.Second)
 
 	currentTerm := node1RaftServer.State.GetCurrentTerm()
-	raft.Log.Info("Current Term:", currentTerm)
+	t.Log("Current Term:", currentTerm)
 	lastApplied := node1RaftServer.State.GetLastApplied()
-	raft.Log.Info("Last applied:", lastApplied)
+	t.Log("Last applied:", lastApplied)
 	votedFor := node1RaftServer.State.GetVotedFor()
-	raft.Log.Info("Voted For:", votedFor)
+	t.Log("Voted For:", votedFor)
 
 	node1RebootLis, _ := rafttestutil.StartListener()
 	defer rafttestutil.CloseListener(node1RebootLis)
@@ -253,7 +240,7 @@ func TestRaftConfigurationChange(t *testing.T) {
 	}
 	t.Parallel()
 
-	raft.Log.Info("Testing joinging and leaving cluster")
+	t.Log("Testing joinging and leaving cluster")
 
 	node1Lis, node1Port := rafttestutil.StartListener()
 	defer rafttestutil.CloseListener(node1Lis)
@@ -271,7 +258,7 @@ func TestRaftConfigurationChange(t *testing.T) {
 	defer rafttestutil.CloseListener(node4Lis)
 	node4 := rafttestutil.SetUpNode("node4", "localhost", node4Port, "_")
 
-	raft.Log.Info("Listeners set up")
+	t.Log("Listeners set up")
 
 	node1RaftDirectory := rafttestutil.CreateRaftDirectory(path.Join(os.TempDir(), "rafttest3", "node1"))
 	var node1RaftServer *raft.NetworkServer
@@ -327,13 +314,13 @@ func TestRaftConfigurationChange(t *testing.T) {
 		t.Fatal("Unable to find a leader")
 	}
 
-	raft.Log.Info(leader.State.NodeID, " is to leave configuration")
+	t.Logf("%s is to leave configuration", leader.State.NodeID)
 
 	newNodes := []raft.Node{node1, node2, node3, node4}
 	for i := 0; i < len(newNodes); i++ {
 		if newNodes[i].NodeID == leader.State.NodeID {
 			newNodes = append(newNodes[:i], newNodes[i+1:]...)
-			raft.Log.Info("Removing leader from new set of nodes")
+			t.Log("Removing leader from new set of nodes")
 			break
 		}
 	}
@@ -386,7 +373,7 @@ func TestStartNodeOutOfConfiguration(t *testing.T) {
 	}
 	t.Parallel()
 
-	raft.Log.Info("Testing starting a node without a configuration")
+	t.Log("Testing starting a node without a configuration")
 
 	node1Lis, node1Port := rafttestutil.StartListener()
 	defer rafttestutil.CloseListener(node1Lis)
