@@ -1,23 +1,32 @@
 module paranoid
 
+go 1.18
+
 require (
-	github.com/cheggaaa/pb v2.0.6+incompatible
-	github.com/golang/protobuf v1.2.0
-	github.com/hanwen/go-fuse v0.0.0-20190217114934-ce2558b4d3b5
-	github.com/huin/goupnp v1.0.0
-	github.com/kardianos/osext v0.0.0-20170510131534-ae77be60afb1
-	github.com/mattn/go-colorable v0.1.0 // indirect
-	github.com/mattn/go-isatty v0.0.4 // indirect
-	github.com/urfave/cli v1.20.0
-	golang.org/x/crypto v0.0.0-20190219172222-a4c6cb3142f2
-	golang.org/x/net v0.0.0-20190213061140-3a22650c66bd
-	golang.org/x/sync v0.0.0-20181221193216-37e7f081c4d4 // indirect
-	golang.org/x/sys v0.0.0-20190220154126-629670e5acc5 // indirect
-	golang.org/x/text v0.3.1-0.20180807135948-17ff2d5776d2 // indirect
-	google.golang.org/genproto v0.0.0-20190219182410-082222b4a5c5 // indirect
-	google.golang.org/grpc v1.18.0
+	github.com/cheggaaa/pb v2.0.7+incompatible
+	github.com/golang/protobuf v1.5.2
+	github.com/hanwen/go-fuse v1.0.0
+	github.com/huin/goupnp v1.0.3
+	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
+	github.com/urfave/cli v1.22.9
+	golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e
+	golang.org/x/net v0.0.0-20220607020251-c690dde0001d
+	google.golang.org/grpc v1.47.0
+)
+
+require (
+	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
+	github.com/mattn/go-colorable v0.1.12 // indirect
+	github.com/mattn/go-isatty v0.0.14 // indirect
+	github.com/russross/blackfriday/v2 v2.1.0 // indirect
+	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
+	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f // indirect
+	golang.org/x/sys v0.0.0-20220610221304-9f5ed59c137d // indirect
+	golang.org/x/text v0.3.7 // indirect
+	google.golang.org/genproto v0.0.0-20220608133413-ed9918b62aac // indirect
+	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/VividCortex/ewma.v1 v1.1.1 // indirect
-	gopkg.in/cheggaaa/pb.v2 v2.0.6 // indirect
+	gopkg.in/cheggaaa/pb.v2 v2.0.7 // indirect
 	gopkg.in/fatih/color.v1 v1.7.0 // indirect
 	gopkg.in/mattn/go-colorable.v0 v0.1.0 // indirect
 	gopkg.in/mattn/go-isatty.v0 v0.0.4 // indirect
