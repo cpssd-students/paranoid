@@ -260,7 +260,7 @@ func (s *NetworkServer) applyLogUpdates(snapshotDirectory string, startIndex, en
 		}
 
 		switch logEntry.Entry.Type {
-		case pb.Entry_StateMachineCommand:
+		case pb.EntryType_ENTRY_TYPE_STATE_MACHINE_COMMAND:
 			libpfsCommand := logEntry.Entry.GetCommand()
 			if libpfsCommand == nil {
 				return 0, errors.New("unable to apply log entry with empty command field")
@@ -270,18 +270,18 @@ func (s *NetworkServer) applyLogUpdates(snapshotDirectory string, startIndex, en
 			if result.Code == returncodes.EUNEXPECTED {
 				return 0, fmt.Errorf("error applying log entry: %s", result.Err)
 			}
-		case pb.Entry_ConfigurationChange:
+		case pb.EntryType_ENTRY_TYPE_CONFIGURATION_CHANGE:
 			config := logEntry.Entry.GetConfig()
 			if config == nil {
 				return 0, errors.New("unable to apply log entry with empty config field")
 			}
 
-			if config.Type == pb.Configuration_CurrentConfiguration {
+			if config.Type == pb.ConfigurationType_CONFIGURATION_TYPE_CURRENT {
 				snapshotConfig.UpdateCurrentConfiguration(protoNodesToNodes(config.Nodes), 0)
 			} else {
 				snapshotConfig.NewFutureConfiguration(protoNodesToNodes(config.Nodes), 0)
 			}
-		case pb.Entry_KeyStateCommand:
+		case pb.EntryType_ENTRY_TYPE_KEY_STATE_COMMAND:
 			keyChange := logEntry.Entry.GetKeyCommand()
 			if keyChange == nil {
 				return 0, errors.New("unable to apply log entry with empty key change field")
@@ -535,7 +535,7 @@ func (s *NetworkServer) sendSnapshot(node *Node) {
 	}
 	defer conn.Close()
 
-	client := pb.NewRaftNetworkClient(conn)
+	client := pb.NewRaftNetworkServiceClient(conn)
 	currentSnapshot := path.Join(s.raftInfoDirectory, SnapshotDirectory, CurrentSnapshotDirectory)
 	snapshotMeta, err := getSnapshotMetaInformation(currentSnapshot)
 	if err != nil {
@@ -579,7 +579,7 @@ func (s *NetworkServer) sendSnapshot(node *Node) {
 				}
 			}
 
-			response, err := client.InstallSnapshot(context.Background(), &pb.SnapshotRequest{
+			response, err := client.Snapshot(context.Background(), &pb.SnapshotRequest{
 				Term:              s.State.GetCurrentTerm(),
 				LeaderId:          s.nodeDetails.NodeID,
 				LastIncludedIndex: snapshotMeta.LastIncludedIndex,

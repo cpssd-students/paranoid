@@ -1,6 +1,3 @@
-//go:build !integration
-// +build !integration
-
 package test
 
 import (
@@ -143,7 +140,7 @@ func TestRaftLogReplication(t *testing.T) {
 	defer rafttestutil.StopRaftServer(node3RaftServer)
 
 	_, err := node1RaftServer.RequestAddLogEntry(&pb.Entry{
-		Type: pb.Entry_Demo,
+		Type: pb.EntryType_ENTRY_TYPE_DEMO,
 		Uuid: rafttestutil.GenerateNewUUID(),
 		Demo: &pb.DemoCommand{Number: 10},
 	})
@@ -190,7 +187,7 @@ func TestRaftPersistentState(t *testing.T) {
 	defer rafttestutil.StopRaftServer(node1RaftServer)
 
 	_, err := node1RaftServer.RequestAddLogEntry(&pb.Entry{
-		Type: pb.Entry_Demo,
+		Type: pb.EntryType_ENTRY_TYPE_DEMO,
 		Uuid: rafttestutil.GenerateNewUUID(),
 		Demo: &pb.DemoCommand{Number: 10},
 	})
@@ -289,7 +286,7 @@ func TestRaftConfigurationChange(t *testing.T) {
 	defer rafttestutil.StopRaftServer(node4RaftServer)
 
 	_, err := node1RaftServer.RequestAddLogEntry(&pb.Entry{
-		Type: pb.Entry_Demo,
+		Type: pb.EntryType_ENTRY_TYPE_DEMO,
 		Uuid: rafttestutil.GenerateNewUUID(),
 		Demo: &pb.DemoCommand{Number: 10},
 	})
@@ -348,7 +345,7 @@ func TestRaftConfigurationChange(t *testing.T) {
 
 	if node1RaftServer.State.NodeID != leader.State.NodeID {
 		_, err := node1RaftServer.RequestAddLogEntry(&pb.Entry{
-			Type: pb.Entry_Demo,
+			Type: pb.EntryType_ENTRY_TYPE_DEMO,
 			Uuid: rafttestutil.GenerateNewUUID(),
 			Demo: &pb.DemoCommand{Number: 1337},
 		})
@@ -357,7 +354,7 @@ func TestRaftConfigurationChange(t *testing.T) {
 		}
 	} else {
 		_, err := node2RaftServer.RequestAddLogEntry(&pb.Entry{
-			Type: pb.Entry_Demo,
+			Type: pb.EntryType_ENTRY_TYPE_DEMO,
 			Uuid: rafttestutil.GenerateNewUUID(),
 			Demo: &pb.DemoCommand{Number: 1337},
 		})
@@ -387,7 +384,7 @@ func TestStartNodeOutOfConfiguration(t *testing.T) {
 	defer rafttestutil.StopRaftServer(node1RaftServer)
 
 	_, err := node1RaftServer.RequestAddLogEntry(&pb.Entry{
-		Type: pb.Entry_Demo,
+		Type: pb.EntryType_ENTRY_TYPE_DEMO,
 		Uuid: rafttestutil.GenerateNewUUID(),
 		Demo: &pb.DemoCommand{Number: 10},
 	})

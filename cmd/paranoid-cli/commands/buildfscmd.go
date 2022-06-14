@@ -68,12 +68,13 @@ func Buildfs(c *cli.Context) {
 			log.Fatalf("broken file in log directory %s: %v", lg, err)
 		}
 
-		if logEntry.Entry.Type == pb.Entry_StateMachineCommand {
-			er := raft.PerformLibPfsCommand(pfsPath, logEntry.Entry.Command)
-			if er.Code == returncodes.EUNEXPECTED {
+		if logEntry.Entry.Type == pb.EntryType_ENTRY_TYPE_STATE_MACHINE_COMMAND {
+			if res := raft.PerformLibPfsCommand(
+				pfsPath, logEntry.Entry.Command,
+			); res.Code == returncodes.EUNEXPECTED {
 				fmt.Println("pfsLib failed on command: ", logEntry.Entry.Command)
 				log.Fatalf("libpfs failed on command %s: %v",
-					logEntry.Entry.Command.String(), er.Err)
+					logEntry.Entry.Command.String(), res.Err)
 			}
 		}
 		bar.Increment()

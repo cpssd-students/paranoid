@@ -283,20 +283,20 @@ func (s *State) GetSpecialNumber() uint64 {
 
 func (s *State) applyLogEntry(logEntry *pb.LogEntry) *StateMachineResult {
 	switch logEntry.Entry.Type {
-	case pb.Entry_Demo:
+	case pb.EntryType_ENTRY_TYPE_DEMO:
 		demoCommand := logEntry.Entry.GetDemo()
 		if demoCommand == nil {
 			log.Fatal("Error applying Log to state machine")
 		}
 		s.specialNumber = demoCommand.Number
-	case pb.Entry_ConfigurationChange:
+	case pb.EntryType_ENTRY_TYPE_CONFIGURATION_CHANGE:
 		config := logEntry.Entry.GetConfig()
 		if config != nil {
 			s.ConfigurationApplied <- config
 		} else {
 			log.Fatal("Error applying configuration update")
 		}
-	case pb.Entry_StateMachineCommand:
+	case pb.EntryType_ENTRY_TYPE_STATE_MACHINE_COMMAND:
 		libpfsCommand := logEntry.Entry.GetCommand()
 		if libpfsCommand == nil {
 			log.Fatal("Error applying Log to state machine")
@@ -305,7 +305,7 @@ func (s *State) applyLogEntry(logEntry *pb.LogEntry) *StateMachineResult {
 			log.Fatal("PfsDirectory is not set")
 		}
 		return PerformLibPfsCommand(s.pfsDirectory, libpfsCommand)
-	case pb.Entry_KeyStateCommand:
+	case pb.EntryType_ENTRY_TYPE_KEY_STATE_COMMAND:
 		keyCommand := logEntry.Entry.GetKeyCommand()
 		if keyCommand == nil {
 			log.Fatal("Error applying KeyStateCommand to state machine")

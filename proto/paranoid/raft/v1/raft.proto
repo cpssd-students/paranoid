@@ -6,19 +6,21 @@ package paranoid.raft.v1;
 
 option go_package = "github.com/cpssd-students/paranoid/proto/paranoid/raft/v1;raft";
 
-service RaftNetwork {
+service RaftNetworkService {
     rpc AppendEntries (AppendEntriesRequest) returns (AppendEntriesResponse) {}
     rpc RequestVote (RequestVoteRequest) returns (RequestVoteResponse) {}
-    rpc ClientToLeaderRequest (EntryRequest) returns (EmptyMessage) {}
-    rpc InstallSnapshot (SnapshotRequest) returns (SnapshotResponse) {}
+    rpc ClientToLeader (ClientToLeaderRequest) returns (ClientToLeaderResponse) {}
+    rpc Snapshot (SnapshotRequest) returns (SnapshotResponse) {}
 }
 
 message EmptyMessage {}
 
-message EntryRequest {
+message ClientToLeaderRequest {
     string sender_id = 1; // required
     Entry entry = 2; // required
 }
+
+message ClientToLeaderResponse {}
 
 message AppendEntriesRequest {
     uint64 term = 1; // required
@@ -57,11 +59,6 @@ message StateMachineCommand {
 }
 
 message KeyStateCommand {
-    enum KSMType {
-        UpdateKeyPiece = 0;
-        NewGeneration = 1;
-        OwnerComplete = 2;
-    }
     KSMType type = 1;
 
     // UpdateKeyPiece arguments
@@ -76,6 +73,13 @@ message KeyStateCommand {
     string owner_complete  = 6; // optional
 }
 
+enum KSMType {
+    KSM_TYPE_UNSPECIFIED = 0;
+    KSM_TYPE_UPDATE_KEY_PIECE = 1;
+    KSM_TYPE_NEW_GENERATION = 2;
+    KSM_TYPE_OWNER_COMPLETE = 3;
+}
+
 message Node {
     string ip = 1; // required
     string port = 2; // required
@@ -84,12 +88,14 @@ message Node {
 }
 
 message Configuration {
-    enum ConfigurationType {
-      CurrentConfiguration = 0;
-      FutureConfiguration = 1;
-    }
     ConfigurationType type = 1; // required
     repeated Node nodes = 2; // required
+}
+
+enum ConfigurationType {
+    CONFIGURATION_TYPE_UNSPECIFIED = 0;
+    CONFIGURATION_TYPE_CURRENT = 1;
+    CONFIGURATION_TYPE_FUTURE = 2;
 }
 
 message DemoCommand {
@@ -97,18 +103,20 @@ message DemoCommand {
 }
 
 message Entry {
-    enum EntryType {
-      StateMachineCommand = 0;
-      ConfigurationChange = 1;
-      Demo = 2;
-      KeyStateCommand = 3;
-    }
     EntryType type = 1; // required 
     string uuid = 2; // required
     StateMachineCommand command = 3; // optional 
     Configuration config = 4; // optional 
     DemoCommand demo = 5; // optional
     KeyStateCommand key_command = 6; // optional
+}
+
+enum EntryType {
+    ENTRY_TYPE_UNSPECIFIED = 0;
+    ENTRY_TYPE_STATE_MACHINE_COMMAND = 1;
+    ENTRY_TYPE_CONFIGURATION_CHANGE = 2;
+    ENTRY_TYPE_DEMO = 3;
+    ENTRY_TYPE_KEY_STATE_COMMAND = 4;
 }
 
 message LogEntry {

@@ -189,7 +189,7 @@ func startRPCServer(lis *net.Listener, password string) {
 		)
 	}
 
-	rpb.RegisterRaftNetworkServer(srv, globals.RaftNetworkServer)
+	rpb.RegisterRaftNetworkServiceServer(srv, globals.RaftNetworkServer)
 
 	globals.Wait.Add(1)
 	go func() {

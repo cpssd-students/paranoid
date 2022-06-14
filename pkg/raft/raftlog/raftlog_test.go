@@ -1,6 +1,3 @@
-//go:build !integration
-// +build !integration
-
 package raftlog
 
 import (
@@ -51,7 +48,7 @@ func TestWriteReadDelete(t *testing.T) {
 		&pb.LogEntry{
 			Term: 0,
 			Entry: &pb.Entry{
-				Type: pb.Entry_StateMachineCommand,
+				Type: pb.EntryType_ENTRY_TYPE_STATE_MACHINE_COMMAND,
 				Command: &pb.StateMachineCommand{
 					Type: 0,
 					Path: "ThisIsAPath",
@@ -66,7 +63,7 @@ func TestWriteReadDelete(t *testing.T) {
 		&pb.LogEntry{
 			Term: 0,
 			Entry: &pb.Entry{
-				Type: pb.Entry_StateMachineCommand,
+				Type: pb.EntryType_ENTRY_TYPE_STATE_MACHINE_COMMAND,
 				Command: &pb.StateMachineCommand{
 					Type: 0,
 					Path: "ThisIsAPath2",

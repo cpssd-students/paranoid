@@ -62,7 +62,7 @@ func StartRaft(lis *net.Listener, nodeDetails Node, pfsDirectory, raftInfoDirect
 	var opts []grpc.ServerOption
 	srv := grpc.NewServer(opts...)
 	raftServer := NewNetworkServer(nodeDetails, pfsDirectory, raftInfoDirectory, startConfiguration, false, false, false)
-	pb.RegisterRaftNetworkServer(srv, raftServer)
+	pb.RegisterRaftNetworkServiceServer(srv, raftServer)
 	raftServer.Wait.Add(1)
 	go func() {
 		log.Print("RaftNetworkServer started")
@@ -163,10 +163,10 @@ func (s *NetworkServer) RequestAddLogEntry(entry *pb.Entry) (*StateMachineResult
 // RequestKeyStateUpdate requests and update
 func (s *NetworkServer) RequestKeyStateUpdate(owner, holder *pb.Node, generation int64) error {
 	entry := &pb.Entry{
-		Type: pb.Entry_KeyStateCommand,
+		Type: pb.EntryType_ENTRY_TYPE_KEY_STATE_COMMAND,
 		Uuid: generateNewUUID(),
 		KeyCommand: &pb.KeyStateCommand{
-			Type:       pb.KeyStateCommand_UpdateKeyPiece,
+			Type:       pb.KSMType_KSM_TYPE_UPDATE_KEY_PIECE,
 			KeyOwner:   owner,
 			KeyHolder:  holder,
 			Generation: generation,
@@ -183,10 +183,10 @@ func (s *NetworkServer) RequestKeyStateUpdate(owner, holder *pb.Node, generation
 // RequestNewGeneration retrns a number, a list of peer nodes, and an error.
 func (s *NetworkServer) RequestNewGeneration(newNode string) (int, []string, error) {
 	entry := &pb.Entry{
-		Type: pb.Entry_KeyStateCommand,
+		Type: pb.EntryType_ENTRY_TYPE_KEY_STATE_COMMAND,
 		Uuid: generateNewUUID(),
 		KeyCommand: &pb.KeyStateCommand{
-			Type:    pb.KeyStateCommand_NewGeneration,
+			Type:    pb.KSMType_KSM_TYPE_NEW_GENERATION,
 			NewNode: newNode,
 		},
 	}
@@ -201,10 +201,10 @@ func (s *NetworkServer) RequestNewGeneration(newNode string) (int, []string, err
 // RequestOwnerComplete of the node
 func (s *NetworkServer) RequestOwnerComplete(nodeID string, generation int64) error {
 	entry := &pb.Entry{
-		Type: pb.Entry_KeyStateCommand,
+		Type: pb.EntryType_ENTRY_TYPE_KEY_STATE_COMMAND,
 		Uuid: generateNewUUID(),
 		KeyCommand: &pb.KeyStateCommand{
-			Type:          pb.KeyStateCommand_OwnerComplete,
+			Type:          pb.KSMType_KSM_TYPE_OWNER_COMPLETE,
 			OwnerComplete: nodeID,
 			Generation:    generation,
 		},
@@ -220,7 +220,7 @@ func (s *NetworkServer) RequestOwnerComplete(nodeID string, generation int64) er
 // RequestWriteCommand performs a write
 func (s *NetworkServer) RequestWriteCommand(filePath string, offset, length int64, data []byte) (returnCode returncodes.Code, bytesWrote int, returnError error) {
 	entry := &pb.Entry{
-		Type: pb.Entry_StateMachineCommand,
+		Type: pb.EntryType_ENTRY_TYPE_STATE_MACHINE_COMMAND,
 		Uuid: generateNewUUID(),
 		Command: &pb.StateMachineCommand{
 			Type:   uint32(TypeWrite),
@@ -240,7 +240,7 @@ func (s *NetworkServer) RequestWriteCommand(filePath string, offset, length int6
 // RequestCreatCommand performs the Creat command
 func (s *NetworkServer) RequestCreatCommand(filePath string, mode uint32) (returnCode returncodes.Code, returnError error) {
 	entry := &pb.Entry{
-		Type: pb.Entry_StateMachineCommand,
+		Type: pb.EntryType_ENTRY_TYPE_STATE_MACHINE_COMMAND,
 		Uuid: generateNewUUID(),
 		Command: &pb.StateMachineCommand{
 			Type: uint32(TypeCreat),
@@ -258,7 +258,7 @@ func (s *NetworkServer) RequestCreatCommand(filePath string, mode uint32) (retur
 // RequestChmodCommand performs the Chmod command
 func (s *NetworkServer) RequestChmodCommand(filePath string, mode uint32) (returnCode returncodes.Code, returnError error) {
 	entry := &pb.Entry{
-		Type: pb.Entry_StateMachineCommand,
+		Type: pb.EntryType_ENTRY_TYPE_STATE_MACHINE_COMMAND,
 		Uuid: generateNewUUID(),
 		Command: &pb.StateMachineCommand{
 			Type: uint32(TypeChmod),
@@ -276,7 +276,7 @@ func (s *NetworkServer) RequestChmodCommand(filePath string, mode uint32) (retur
 // RequestTruncateCommand performs the Truncate command
 func (s *NetworkServer) RequestTruncateCommand(filePath string, length int64) (returnCode returncodes.Code, returnError error) {
 	entry := &pb.Entry{
-		Type: pb.Entry_StateMachineCommand,
+		Type: pb.EntryType_ENTRY_TYPE_STATE_MACHINE_COMMAND,
 		Uuid: generateNewUUID(),
 		Command: &pb.StateMachineCommand{
 			Type:   uint32(TypeTruncate),
@@ -304,7 +304,7 @@ func (s *NetworkServer) RequestUtimesCommand(filePath string, atime, mtime *time
 	modifySeconds, modifyNanoSeconds := splitTime(mtime)
 
 	entry := &pb.Entry{
-		Type: pb.Entry_StateMachineCommand,
+		Type: pb.EntryType_ENTRY_TYPE_STATE_MACHINE_COMMAND,
 		Uuid: generateNewUUID(),
 		Command: &pb.StateMachineCommand{
 			Type:              uint32(TypeUtimes),
@@ -325,7 +325,7 @@ func (s *NetworkServer) RequestUtimesCommand(filePath string, atime, mtime *time
 // RequestRenameCommand performs the rename command
 func (s *NetworkServer) RequestRenameCommand(oldPath, newPath string) (returnCode returncodes.Code, returnError error) {
 	entry := &pb.Entry{
-		Type: pb.Entry_StateMachineCommand,
+		Type: pb.EntryType_ENTRY_TYPE_STATE_MACHINE_COMMAND,
 		Uuid: generateNewUUID(),
 		Command: &pb.StateMachineCommand{
 			Type:    uint32(TypeRename),
@@ -343,7 +343,7 @@ func (s *NetworkServer) RequestRenameCommand(oldPath, newPath string) (returnCod
 // RequestLinkCommand performs the link command
 func (s *NetworkServer) RequestLinkCommand(oldPath, newPath string) (returnCode returncodes.Code, returnError error) {
 	entry := &pb.Entry{
-		Type: pb.Entry_StateMachineCommand,
+		Type: pb.EntryType_ENTRY_TYPE_STATE_MACHINE_COMMAND,
 		Uuid: generateNewUUID(),
 		Command: &pb.StateMachineCommand{
 			Type:    uint32(TypeLink),
@@ -361,7 +361,7 @@ func (s *NetworkServer) RequestLinkCommand(oldPath, newPath string) (returnCode 
 // RequestSymlinkCommand performs the symlink command
 func (s *NetworkServer) RequestSymlinkCommand(oldPath, newPath string) (returnCode returncodes.Code, returnError error) {
 	entry := &pb.Entry{
-		Type: pb.Entry_StateMachineCommand,
+		Type: pb.EntryType_ENTRY_TYPE_STATE_MACHINE_COMMAND,
 		Uuid: generateNewUUID(),
 		Command: &pb.StateMachineCommand{
 			Type:    uint32(TypeSymlink),
@@ -379,7 +379,7 @@ func (s *NetworkServer) RequestSymlinkCommand(oldPath, newPath string) (returnCo
 // RequestUnlinkCommand performs the unlink command
 func (s *NetworkServer) RequestUnlinkCommand(filePath string) (returnCode returncodes.Code, returnError error) {
 	entry := &pb.Entry{
-		Type: pb.Entry_StateMachineCommand,
+		Type: pb.EntryType_ENTRY_TYPE_STATE_MACHINE_COMMAND,
 		Uuid: generateNewUUID(),
 		Command: &pb.StateMachineCommand{
 			Type: uint32(TypeUnlink),
@@ -396,7 +396,7 @@ func (s *NetworkServer) RequestUnlinkCommand(filePath string) (returnCode return
 // RequestMkdirCommand performs the mkdir command
 func (s *NetworkServer) RequestMkdirCommand(filePath string, mode uint32) (returnCode returncodes.Code, returnError error) {
 	entry := &pb.Entry{
-		Type: pb.Entry_StateMachineCommand,
+		Type: pb.EntryType_ENTRY_TYPE_STATE_MACHINE_COMMAND,
 		Uuid: generateNewUUID(),
 		Command: &pb.StateMachineCommand{
 			Type: uint32(TypeMkdir),
@@ -414,7 +414,7 @@ func (s *NetworkServer) RequestMkdirCommand(filePath string, mode uint32) (retur
 // RequestRmdirCommand performs the rmdir command
 func (s *NetworkServer) RequestRmdirCommand(filePath string) (returnCode returncodes.Code, returnError error) {
 	entry := &pb.Entry{
-		Type: pb.Entry_StateMachineCommand,
+		Type: pb.EntryType_ENTRY_TYPE_STATE_MACHINE_COMMAND,
 		Uuid: generateNewUUID(),
 		Command: &pb.StateMachineCommand{
 			Type: uint32(TypeRmdir),
@@ -432,10 +432,10 @@ func (s *NetworkServer) RequestRmdirCommand(filePath string) (returnCode returnc
 func (s *NetworkServer) RequestChangeConfiguration(nodes []Node) error {
 	log.Printf("Configuration change requested %v", nodes)
 	entry := &pb.Entry{
-		Type: pb.Entry_ConfigurationChange,
+		Type: pb.EntryType_ENTRY_TYPE_CONFIGURATION_CHANGE,
 		Uuid: generateNewUUID(),
 		Config: &pb.Configuration{
-			Type:  pb.Configuration_FutureConfiguration,
+			Type:  pb.ConfigurationType_CONFIGURATION_TYPE_FUTURE,
 			Nodes: convertNodesToProto(nodes),
 		},
 	}
@@ -511,12 +511,12 @@ func PerformLibPfsCommand(directory string, command *pb.StateMachineCommand) *St
 // PerformKSMCommand updates the keys
 func PerformKSMCommand(sateMachine *keyman.KeyStateMachine, keyCommand *pb.KeyStateCommand) *StateMachineResult {
 	switch keyCommand.Type {
-	case pb.KeyStateCommand_UpdateKeyPiece:
+	case pb.KSMType_KSM_TYPE_UPDATE_KEY_PIECE:
 		err := keyman.StateMachine.Update(keyCommand)
 		return &StateMachineResult{
 			Err: err,
 		}
-	case pb.KeyStateCommand_NewGeneration:
+	case pb.KSMType_KSM_TYPE_NEW_GENERATION:
 		generationNumber, peers, err := keyman.StateMachine.NewGeneration(keyCommand.NewNode)
 		return &StateMachineResult{
 			Err: err,
@@ -525,7 +525,7 @@ func PerformKSMCommand(sateMachine *keyman.KeyStateMachine, keyCommand *pb.KeySt
 				Peers:            peers,
 			},
 		}
-	case pb.KeyStateCommand_OwnerComplete:
+	case pb.KSMType_KSM_TYPE_OWNER_COMPLETE:
 		err := keyman.StateMachine.OwnerComplete(keyCommand.OwnerComplete, keyCommand.Generation)
 		return &StateMachineResult{
 			Err: err,

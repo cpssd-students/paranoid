@@ -36,9 +36,11 @@ const (
 // MaxAppendEntries that can be send it one append request
 const MaxAppendEntries uint64 = 100
 
+var _ pb.RaftNetworkServiceServer = (*NetworkServer)(nil)
+
 // NetworkServer implements the raft protobuf server interface
 type NetworkServer struct {
-	pb.UnimplementedRaftNetworkServer
+	pb.UnimplementedRaftNetworkServiceServer
 
 	State *State
 	Wait  sync.WaitGroup
@@ -252,12 +254,12 @@ func (s *NetworkServer) appendLogEntry(entry *pb.Entry) {
 		return
 	}
 
-	if entry.Type == pb.Entry_ConfigurationChange {
+	if entry.Type == pb.EntryType_ENTRY_TYPE_CONFIGURATION_CHANGE {
 		config := entry.GetConfig()
 		if config == nil {
 			log.Fatal("Incorrect entry information. No configuration present")
 		}
-		if config.Type == pb.Configuration_CurrentConfiguration {
+		if config.Type == pb.ConfigurationType_CONFIGURATION_TYPE_CURRENT {
 			s.State.Configuration.UpdateCurrentConfiguration(protoNodesToNodes(config.Nodes), s.State.Log.GetMostRecentIndex())
 		} else {
 			s.State.Configuration.NewFutureConfiguration(protoNodesToNodes(config.Nodes), s.State.Log.GetMostRecentIndex())
@@ -266,10 +268,10 @@ func (s *NetworkServer) appendLogEntry(entry *pb.Entry) {
 }
 
 func (s *NetworkServer) addLogEntryLeader(entry *pb.Entry) error {
-	if entry.Type == pb.Entry_ConfigurationChange {
+	if entry.Type == pb.EntryType_ENTRY_TYPE_CONFIGURATION_CHANGE {
 		config := entry.GetConfig()
 		if config != nil {
-			if config.Type == pb.Configuration_FutureConfiguration {
+			if config.Type == pb.ConfigurationType_CONFIGURATION_TYPE_FUTURE {
 				if s.State.Configuration.GetFutureConfigurationActive() {
 					return errors.New("Can not change confirugation while another configuration change is underway")
 				}
@@ -293,16 +295,16 @@ func (s *NetworkServer) addLogEntryLeader(entry *pb.Entry) error {
 }
 
 // ClientToLeaderRequest implementation
-func (s *NetworkServer) ClientToLeaderRequest(ctx context.Context, req *pb.EntryRequest) (*pb.EmptyMessage, error) {
+func (s *NetworkServer) ClientToLeader(ctx context.Context, req *pb.ClientToLeaderRequest) (*pb.ClientToLeaderResponse, error) {
 	if !s.State.Configuration.InConfiguration(req.SenderId) {
-		return &pb.EmptyMessage{}, errors.New("Node is not in the configuration")
+		return &pb.ClientToLeaderResponse{}, errors.New("Node is not in the configuration")
 	}
 
 	if s.State.GetCurrentState() != LEADER {
-		return &pb.EmptyMessage{}, errors.New("Node is not the current leader")
+		return &pb.ClientToLeaderResponse{}, errors.New("Node is not the current leader")
 	}
 	err := s.addLogEntryLeader(req.Entry)
-	return &pb.EmptyMessage{}, err
+	return &pb.ClientToLeaderResponse{}, err
 }
 
 //sendLeaderLogEntry forwards a client request to the leader
@@ -328,8 +330,8 @@ func (s *NetworkServer) sendLeaderLogEntry(entry *pb.Entry) error {
 			defer conn.Close()
 
 			if err == nil {
-				client := pb.NewRaftNetworkClient(conn)
-				_, err := client.ClientToLeaderRequest(context.Background(), &pb.EntryRequest{
+				client := pb.NewRaftNetworkServiceClient(conn)
+				_, err := client.ClientToLeader(context.Background(), &pb.ClientToLeaderRequest{
 					SenderId: s.State.NodeID,
 					Entry:    entry,
 				})
@@ -423,7 +425,7 @@ func (s *NetworkServer) requestPeerVote(node *Node, term uint64, voteChannel cha
 			continue
 		}
 		defer conn.Close()
-		client := pb.NewRaftNetworkClient(conn)
+		client := pb.NewRaftNetworkServiceClient(conn)
 		response, err := client.RequestVote(context.Background(), &pb.RequestVoteRequest{
 			Term:         s.State.GetCurrentTerm(),
 			CandidateId:  s.State.NodeID,
@@ -544,7 +546,7 @@ func (s *NetworkServer) sendHeartBeat(node *Node) {
 		return
 	}
 	defer conn.Close()
-	client := pb.NewRaftNetworkClient(conn)
+	client := pb.NewRaftNetworkServiceClient(conn)
 	if s.State.Log.GetMostRecentIndex() >= nextIndex && !sendingSnapshot {
 		prevLogTerm := uint64(0)
 		if nextIndex-1 > 0 {
@@ -695,7 +697,7 @@ func (s *NetworkServer) manageConfigurationChanges() {
 			}
 		case config := <-s.State.ConfigurationApplied:
 			log.Printf("New configuration applied: %v", config)
-			if config.Type == pb.Configuration_CurrentConfiguration {
+			if config.Type == pb.ConfigurationType_CONFIGURATION_TYPE_CURRENT {
 				inConfig := false
 				for i := 0; i < len(config.Nodes); i++ {
 					if config.Nodes[i].NodeId == s.State.NodeID {
@@ -710,11 +712,11 @@ func (s *NetworkServer) manageConfigurationChanges() {
 			} else {
 				if s.State.GetCurrentState() == LEADER {
 					newConfig := &pb.Entry{
-						Type:    pb.Entry_ConfigurationChange,
+						Type:    pb.EntryType_ENTRY_TYPE_CONFIGURATION_CHANGE,
 						Uuid:    generateNewUUID(),
 						Command: nil,
 						Config: &pb.Configuration{
-							Type:  pb.Configuration_CurrentConfiguration,
+							Type:  pb.ConfigurationType_CONFIGURATION_TYPE_CURRENT,
 							Nodes: config.Nodes,
 						},
 					}
@@ -742,7 +744,12 @@ func (s *NetworkServer) manageEntryApplication() {
 }
 
 // NewNetworkServer creates a new instance of the raft server
-func NewNetworkServer(nodeDetails Node, pfsDirectory, raftInfoDirectory string, testConfiguration *StartConfiguration, TLSEnabled, TLSSkipVerify, encrypted bool) *NetworkServer {
+func NewNetworkServer(
+	nodeDetails Node,
+	pfsDirectory, raftInfoDirectory string,
+	testConfiguration *StartConfiguration,
+	TLSEnabled, TLSSkipVerify, encrypted bool,
+) *NetworkServer {
 	raftServer := &NetworkServer{State: newState(nodeDetails, pfsDirectory, raftInfoDirectory, testConfiguration)}
 	raftServer.ElectionTimeoutReset = make(chan bool, 100)
 	raftServer.Quit = make(chan bool)

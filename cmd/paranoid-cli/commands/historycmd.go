@@ -81,10 +81,10 @@ func logsToLogfile(logDir, filePath string, c *cli.Context) {
 func toLine(logNum int, pad string, p *pb.LogEntry) string {
 	marker := fmt.Sprintf("%-"+pad+"d Term: %-"+pad+"d", logNum, p.Term)
 
-	if p.Entry.Type == pb.Entry_StateMachineCommand {
+	if p.Entry.Type == pb.EntryType_ENTRY_TYPE_STATE_MACHINE_COMMAND {
 		return fmt.Sprintf("%s Command: %s\n",
 			marker, commandString(p.Entry.Command))
-	} else if p.Entry.Type == pb.Entry_ConfigurationChange {
+	} else if p.Entry.Type == pb.EntryType_ENTRY_TYPE_CONFIGURATION_CHANGE {
 		return fmt.Sprintf("%s ConfigChange: %s\n",
 			marker, configurationString(p.Entry.Config))
 	} else {
@@ -150,11 +150,11 @@ func commandTypeString(ty raft.ActionType) string {
 }
 
 // configTypeString returns the string representation of a configuration change log type.
-func configTypeString(ty pb.Configuration_ConfigurationType) string {
+func configTypeString(ty pb.ConfigurationType) string {
 	switch ty {
-	case pb.Configuration_CurrentConfiguration:
+	case pb.ConfigurationType_CONFIGURATION_TYPE_CURRENT:
 		return "Current Configuration"
-	case pb.Configuration_FutureConfiguration:
+	case pb.ConfigurationType_CONFIGURATION_TYPE_FUTURE:
 		return "Future Configuration"
 	default:
 		return "Unknown"
