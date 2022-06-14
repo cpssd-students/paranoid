@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"path"
 	"sync"
@@ -14,7 +15,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/cpssd-students/paranoid/cmd/pfsd/keyman"
-	"github.com/cpssd-students/paranoid/pkg/logger"
 	"github.com/cpssd-students/paranoid/pkg/raft"
 )
 
@@ -22,9 +22,6 @@ const (
 	// PasswordSaltLength is the length of the password salt
 	PasswordSaltLength int = 64
 )
-
-// Log is used to log messages from pfsd
-var Log *logger.ParanoidLogger
 
 // Node struct
 type Node struct {
@@ -40,10 +37,11 @@ func (n Node) String() string {
 
 // FileSystemAttributes stores the information written onto the disk
 type FileSystemAttributes struct {
-	Encrypted     bool       `json:"encrypted"`
-	KeyGenerated  bool       `json:"keygenerated"`
-	NetworkOff    bool       `json:"networkoff"`
-	EncryptionKey keyman.Key `json:"encryptionkey,omitempty"` //The encryption key is only saved to file in this manner if networking is turned off
+	Encrypted    bool `json:"encrypted"`
+	KeyGenerated bool `json:"keygenerated"`
+	NetworkOff   bool `json:"networkoff"`
+	// EncryptionKey key is only saved to file in this manner if networking is turned off.
+	EncryptionKey keyman.Key `json:"encryptionkey,omitempty"`
 }
 
 // RaftNetworkServer is an instance of the network server
@@ -103,7 +101,10 @@ func SetPoolPasswordHash(password string) error {
 	}
 
 	if password != "" {
-		PoolPasswordHash, err = bcrypt.GenerateFromPassword(append(PoolPasswordSalt, []byte(password)...), bcrypt.DefaultCost)
+		PoolPasswordHash, err = bcrypt.GenerateFromPassword(
+			append(PoolPasswordSalt, []byte(password)...),
+			bcrypt.DefaultCost,
+		)
 		return err
 	}
 	return nil
@@ -242,20 +243,21 @@ func (ks KeyPieceStore) SaveToDisk() error {
 	piecePath := path.Join(ParanoidDir, "meta", "pieces-new")
 	file, err := os.Create(piecePath)
 	if err != nil {
-		Log.Errorf("Unable to open %s for storing pieces: %s", piecePath, file.Name())
-		return fmt.Errorf("Unable to open %s for storing pieces: %s", piecePath, file.Name())
+		log.Printf("Unable to open %s for storing pieces: %s", piecePath, file.Name())
+		return fmt.Errorf("Unable to open %s for storing pieces %s: %w",
+			piecePath, file.Name(), err)
 	}
 	defer file.Close()
 	enc := gob.NewEncoder(file)
 	err = enc.Encode(ks)
 	if err != nil {
-		Log.Error("Failed encoding KeyPieceStore to GOB:", err)
-		return fmt.Errorf("failed encoding KeyPieceStore to GOB: %s", err)
+		log.Printf("Failed encoding KeyPieceStore to GOB: %v", err)
+		return fmt.Errorf("failed encoding KeyPieceStore to GOB: %w", err)
 	}
 	err = os.Rename(piecePath, path.Join(ParanoidDir, "meta", "pieces"))
 	if err != nil {
-		Log.Error("Failed to save KeyPieceStore to file:", err)
-		return fmt.Errorf("Failed to save KeyPieceStore to file: %s", err)
+		log.Printf("Failed to save KeyPieceStore to file: %v", err)
+		return fmt.Errorf("Failed to save KeyPieceStore to file: %w", err)
 	}
 	return nil
 }

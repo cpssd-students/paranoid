@@ -4,17 +4,19 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"path"
 	"syscall"
 
 	"github.com/cpssd-students/paranoid/pkg/libpfs/returncodes"
-	log "github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 // MkdirCommand is called when making a paranoidDirectory
-func MkdirCommand(paranoidDirectory, dirPath string, mode os.FileMode) (returnCode returncodes.Code, returnError error) {
-	log.V(1).Infof("Mkdir %s in %s", dirPath, paranoidDirectory)
+func MkdirCommand(
+	paranoidDirectory, dirPath string, mode os.FileMode,
+) (returnCode returncodes.Code, returnError error) {
+	log.Printf("Mkdir %s in %s", dirPath, paranoidDirectory)
 
 	err := GetFileSystemLock(paranoidDirectory, ExclusiveLock)
 	if err != nil {
@@ -52,29 +54,30 @@ func MkdirCommand(paranoidDirectory, dirPath string, mode os.FileMode) (returnCo
 
 	err = os.Mkdir(dirParanoidPath, mode)
 	if err != nil {
-		return returncodes.EUNEXPECTED, fmt.Errorf("error making paranoidDirectory %s: %s", dirParanoidPath, err)
+		return returncodes.EUNEXPECTED,
+			fmt.Errorf("error making paranoidDirectory %s: %w", dirParanoidPath, err)
 	}
 
 	contentsFile, err := os.Create(contentsPath)
 	if err != nil {
-		return returncodes.EUNEXPECTED, fmt.Errorf("error creating contents file: %s", err)
+		return returncodes.EUNEXPECTED, fmt.Errorf("error creating contents file: %w", err)
 	}
 	defer contentsFile.Close()
 
-	err = contentsFile.Chmod(os.FileMode(mode))
+	err = contentsFile.Chmod(mode)
 	if err != nil {
-		return returncodes.EUNEXPECTED, fmt.Errorf("error changing file permissions: %s", err)
+		return returncodes.EUNEXPECTED, fmt.Errorf("error changing file permissions: %w", err)
 	}
 
 	dirInfoFile, err := os.Create(dirInfoPath)
 	if err != nil {
-		return returncodes.EUNEXPECTED, fmt.Errorf("error creating info file: %s", err)
+		return returncodes.EUNEXPECTED, fmt.Errorf("error creating info file: %w", err)
 	}
 	defer dirInfoFile.Close()
 
 	_, err = dirInfoFile.Write(inodeBytes)
 	if err != nil {
-		return returncodes.EUNEXPECTED, fmt.Errorf("error writing to info file: %s", err)
+		return returncodes.EUNEXPECTED, fmt.Errorf("error writing to info file: %w", err)
 	}
 
 	inodeFile, err := os.Create(inodePath)

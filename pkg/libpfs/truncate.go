@@ -3,27 +3,27 @@ package libpfs
 import (
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"path"
 
 	"github.com/cpssd-students/paranoid/pkg/libpfs/encryption"
 	"github.com/cpssd-students/paranoid/pkg/libpfs/returncodes"
-	log "github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 //TruncateCommand reduces the file given to the new length
-func TruncateCommand(paranoidDirectory, filePath string, length int64) (returnCode returncodes.Code, returnError error) {
-	log.V(1).Infof("truncate file %s in %s to %d",
+func TruncateCommand(
+	paranoidDirectory, filePath string, length int64,
+) (returnCode returncodes.Code, returnError error) {
+	log.Printf("truncate file %s in %s to %d",
 		filePath, paranoidDirectory, length)
 
-	err := GetFileSystemLock(paranoidDirectory, SharedLock)
-	if err != nil {
+	if err := GetFileSystemLock(paranoidDirectory, SharedLock); err != nil {
 		return returncodes.EUNEXPECTED, err
 	}
 
 	defer func() {
-		err := UnLockFileSystem(paranoidDirectory)
-		if err != nil {
+		if err := UnLockFileSystem(paranoidDirectory); err != nil {
 			returnCode = returncodes.EUNEXPECTED
 			returnError = err
 		}
@@ -66,7 +66,8 @@ func TruncateCommand(paranoidDirectory, filePath string, length int64) (returnCo
 		}
 	}()
 
-	contentsFile, err := os.OpenFile(path.Join(paranoidDirectory, "contents", inodeName), os.O_WRONLY, 0777)
+	contentsFile, err := os.OpenFile(
+		path.Join(paranoidDirectory, "contents", inodeName), os.O_WRONLY, 0777)
 	if err != nil {
 		return returncodes.EUNEXPECTED, fmt.Errorf("error opening contents file: %s", err)
 	}

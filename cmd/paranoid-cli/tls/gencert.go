@@ -65,15 +65,18 @@ func GenCertificate(pfsDir string) error {
 			// American spelling :(
 			Organization: []string{organisation},
 		},
-		NotBefore:             startDate,
-		NotAfter:              endDate,
-		KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature | x509.KeyUsageCertSign,
+		NotBefore: startDate,
+		NotAfter:  endDate,
+		KeyUsage: x509.KeyUsageKeyEncipherment |
+			x509.KeyUsageDigitalSignature |
+			x509.KeyUsageCertSign,
 		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
 		BasicConstraintsValid: true,
-		IsCA: true,
+		IsCA:                  true,
 	}
 
-	fmt.Print("Enter a comma-separated list of hostnames and/or IP addresses this cert will validate: ")
+	fmt.Print("Enter a comma-separated list of hostnames and/or IP addresses " +
+		"this cert will validate: ")
 	scanner.Scan()
 	if err = scanner.Err(); err != nil {
 		return fmt.Errorf("could not read user input: %v", err)
@@ -89,18 +92,20 @@ func GenCertificate(pfsDir string) error {
 		}
 	}
 
-	certBytes, err := x509.CreateCertificate(rand.Reader, &template, &template, &privateKey.PublicKey, privateKey)
+	certBytes, err := x509.CreateCertificate(
+		rand.Reader, &template, &template, &privateKey.PublicKey, privateKey)
 	if err != nil {
 		return fmt.Errorf("failed to create certificate: %v", err)
 	}
 
 	certPath := path.Join(pfsDir, "meta", "cert.pem")
 	certFile, err := os.OpenFile(certPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
-	defer certFile.Close()
 	if err != nil {
 		return fmt.Errorf("failed to create cert file: %v", err)
 	}
-	pem.Encode(certFile, &pem.Block{
+	defer certFile.Close()
+
+	_ = pem.Encode(certFile, &pem.Block{
 		Type:  "CERTIFICATE",
 		Bytes: certBytes,
 	})
@@ -108,11 +113,11 @@ func GenCertificate(pfsDir string) error {
 
 	keyPath := path.Join(pfsDir, "meta", "key.pem")
 	keyFile, err := os.OpenFile(keyPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
-	defer keyFile.Close()
 	if err != nil {
 		return fmt.Errorf("failed to create key file: %v", err)
 	}
-	pem.Encode(keyFile, &pem.Block{
+	defer keyFile.Close()
+	_ = pem.Encode(keyFile, &pem.Block{
 		Type:  "RSA PRIVATE KEY",
 		Bytes: x509.MarshalPKCS1PrivateKey(privateKey),
 	})

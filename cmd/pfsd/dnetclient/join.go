@@ -3,6 +3,7 @@ package dnetclient
 import (
 	"context"
 	"fmt"
+	"log"
 	"strconv"
 	"time"
 
@@ -40,7 +41,7 @@ func Join(pool, password string) error {
 	interval := response.ResetInterval / 10 * 9
 	globals.ResetInterval, err = time.ParseDuration(strconv.FormatInt(interval, 10) + "ms")
 	if err != nil {
-		Log.Error("Invalid renew interval.", err)
+		log.Printf("Invalid renew interval: %v", err)
 	}
 
 	peerList := "Currently Connected: "
@@ -53,9 +54,9 @@ func Join(pool, password string) error {
 			CommonName: node.CommonName,
 		})
 	}
-	Log.Info(peerList)
+	log.Println(peerList)
 
-	Log.Info("Successfully joined discovery network")
+	log.Println("Successfully joined discovery network")
 
 	return nil
 }

@@ -3,6 +3,7 @@ package dnetclient
 import (
 	"context"
 	"errors"
+	"log"
 
 	"github.com/cpssd-students/paranoid/cmd/pfsd/globals"
 
@@ -13,7 +14,7 @@ import (
 func Disconnect(pool, password string) error {
 	conn, err := dialDiscovery()
 	if err != nil {
-		Log.Error("Failed to dial discovery server at ", globals.DiscoveryAddr)
+		log.Printf("Failed to dial discovery server at %s", globals.DiscoveryAddr)
 		return errors.New("failed to dial discovery server")
 	}
 	defer conn.Close()
@@ -30,7 +31,7 @@ func Disconnect(pool, password string) error {
 				Uuid: globals.ThisNode.UUID},
 		})
 	if err != nil {
-		Log.Error("Could not send disconnect message")
+		log.Print("Could not send disconnect message")
 		return errors.New("could not send disconnect message")
 	}
 

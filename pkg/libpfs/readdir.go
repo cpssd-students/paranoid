@@ -3,16 +3,18 @@ package libpfs
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"path"
 	"strings"
 
 	"github.com/cpssd-students/paranoid/pkg/libpfs/returncodes"
-	log "github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 //ReadDirCommand returns a list of all the files in the given paranoidDirectory
-func ReadDirCommand(paranoidDirectory, dirPath string) (returnCode returncodes.Code, fileNames []string, returnError error) {
-	log.V(1).Infof("readdir %s from %s", dirPath, paranoidDirectory)
+func ReadDirCommand(
+	paranoidDirectory, dirPath string,
+) (returnCode returncodes.Code, fileNames []string, returnError error) {
+	log.Printf("readdir %s from %s", dirPath, paranoidDirectory)
 
 	err := GetFileSystemLock(paranoidDirectory, SharedLock)
 	if err != nil {
@@ -54,7 +56,8 @@ func ReadDirCommand(paranoidDirectory, dirPath string) (returnCode returncodes.C
 
 	files, err := ioutil.ReadDir(dirParanoidPath)
 	if err != nil {
-		return returncodes.EUNEXPECTED, nil, fmt.Errorf("error reading paranoidDirectory %s: %s", dirPath, err)
+		return returncodes.EUNEXPECTED, nil,
+			fmt.Errorf("error reading paranoidDirectory %s: %w", dirPath, err)
 	}
 
 	var names []string

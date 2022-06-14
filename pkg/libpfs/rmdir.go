@@ -4,17 +4,19 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
 	"syscall"
 
 	"github.com/cpssd-students/paranoid/pkg/libpfs/returncodes"
-	log "github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 // RmdirCommand removes a paranoidDirectory
-func RmdirCommand(paranoidDirectory, dirPath string) (returnCode returncodes.Code, returnError error) {
-	log.V(1).Infof("rmdir %s in %s", dirPath, paranoidDirectory)
+func RmdirCommand(
+	paranoidDirectory, dirPath string,
+) (returnCode returncodes.Code, returnError error) {
+	log.Printf("rmdir %s in %s", dirPath, paranoidDirectory)
 
 	err := GetFileSystemLock(paranoidDirectory, ExclusiveLock)
 	if err != nil {

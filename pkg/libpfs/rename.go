@@ -4,15 +4,17 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 
 	"github.com/cpssd-students/paranoid/pkg/libpfs/returncodes"
-	log "github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 // RenameCommand is called when renaming a file
-func RenameCommand(paranoidDirectory, oldFilePath, newFilePath string) (returnCode returncodes.Code, returnError error) {
-	log.V(1).Infof("rename %s to %s in %s",
+func RenameCommand(
+	paranoidDirectory, oldFilePath, newFilePath string,
+) (returnCode returncodes.Code, returnError error) {
+	log.Printf("rename %s to %s in %s",
 		oldFilePath, newFilePath, paranoidDirectory)
 
 	oldFileParanoidPath := getParanoidPath(paranoidDirectory, oldFilePath)
@@ -46,7 +48,8 @@ func RenameCommand(paranoidDirectory, oldFilePath, newFilePath string) (returnCo
 	}
 
 	if newFileType != typeENOENT {
-		//Renaming is allowed when a file already exists, unless the existing file is a non empty paranoidDirectory
+		// Renaming is allowed when a file already exists, unless the existing
+		// file is a non empty paranoidDirectory
 		if newFileType == typeFile {
 			_, err := UnlinkCommand(paranoidDirectory, newFilePath)
 			if err != nil {

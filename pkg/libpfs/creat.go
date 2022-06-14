@@ -5,26 +5,26 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
 
 	"github.com/cpssd-students/paranoid/pkg/libpfs/encryption"
 	"github.com/cpssd-students/paranoid/pkg/libpfs/returncodes"
-	log "github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 //CreatCommand creates a new file with the name filePath in the pfs paranoidDirectory
-func CreatCommand(paranoidDirectory, filePath string, perms os.FileMode) (returnCode returncodes.Code, returnError error) {
-	log.V(1).Infof("creat called on %s in %s", filePath, paranoidDirectory)
+func CreatCommand(
+	paranoidDirectory, filePath string, perms os.FileMode,
+) (returnCode returncodes.Code, returnError error) {
+	log.Printf("creat called on %s in %s", filePath, paranoidDirectory)
 
-	err := GetFileSystemLock(paranoidDirectory, ExclusiveLock)
-	if err != nil {
+	if err := GetFileSystemLock(paranoidDirectory, ExclusiveLock); err != nil {
 		return returncodes.EUNEXPECTED, err
 	}
 
 	defer func() {
-		err := UnLockFileSystem(paranoidDirectory)
-		if err != nil {
+		if err := UnLockFileSystem(paranoidDirectory); err != nil {
 			returnCode = returncodes.EUNEXPECTED
 			returnError = err
 		}

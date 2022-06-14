@@ -2,6 +2,7 @@ package pnetserver
 
 import (
 	"context"
+	"log"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -16,7 +17,7 @@ func (s *ParanoidServer) RequestKeyPiece(
 ) (*pb.KeyPiece, error) {
 	key := globals.HeldKeyPieces.GetPiece(req.Generation, req.Node.Uuid)
 	if key == nil {
-		Log.Warn("Key not found for node", req.Node)
+		log.Printf("Key not found for node %s", req.Node)
 		return &pb.KeyPiece{},
 			status.Errorf(codes.NotFound, "Key not found for node %v", req.Node)
 	}

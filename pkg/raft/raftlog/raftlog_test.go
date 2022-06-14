@@ -5,12 +5,12 @@ package raftlog
 
 import (
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
 	"testing"
 
-	"paranoid/pkg/logger"
-	pb "paranoid/proto/raft"
+	pb "github.com/cpssd-students/paranoid/proto/raft"
 )
 
 var (
@@ -20,17 +20,17 @@ var (
 func createTestDir() {
 	err := os.RemoveAll(testDir)
 	if err != nil {
-		Log.Fatal("error creating test directory:", err)
+		log.Fatalf("error creating test directory: %v", err)
 	}
 
 	err = os.Mkdir(testDir, 0777)
 	if err != nil {
-		Log.Fatal("error creating test directory:", err)
+		log.Fatalf("error creating test directory: %v", err)
 	}
 
 	err = os.Mkdir(path.Join(testDir, "meta"), 0777)
 	if err != nil {
-		Log.Fatal("error creating test directory:", err)
+		log.Fatalf("error creating test directory: %v", err)
 	}
 }
 
@@ -39,7 +39,6 @@ func removeTestDir() {
 }
 
 func TestWriteReadDelete(t *testing.T) {
-	Log = logger.New("activitylogger_test", "pfsdTest", os.DevNull)
 	testDir = path.Join(os.TempDir(), "paranoidTest")
 	removeTestDir()
 	createTestDir()

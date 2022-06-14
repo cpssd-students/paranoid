@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net"
 	"os"
 	"path"
@@ -22,11 +23,8 @@ import (
 	"github.com/cpssd-students/paranoid/cmd/pfsd/pnetclient"
 	"github.com/cpssd-students/paranoid/cmd/pfsd/pnetserver"
 	"github.com/cpssd-students/paranoid/cmd/pfsd/upnp"
-	"github.com/cpssd-students/paranoid/pkg/libpfs"
 	"github.com/cpssd-students/paranoid/pkg/libpfs/encryption"
-	"github.com/cpssd-students/paranoid/pkg/logger"
 	"github.com/cpssd-students/paranoid/pkg/raft"
-	"github.com/cpssd-students/paranoid/pkg/raft/raftlog"
 	pb "github.com/cpssd-students/paranoid/proto/paranoidnetwork"
 	rpb "github.com/cpssd-students/paranoid/proto/raft"
 
@@ -44,7 +42,6 @@ const (
 
 var (
 	srv *grpc.Server
-	log *logger.ParanoidLogger
 )
 
 // Flags
@@ -104,7 +101,9 @@ func startKeyStateMachine() {
 	}
 }
 
-func sendKeyPiece(uuid string, generation int64, piece *keyman.KeyPiece, responseChan chan keySentResponse) {
+func sendKeyPiece(
+	uuid string, generation int64, piece *keyman.KeyPiece, responseChan chan keySentResponse,
+) {
 	err := pnetclient.SendKeyPiece(uuid, generation, piece, true)
 	responseChan <- keySentResponse{
 		err:  err,
@@ -115,14 +114,14 @@ func sendKeyPiece(uuid string, generation int64, piece *keyman.KeyPiece, respons
 func startRPCServer(lis *net.Listener, password string) {
 	var opts []grpc.ServerOption
 	if globals.TLSEnabled {
-		log.Info("Starting ParanoidNetwork server with TLS.")
+		log.Print("Starting ParanoidNetwork server with TLS.")
 		creds, err := credentials.NewServerTLSFromFile(*certFile, *keyFile)
 		if err != nil {
 			log.Fatal("Failed to generate TLS credentials:", err)
 		}
 		opts = []grpc.ServerOption{grpc.Creds(creds)}
 	} else {
-		log.Info("Starting ParanoidNetwork server without TLS.")
+		log.Print("Starting ParanoidNetwork server without TLS.")
 	}
 	srv = grpc.NewServer(opts...)
 
@@ -137,13 +136,13 @@ func startRPCServer(lis *net.Listener, password string) {
 	startKeyStateMachine()
 
 	if globals.Encrypted && globals.KeyGenerated {
-		log.Info("Attempting to unlock")
+		log.Print("Attempting to unlock")
 		Unlock()
 	}
 
 	//First node to join a given cluster
 	if len(globals.Nodes.GetAll()) == 0 {
-		log.Info("Performing first node setup")
+		log.Print("Performing first node setup")
 		globals.RaftNetworkServer = raft.NewNetworkServer(
 			nodeDetails,
 			globals.ParanoidDir,
@@ -164,10 +163,10 @@ func startRPCServer(lis *net.Listener, password string) {
 			default:
 				_, _, err := globals.RaftNetworkServer.RequestNewGeneration(globals.ThisNode.UUID)
 				if err == nil {
-					log.Info("Successfully created initial generation")
+					log.Print("Successfully created initial generation")
 					break initalGenerationLoop
 				}
-				log.Error("Unable to create initial generation:", err)
+				log.Printf("Unable to create initial generation: %v", err)
 			}
 		}
 		if globals.Encrypted {
@@ -196,9 +195,9 @@ func startRPCServer(lis *net.Listener, password string) {
 	go func() {
 		defer globals.Wait.Done()
 		err := srv.Serve(*lis)
-		log.Info("Paranoid network server stopped")
-		if err != nil && globals.ShuttingDown == false {
-			log.Fatal("Server stopped because of an error:", err)
+		log.Print("Paranoid network server stopped")
+		if err != nil && !globals.ShuttingDown {
+			log.Fatalf("Server stopped because of an error: %v", err)
 		}
 	}()
 
@@ -212,28 +211,31 @@ func startRPCServer(lis *net.Listener, password string) {
 			default:
 				generation, peers, err := pnetclient.NewGeneration(password)
 				if err != nil {
-					log.Error("Unable to start new generation:", err)
+					log.Printf("Unable to start new generation: %v", err)
 				}
 
 				keyPiecesN := int64(len(peers) + 1)
 				minKeysRequired := (keyPiecesN / 2) + 1
-				log.Info("pieces : ", keyPiecesN)
-				keyPieces, err := keyman.GeneratePieces(globals.EncryptionKey, keyPiecesN, minKeysRequired)
+				log.Printf("%d pieces", keyPiecesN)
+				keyPieces, err := keyman.GeneratePieces(
+					globals.EncryptionKey, keyPiecesN, minKeysRequired)
 				if err != nil {
 					log.Fatal("Unable to split keys:", err)
 				}
 				if len(keyPieces) != int(keyPiecesN) {
-					log.Fatal("Unable to split keys: incorrect number of pieces returned. Got:", len(keyPieces),
-						"Expected:", keyPiecesN)
+					log.Fatalf("Unable to split keys: incorrect number of pieces returned. "+
+						"Got: %d, expected: %d",
+						len(keyPieces), keyPiecesN)
 				}
 
-				err = globals.HeldKeyPieces.AddPiece(generation, globals.ThisNode.UUID, keyPieces[0])
-				if err != nil {
+				if err := globals.HeldKeyPieces.AddPiece(
+					generation, globals.ThisNode.UUID, keyPieces[0],
+				); err != nil {
 					log.Fatal("Unable to store my key piece")
 				}
 				keyPieces = keyPieces[1:]
 
-				log.Info("pieces : ", len(keyPieces))
+				log.Printf("%d pieces", len(keyPieces))
 
 				sendKeysTimer := time.NewTimer(0)
 				sendKeysResponse := make(chan keySentResponse, len(peers))
@@ -260,13 +262,13 @@ func startRPCServer(lis *net.Listener, password string) {
 						}
 						sendKeysTimer.Reset(JoinSendKeysInterval)
 					case keySendInfo := <-sendKeysResponse:
-						log.Info("Received key piece response")
+						log.Print("Received key piece response")
 						if keySendInfo.err != nil {
 							if keySendInfo.err == keyman.ErrGenerationDeprecated {
-								log.Error("Attempting to replicate keys for deprecated generation")
+								log.Print("Attempting to replicate keys for deprecated generation")
 								break sendKeysLoop
 							} else {
-								log.Error("Error sending key info:", keySendInfo.err)
+								log.Printf("Error sending key info: %v", keySendInfo.err)
 							}
 						} else {
 							for i := 0; i < len(peers); i++ {
@@ -281,12 +283,12 @@ func startRPCServer(lis *net.Listener, password string) {
 							}
 						}
 					case <-attemptJoin:
-						log.Info("Attempting to join raft cluster")
+						log.Print("Attempting to join raft cluster")
 						err := pnetclient.JoinCluster(password)
 						if err != nil {
-							log.Error("Unable to join a raft cluster:", err)
+							log.Printf("Unable to join a raft cluster: %v", err)
 						} else {
-							log.Info("Successfully joined raft cluster")
+							log.Print("Successfully joined raft cluster")
 							globals.Wait.Add(1)
 							go func() {
 								defer globals.Wait.Done()
@@ -316,8 +318,8 @@ func startRPCServer(lis *net.Listener, password string) {
 			KeyGenerated: globals.KeyGenerated,
 			NetworkOff:   globals.NetworkOff,
 		})
-	} else if globals.RaftNetworkServer.State.Configuration.HasConfiguration() == false {
-		log.Info("Attempting to join raft cluster")
+	} else if !globals.RaftNetworkServer.State.Configuration.HasConfiguration() {
+		log.Print("Attempting to join raft cluster")
 		err := dnetclient.JoinCluster(password)
 		if err != nil {
 			log.Fatal("Unable to join a raft cluster")
@@ -326,34 +328,6 @@ func startRPCServer(lis *net.Listener, password string) {
 
 	globals.Wait.Add(1)
 	go pnetclient.KSMObserver(keyman.StateMachine)
-}
-
-func setupLogging() {
-	logDir := path.Join(globals.ParanoidDir, "meta", "logs")
-
-	log = logger.New("main", "pfsd", logDir)
-	dnetclient.Log = logger.New("dnetclient", "pfsd", logDir)
-	pnetclient.Log = logger.New("pnetclient", "pfsd", logDir)
-	pnetserver.Log = logger.New("pnetserver", "pfsd", logDir)
-	upnp.Log = logger.New("upnp", "pfsd", logDir)
-	keyman.Log = logger.New("keyman", "pfsd", logDir)
-	raft.Log = logger.New("raft", "pfsd", logDir)
-	raftlog.Log = logger.New("raftlog", "pfsd", logDir)
-	libpfs.Log = logger.New("libpfs", "pfsd", logDir)
-	intercom.Log = logger.New("intercom", "pfsd", logDir)
-	globals.Log = logger.New("globals", "pfsd", logDir)
-
-	log.SetOutput(logger.STDERR | logger.LOGFILE)
-	dnetclient.Log.SetOutput(logger.STDERR | logger.LOGFILE)
-	pnetclient.Log.SetOutput(logger.STDERR | logger.LOGFILE)
-	pnetserver.Log.SetOutput(logger.STDERR | logger.LOGFILE)
-	upnp.Log.SetOutput(logger.STDERR | logger.LOGFILE)
-	keyman.Log.SetOutput(logger.STDERR | logger.LOGFILE)
-	raft.Log.SetOutput(logger.STDERR | logger.LOGFILE)
-	raftlog.Log.SetOutput(logger.STDERR | logger.LOGFILE)
-	libpfs.Log.SetOutput(logger.STDERR | logger.LOGFILE)
-	intercom.Log.SetOutput(logger.STDERR | logger.LOGFILE)
-	globals.Log.SetOutput(logger.STDERR | logger.LOGFILE)
 }
 
 func getFileSystemAttributes() {
@@ -453,7 +427,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	setupLogging()
 	getFileSystemAttributes()
 
 	globals.TLSSkipVerify = *skipVerify
@@ -499,10 +472,10 @@ func main() {
 		globals.UPnPEnabled = false
 		err = upnp.DiscoverDevices()
 		if err == nil {
-			log.Info("UPnP devices available")
+			log.Print("UPnP devices available")
 			externalPort, err := upnp.AddPortMapping(ip, portInt)
 			if err == nil {
-				log.Info("UPnP port mapping enabled")
+				log.Print("UPnP port mapping enabled")
 				port = strconv.Itoa(externalPort)
 				globals.ThisNode.Port = port
 				globals.UPnPEnabled = true
@@ -513,7 +486,7 @@ func main() {
 		if err != nil {
 			log.Fatal("Can't get IP. Error : ", err)
 		}
-		log.Info("Peer address:", globals.ThisNode.IP+":"+globals.ThisNode.Port)
+		log.Printf("Peer address: %s:%s", globals.ThisNode.IP, globals.ThisNode.Port)
 
 		if _, err := os.Stat(globals.ParanoidDir); os.IsNotExist(err) {
 			log.Fatal("Path", globals.ParanoidDir, "does not exist.")
@@ -533,7 +506,7 @@ func main() {
 		startRPCServer(&lis, *discoveryPasswordFlag)
 	}
 	createPid("pfsd")
-	pfi.StartPfi(false)
+	pfi.StartPfi()
 
 	intercom.RunServer(path.Join(globals.ParanoidDir, "meta"))
 

@@ -12,12 +12,7 @@ import (
 
 	"github.com/cpssd-students/paranoid/pkg/libpfs/encryption"
 	"github.com/cpssd-students/paranoid/pkg/libpfs/returncodes"
-	"github.com/cpssd-students/paranoid/pkg/logger"
 )
-
-// Log is an instance of old logging system.
-// TODO: Remove after migrating completely to new logging
-var Log *logger.ParanoidLogger
 
 type inode struct {
 	Count int         `json:"count"`
@@ -188,9 +183,11 @@ func getFileInode(filePath string) (inodeBytes []byte, errorCode returncodes.Cod
 	f, err := os.Lstat(filePath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return nil, returncodes.ENOENT, errors.New("error getting inode, " + filePath + " does not exist")
+			return nil, returncodes.ENOENT,
+				fmt.Errorf("file inode does not exist: %s", filePath)
 		}
-		return nil, returncodes.EUNEXPECTED, fmt.Errorf("unexpected error getting inode of file %s: %s", filePath, err)
+		return nil, returncodes.EUNEXPECTED,
+			fmt.Errorf("unexpected error getting inode of file %s: %w", filePath, err)
 	}
 	if f.Mode().IsDir() {
 		filePath = path.Join(filePath, "info")
@@ -198,11 +195,14 @@ func getFileInode(filePath string) (inodeBytes []byte, errorCode returncodes.Cod
 	bytes, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return nil, returncodes.ENOENT, errors.New("error getting inode, " + filePath + "does not exist")
+			return nil, returncodes.ENOENT,
+				fmt.Errorf("file inode does not exist: %s", filePath)
 		} else if os.IsPermission(err) {
-			return nil, returncodes.EACCES, errors.New("error getting inode, could not access " + filePath)
+			return nil, returncodes.EACCES,
+				fmt.Errorf("permission error getting inode of file %s: %w", filePath, err)
 		}
-		return nil, returncodes.EUNEXPECTED, fmt.Errorf("unexpected error getting inode of file %s: %s", filePath, err)
+		return nil, returncodes.EUNEXPECTED,
+			fmt.Errorf("unexpected error getting inode of file %s: %w", filePath, err)
 	}
 	return bytes, returncodes.OK, nil
 }
@@ -211,11 +211,13 @@ func deleteFile(filePath string) (returncode returncodes.Code, returnerror error
 	err := os.Remove(filePath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return returncodes.ENOENT, errors.New("error deleting file: " + filePath + " does not exist")
+			return returncodes.ENOENT,
+				fmt.Errorf("file does not exist: %s", filePath)
 		} else if os.IsPermission(err) {
-			return returncodes.EACCES, errors.New("error deleting file: could not access " + filePath)
+			return returncodes.EACCES,
+				fmt.Errorf("permission error deleting file %s: %w", filePath, err)
 		}
-		return returncodes.EUNEXPECTED, fmt.Errorf("unexpected error deleting file: %s", err)
+		return returncodes.EUNEXPECTED, fmt.Errorf("unexpected error deleting file: %w", err)
 	}
 	return returncodes.OK, nil
 }
@@ -242,19 +244,24 @@ func getFileType(directory, filePath string) (returncodes.Code, error) {
 
 	inode, code, err := getFileInode(filePath)
 	if err != nil {
-		return 0, fmt.Errorf("error getting file type of %s, error getting inode: %s", filePath, err)
+		return 0,
+			fmt.Errorf("error getting file type of %s, error getting inode: %w", filePath, err)
 	}
 
 	if code != returncodes.OK {
 		if code == returncodes.ENOENT {
 			return typeENOENT, nil
 		}
-		return 0, fmt.Errorf("error getting file type of %s, unexpected result from getFileInode: %s", filePath, code)
+		return 0,
+			fmt.Errorf("error getting file type of %s, unexpected result from getFileInode: %v",
+				filePath, code)
 	}
 
 	f, err = os.Lstat(path.Join(directory, "contents", string(inode)))
 	if err != nil {
-		return 0, fmt.Errorf("error getting file type of %s, symlink check error occurred: %s", filePath, err)
+		return 0,
+			fmt.Errorf("error getting file type of %s, symlink check error occurred: %w",
+				filePath, err)
 	}
 
 	if f.Mode()&os.ModeSymlink > 0 {

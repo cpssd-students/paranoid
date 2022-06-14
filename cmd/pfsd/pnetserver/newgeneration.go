@@ -2,6 +2,7 @@ package pnetserver
 
 import (
 	"context"
+	"log"
 
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc/codes"
@@ -30,7 +31,7 @@ func (s *ParanoidServer) NewGeneration(
 		}
 	}
 
-	Log.Info("Requesting new generation")
+	log.Print("Requesting new generation")
 	generationNumber, peers, err := globals.RaftNetworkServer.RequestNewGeneration(
 		req.GetRequestingNode().Uuid)
 	if err != nil {

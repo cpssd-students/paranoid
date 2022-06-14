@@ -38,7 +38,7 @@ func GenerateKey(size int) (*Key, error) {
 		return nil, aes.KeySizeError(size)
 	}
 	data := make([]byte, size)
-	rand.Read(data)
+	_, _ = rand.Read(data)
 	return NewKey(data)
 }
 

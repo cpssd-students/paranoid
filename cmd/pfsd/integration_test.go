@@ -14,9 +14,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cpssd-students/paranoid/pkg/logger"
-"github.com/cpssd-students/paranoid/
 	"github.com/cpssd-students/paranoid/cmd/pfsd/globals"
+	"github.com/cpssd-students/paranoid/pkg/logger"
 
 	"github.com/cpssd-students/paranoid/pkg/libpfs"
 )
@@ -27,7 +26,7 @@ func createTestDir(t *testing.T, name string) {
 	if err != nil {
 		if os.IsExist(err) {
 			cmd := exec.Command("fusermount", "-z", "-u", path.Join(os.TempDir(), name))
-			cmd.Run()
+			_ = cmd.Run()
 			os.RemoveAll(path.Join(os.TempDir(), name))
 			err = os.Mkdir(path.Join(os.TempDir(), name), 0777)
 			if err != nil {
@@ -80,8 +79,11 @@ func TestKillSignal(t *testing.T) {
 		t.Fatal("unable to save file system attributes to file:", err)
 	}
 
-	err = ioutil.WriteFile(path.Join(os.TempDir(), "testksDirectory", "meta", "attributes"), attributesJSON, 0600)
-	if err != nil {
+	if err = ioutil.WriteFile(
+		path.Join(os.TempDir(), "testksDirectory", "meta", "attributes"),
+		attributesJSON,
+		0600,
+	); err != nil {
 		t.Fatal("unable to save file system attributes to file:", err)
 	}
 
@@ -100,10 +102,10 @@ func TestKillSignal(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer pfsd.Process.Kill()
+	defer func() { _ = pfsd.Process.Kill() }()
 	defer func() {
 		cmd := exec.Command("fusermount", "-z", "-u", path.Join(os.TempDir(), "testksMountPoint"))
-		cmd.Run()
+		_ = cmd.Run()
 	}()
 
 	time.Sleep(10 * time.Second)
@@ -125,7 +127,7 @@ func TestKillSignal(t *testing.T) {
 
 		done := make(chan bool, 1)
 		go func() {
-			pfsd.Wait()
+			_ = pfsd.Wait()
 			done <- true
 		}()
 

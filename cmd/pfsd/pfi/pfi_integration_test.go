@@ -4,6 +4,7 @@
 package pfi
 
 import (
+	"log"
 	"os"
 	"path"
 	"testing"
@@ -14,7 +15,6 @@ import (
 
 	"github.com/cpssd-students/paranoid/cmd/pfsd/globals"
 	"github.com/cpssd-students/paranoid/pkg/libpfs"
-	"github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 func createTestDir(t *testing.T, name string) {
@@ -30,9 +30,7 @@ func removeTestDir(name string) {
 }
 
 func TestMain(m *testing.M) {
-	Log = logger.New("testPackage", "testComponent", os.DevNull)
 	globals.ParanoidDir = path.Join(os.TempDir(), "pfiTestPfsDir")
-	libpfs.Log = logger.New("testPackage", "testComponent", os.DevNull)
 	os.Exit(m.Run())
 }
 
@@ -41,7 +39,7 @@ func setuptesting(t *testing.T) {
 	createTestDir(t, "pfiTestPfsDir")
 	_, err := libpfs.InitCommand(path.Join(os.TempDir(), "pfiTestPfsDir"))
 	if err != nil {
-		Log.Fatal("Error initing paranoid file system:", err)
+		log.Fatalf("Error initing paranoid file system: %v", err)
 	}
 }
 
@@ -49,8 +47,10 @@ func TestFuseFilePerms(t *testing.T) {
 	setuptesting(t)
 	defer removeTestDir("pfiTestPfsDir")
 
-	_, err := libpfs.CreatCommand(path.Join(os.TempDir(), "pfiTestPfsDir"), "helloworld.txt", os.FileMode(0777))
-	if err != nil {
+	if _, err := libpfs.CreatCommand(
+		path.Join(os.TempDir(), "pfiTestPfsDir"), "helloworld.txt",
+		os.FileMode(0777),
+	); err != nil {
 		t.Error("pfsm setup failed :", err)
 	}
 
@@ -192,8 +192,10 @@ func TestFuseLink(t *testing.T) {
 	setuptesting(t)
 	defer removeTestDir("pfiTestPfsDir")
 
-	_, err := libpfs.CreatCommand(path.Join(os.TempDir(), "pfiTestPfsDir"), "helloworld.txt", os.FileMode(0777))
-	if err != nil {
+	if _, err := libpfs.CreatCommand(
+		path.Join(os.TempDir(), "pfiTestPfsDir"), "helloworld.txt",
+		os.FileMode(0777),
+	); err != nil {
 		t.Error("pfsm setup failed :", err)
 	}
 
@@ -247,7 +249,7 @@ func TestFuseUtimes(t *testing.T) {
 
 	atime := time.Unix(100, 101*1000)
 	mtime := time.Unix(500, 530*1000)
-	roundFactor := time.Duration(1 * time.Second)
+	roundFactor := 1 * time.Second
 	code = file.Utimens(&atime, &mtime)
 	if code != fuse.OK {
 		t.Error("Failed to utimens file, error : ", code)

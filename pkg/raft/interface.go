@@ -4,6 +4,7 @@ package raft
 
 import (
 	"errors"
+	"log"
 	"net"
 	"os"
 	"time"
@@ -64,10 +65,10 @@ func StartRaft(lis *net.Listener, nodeDetails Node, pfsDirectory, raftInfoDirect
 	pb.RegisterRaftNetworkServer(srv, raftServer)
 	raftServer.Wait.Add(1)
 	go func() {
-		Log.Info("RaftNetworkServer started")
+		log.Print("RaftNetworkServer started")
 		err := srv.Serve(*lis)
 		if err != nil {
-			Log.Error("Error running RaftNetworkServer", err)
+			log.Printf("Error running RaftNetworkServer: %v", err)
 		}
 	}()
 	return raftServer, srv
@@ -149,7 +150,7 @@ func (s *NetworkServer) RequestAddLogEntry(entry *pb.Entry) (*StateMachineResult
 		case appliedEntry := <-s.State.EntryApplied:
 			LogEntry, err := s.State.Log.GetLogEntry(appliedEntry.Index)
 			if err != nil {
-				Log.Fatal("unable to get log entry:", err)
+				log.Fatalf("unable to get log entry: %v", err)
 			}
 			if LogEntry.Entry.Uuid == entry.Uuid {
 				return appliedEntry.Result, nil
@@ -173,7 +174,7 @@ func (s *NetworkServer) RequestKeyStateUpdate(owner, holder *pb.Node, generation
 	}
 	result, err := s.RequestAddLogEntry(entry)
 	if err != nil {
-		Log.Error("failed to add log entry for key state update:", err)
+		log.Printf("failed to add log entry for key state update: %v", err)
 		return err
 	}
 	return result.Err
@@ -191,7 +192,7 @@ func (s *NetworkServer) RequestNewGeneration(newNode string) (int, []string, err
 	}
 	result, err := s.RequestAddLogEntry(entry)
 	if err != nil {
-		Log.Error("failed to add log entry for new generation:", err)
+		log.Printf("failed to add log entry for new generation: %v", err)
 		return -1, nil, err
 	}
 	return result.KSMResult.GenerationNumber, result.KSMResult.Peers, result.Err
@@ -210,7 +211,7 @@ func (s *NetworkServer) RequestOwnerComplete(nodeID string, generation int64) er
 	}
 	result, err := s.RequestAddLogEntry(entry)
 	if err != nil {
-		Log.Error("failed to add log entry for owner complete:", err)
+		log.Printf("failed to add log entry for owner complete: %v", err)
 		return err
 	}
 	return result.Err
@@ -429,7 +430,7 @@ func (s *NetworkServer) RequestRmdirCommand(filePath string) (returnCode returnc
 
 // RequestChangeConfiguration performs a change in Configuration
 func (s *NetworkServer) RequestChangeConfiguration(nodes []Node) error {
-	Log.Info("Configuration change requested:", nodes)
+	log.Printf("Configuration change requested %v", nodes)
 	entry := &pb.Entry{
 		Type: pb.Entry_ConfigurationChange,
 		Uuid: generateNewUUID(),
@@ -503,7 +504,7 @@ func PerformLibPfsCommand(directory string, command *pb.StateMachineCommand) *St
 		code, err := libpfs.RmdirCommand(directory, command.Path)
 		return &StateMachineResult{Code: code, Err: err}
 	}
-	Log.Fatal("Unrecognised command type")
+	log.Fatalf("Unrecognised command type")
 	return nil
 }
 
@@ -530,6 +531,6 @@ func PerformKSMCommand(sateMachine *keyman.KeyStateMachine, keyCommand *pb.KeySt
 			Err: err,
 		}
 	}
-	Log.Fatalf("Unrecognised command type: %s", keyCommand.Type)
+	log.Fatalf("Unrecognised command type: %s", keyCommand.Type)
 	return nil
 }

@@ -9,20 +9,15 @@ import (
 	"reflect"
 	"testing"
 
-	"paranoid/cmd/pfsd/keyman"
-	"paranoid/pkg/libpfs"
-	"paranoid/pkg/logger"
-	"paranoid/pkg/raft"
-	"paranoid/pkg/raft/raftlog"
-	"paranoid/pkg/raft/rafttestutil"
-	pb "paranoid/proto/raft"
+	"github.com/cpssd-students/paranoid/cmd/pfsd/keyman"
+	"github.com/cpssd-students/paranoid/pkg/libpfs"
+	"github.com/cpssd-students/paranoid/pkg/raft"
+	"github.com/cpssd-students/paranoid/pkg/raft/raftlog"
+	"github.com/cpssd-students/paranoid/pkg/raft/rafttestutil"
+	pb "github.com/cpssd-students/paranoid/proto/raft"
 )
 
 func TestMain(m *testing.M) {
-	raft.Log = logger.New("rafttest", "rafttest", os.DevNull)
-	raftlog.Log = logger.New("rafttest", "rafttest", os.DevNull)
-	libpfs.Log = logger.New("rafttest", "rafttest", os.DevNull)
-	keyman.Log = logger.New("rafttest", "rafttest", os.DevNull)
 	os.MkdirAll(path.Join(os.TempDir(), "keystatetest", "meta"), 0777)
 	exitCode := m.Run()
 	os.Exit(exitCode)
@@ -34,16 +29,23 @@ func TestKeyStateUpdate(t *testing.T) {
 	}
 	t.Parallel()
 
-	raft.Log.Info("Testing key state updates")
+	log.Printf("Testing key state updates")
 	nodeLis, nodePort := rafttestutil.StartListener()
 	defer rafttestutil.CloseListener(nodeLis)
 	node := rafttestutil.SetUpNode("node", "localhost", nodePort, "_")
-	raft.Log.Info("Node setup complete.")
+	log.Printf("Node setup complete.")
 
-	nodeRaftDirectory := rafttestutil.CreateRaftDirectory(path.Join(os.TempDir(), "keystatetest", "node"))
+	nodeRaftDirectory := rafttestutil.CreateRaftDirectory(
+		path.Join(os.TempDir(), "keystatetest", "node"))
 	var nodeRaftServer *raft.NetworkServer
 	defer rafttestutil.RemoveRaftDirectory(nodeRaftDirectory, nodeRaftServer)
-	nodeRaftServer, nodesrv := raft.StartRaft(nodeLis, node, "", nodeRaftDirectory, &raft.StartConfiguration{Peers: []raft.Node{}})
+	nodeRaftServer, nodesrv := raft.StartRaft(
+		nodeLis,
+		node,
+		"",
+		nodeRaftDirectory,
+		&raft.StartConfiguration{Peers: []raft.Node{}},
+	)
 	defer nodesrv.Stop()
 	defer rafttestutil.StopRaftServer(nodeRaftServer)
 
@@ -60,7 +62,8 @@ func TestKeyStateUpdate(t *testing.T) {
 		t.Error("Failed to initialise new generation:", err)
 	}
 	if generation != 0 {
-		t.Error("Failed to initialise new generation, exptected generation number 0. Got:", generation)
+		t.Error("Failed to initialise new generation, exptected generation number 0. Got:",
+			generation)
 	}
 	if keyman.StateMachine.Generations[0] == nil {
 		t.Error("Failed to initialise new generation, generation is nil")

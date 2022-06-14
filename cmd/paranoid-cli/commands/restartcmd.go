@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/user"
 	"path"
@@ -10,8 +11,6 @@ import (
 	"syscall"
 
 	"github.com/urfave/cli"
-
-	log "github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 // Restart subcommand

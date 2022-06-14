@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"math/big"
 
 	"github.com/cpssd-students/paranoid/cmd/pfsd/globals"
@@ -38,11 +39,11 @@ func RequestKeyPiece(uuid string, generation int64) (*keyman.KeyPiece, error) {
 	},
 	)
 	if err != nil {
-		Log.Warn("Failed requesting KeyPiece from", node, "Error:", err)
-		return nil, fmt.Errorf("failed requesting KeyPiece from %s: %s", node, err)
+		log.Printf("Failed requesting KeyPiece from %s: %v", node, err)
+		return nil, fmt.Errorf("failed requesting KeyPiece from %s: %w", node, err)
 	}
 
-	Log.Info("Received KeyPiece from", node)
+	log.Printf("Received KeyPiece from %s", node)
 	var fingerprintArray [32]byte
 	copy(fingerprintArray[:], pieceProto.ParentFingerprint)
 	var primeBig big.Int

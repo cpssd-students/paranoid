@@ -1,30 +1,23 @@
 package pfi
 
 import (
-	"path"
+	"log"
 
 	"github.com/cpssd-students/paranoid/cmd/pfsd/globals"
-	"github.com/cpssd-students/paranoid/pkg/logger"
 
 	"github.com/hanwen/go-fuse/fuse/nodefs"
 	"github.com/hanwen/go-fuse/fuse/pathfs"
 )
 
 // StartPfi with given verbosity level
-func StartPfi(logVerbose bool) {
+func StartPfi() {
 	// Create a logger
 	var err error
-	Log = logger.New("pfi", "pfsd", path.Join(globals.ParanoidDir, "meta", "logs"))
-	Log.SetOutput(logger.STDERR | logger.LOGFILE)
 
 	if globals.RaftNetworkServer == nil {
 		SendOverNetwork = false
 	} else {
 		SendOverNetwork = true
-	}
-
-	if logVerbose {
-		Log.SetLogLevel(logger.VERBOSE)
 	}
 
 	// setting up with fuse
@@ -35,7 +28,7 @@ func StartPfi(logVerbose bool) {
 	}, &opts)
 	server, _, err := nodefs.MountRoot(globals.MountPoint, nfs.Root(), nil)
 	if err != nil {
-		Log.Fatalf("Mount fail: %v\n", err)
+		log.Fatalf("Mount fail: %v", err)
 	}
 
 	globals.Wait.Add(1)
@@ -47,17 +40,14 @@ func StartPfi(logVerbose bool) {
 			server.Serve()
 		}()
 
-		select {
-		case _, ok := <-globals.Quit:
-			if !ok {
-				Log.Info("Attempting to unmount pfi")
-				err = server.Unmount()
-				if err != nil {
-					Log.Fatal("Error unmounting : ", err)
-				}
-				Log.Info("pfi unmounted successfully")
-				return
+		if ok := <-globals.Quit; !ok {
+			log.Print("Attempting to unmount pfi")
+			err = server.Unmount()
+			if err != nil {
+				log.Fatalf("Error unmounting: %v", err)
 			}
+			log.Print("pfi unmounted successfully")
+			return
 		}
 	}()
 }

@@ -2,6 +2,7 @@ package pnetclient
 
 import (
 	"errors"
+	"log"
 
 	"context"
 
@@ -13,11 +14,11 @@ import (
 func JoinCluster(password string) error {
 	nodes := globals.Nodes.GetAll()
 	for _, node := range nodes {
-		Log.Info("Sending join cluster request to node:", node)
+		log.Printf("Sending join cluster request to node %s", node)
 
 		conn, err := Dial(node)
 		if err != nil {
-			Log.Error("JoinCluster: failed to dial ", node)
+			log.Printf("JoinCluster: failed to dial %s: %v", node, err)
 		}
 		defer conn.Close()
 
@@ -31,7 +32,7 @@ func JoinCluster(password string) error {
 			PoolPassword: password,
 		})
 		if err != nil {
-			Log.Error("Error requesting to join cluster", node, ":", err)
+			log.Printf("Error requesting to join cluster %s: %v", node, err)
 		} else {
 			return nil
 		}

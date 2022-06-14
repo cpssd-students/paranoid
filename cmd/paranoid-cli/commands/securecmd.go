@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"os/user"
 	"path"
@@ -10,7 +11,6 @@ import (
 	"github.com/urfave/cli"
 
 	"github.com/cpssd-students/paranoid/cmd/paranoid-cli/tls"
-	log "github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 // Secure subcommand
@@ -54,7 +54,7 @@ func Secure(c *cli.Context) {
 	}
 
 	if (c.String("cert") != "") && (c.String("key") != "") {
-		log.Info("Using existing certificate.")
+		log.Println("Using existing certificate.")
 		err = os.Link(c.String("cert"), certPath)
 		if err != nil {
 			fmt.Println("FATAL: Failed to copy cert file:", err)

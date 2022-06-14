@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
 	"sync"
@@ -383,7 +384,7 @@ func (c *Configuration) GetNextIndex(nodeID string) uint64 {
 			return c.futureNextIndex[i]
 		}
 	}
-	Log.Fatal("Could not get NextIndex. Node not found")
+	log.Fatal("Could not get NextIndex. Node not found")
 	return 0
 }
 
@@ -402,7 +403,7 @@ func (c *Configuration) GetMatchIndex(nodeID string) uint64 {
 			return c.futureMatchIndex[i]
 		}
 	}
-	Log.Fatal("Could not get MatchIndex. Node not found")
+	log.Fatal("Could not get MatchIndex. Node not found")
 	return 0
 }
 
@@ -460,12 +461,12 @@ func (c *Configuration) SetSendingSnapshot(nodeID string, x bool) {
 //CalculateNewCommitIndex calculates a new commit index in the manner described
 // in the Raft paper
 func (c *Configuration) CalculateNewCommitIndex(
-	lastCommitIndex, term uint64, log *raftlog.RaftLog,
+	lastCommitIndex, term uint64, rlog *raftlog.RaftLog,
 ) uint64 {
 	c.configLock.Lock()
 	defer c.configLock.Unlock()
 
-	if log.GetMostRecentTerm() != term {
+	if rlog.GetMostRecentTerm() != term {
 		return lastCommitIndex
 	}
 
@@ -473,10 +474,10 @@ func (c *Configuration) CalculateNewCommitIndex(
 	futureMajority := getRequiredVotes(len(c.futureMatchIndex))
 	newCommitIndex := lastCommitIndex
 
-	for i := lastCommitIndex + 1; i <= log.GetMostRecentIndex(); i++ {
-		logEntry, err := log.GetLogEntry(i)
+	for i := lastCommitIndex + 1; i <= rlog.GetMostRecentIndex(); i++ {
+		logEntry, err := rlog.GetLogEntry(i)
 		if err != nil {
-			Log.Fatal("Unable to get log entry:", err)
+			log.Fatal("Unable to get log entry:", err)
 		}
 		if logEntry.Term == term {
 			currentCount := 0
@@ -526,24 +527,24 @@ func (c *Configuration) savePersistentConfiguration() {
 
 	persistentConfigBytes, err := json.Marshal(perState)
 	if err != nil {
-		Log.Fatal("Error saving persistent confiuration to disk:", err)
+		log.Fatalf("Error saving persistent confiuration to disk: %v", err)
 	}
 
 	if _, err := os.Stat(c.raftInfoDirectory); os.IsNotExist(err) {
-		Log.Fatal("Raft Info Directory does not exist:", err)
+		log.Fatalf("Raft Info Directory does not exist: %v", err)
 	}
 
 	newPeristentFile := path.Join(c.raftInfoDirectory, PersistentConfigurationFileName+"-new")
 	err = ioutil.WriteFile(newPeristentFile, persistentConfigBytes, 0600)
 	if err != nil {
-		Log.Fatal("Error writing new persistent configuration to disk:", err)
+		log.Fatalf("Error writing new persistent configuration to disk: %v", err)
 	}
 
 	if err = os.Rename(
 		newPeristentFile,
 		path.Join(c.raftInfoDirectory, PersistentConfigurationFileName),
 	); err != nil {
-		Log.Fatal("Error saving persistent configuration to disk:", err)
+		log.Fatalf("Error saving persistent configuration to disk: %v", err)
 	}
 }
 
@@ -552,7 +553,7 @@ func (c *Configuration) saveOriginalConfiguration() {
 		path.Join(c.raftInfoDirectory, PersistentConfigurationFileName),
 		path.Join(c.raftInfoDirectory, OriginalConfigurationFileName),
 	); err != nil {
-		Log.Fatal("Error saving original configuration to disk:", err)
+		log.Fatalf("Error saving original configuration to disk: %v", err)
 	}
 	c.savePersistentConfiguration()
 }
@@ -563,13 +564,13 @@ func getPersistentConfiguration(persistentConfigurationFile string) *persistentC
 	}
 	persistentFileContents, err := ioutil.ReadFile(persistentConfigurationFile)
 	if err != nil {
-		Log.Fatal("Error reading persistent state from disk:", err)
+		log.Fatalf("Error reading persistent state from disk: %v", err)
 	}
 
 	perConfig := &persistentConfiguration{}
 	err = json.Unmarshal(persistentFileContents, &perConfig)
 	if err != nil {
-		Log.Fatal("Error reading persistent state from disk:", err)
+		log.Fatalf("Error reading persistent state from disk: %v", err)
 	}
 	return perConfig
 }

@@ -3,14 +3,16 @@ package libpfs
 import (
 	"errors"
 	"fmt"
+	"log"
 
 	"github.com/cpssd-students/paranoid/pkg/libpfs/returncodes"
-	log "github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 //AccessCommand is used by fuse to check if it has access to a given file.
-func AccessCommand(paranoidDirectory, filePath string, mode uint32) (returnCode returncodes.Code, returnError error) {
-	log.V(1).Infof("access called on %s in %s", filePath, paranoidDirectory)
+func AccessCommand(
+	paranoidDirectory, filePath string, mode uint32,
+) (returnCode returncodes.Code, returnError error) {
+	log.Printf("access called on %s in %s", filePath, paranoidDirectory)
 
 	err := GetFileSystemLock(paranoidDirectory, SharedLock)
 	if err != nil {

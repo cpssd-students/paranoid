@@ -2,6 +2,7 @@ package pnetclient
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/cpssd-students/paranoid/cmd/pfsd/globals"
 	"github.com/cpssd-students/paranoid/cmd/pfsd/keyman"
@@ -11,11 +12,11 @@ import (
 func Distribute(key *keyman.Key, peers []globals.Node, generation int) error {
 	numPieces := int64(len(peers) + 1)
 	requiredPieces := numPieces/2 + 1
-	Log.Info("Generating pieces.")
+	log.Print("Generating pieces.")
 	pieces, err := keyman.GeneratePieces(key, numPieces, requiredPieces)
 	if err != nil {
-		Log.Error("Could not chunk key:", err)
-		return fmt.Errorf("could not chunk key: %s", err)
+		log.Printf("Could not chunk key: %v", err)
+		return fmt.Errorf("could not chunk key: %w", err)
 	}
 	// We always keep the first piece and distribute the rest
 	_ = globals.HeldKeyPieces.AddPiece(int64(generation), globals.ThisNode.UUID, pieces[0])
@@ -24,7 +25,7 @@ func Distribute(key *keyman.Key, peers []globals.Node, generation int) error {
 	for i := 1; i < len(pieces); i++ {
 		err := SendKeyPiece(peers[i-1].UUID, int64(generation), pieces[i], false)
 		if err != nil {
-			Log.Error("Error sending key piece:", err)
+			log.Printf("Error sending key piece: %v", err)
 		} else {
 			count++
 		}
@@ -35,9 +36,9 @@ func Distribute(key *keyman.Key, peers []globals.Node, generation int) error {
 			globals.ThisNode.UUID,
 			int64(generation),
 		); err != nil {
-			Log.Error("Error marking generation complete:", err)
+			log.Printf("Error marking generation complete: %v", err)
 		} else {
-			Log.Info("Successfully completed generation", generation)
+			log.Printf("Successfully completed generation %d", generation)
 		}
 	}
 	return nil
@@ -67,7 +68,7 @@ func KSMObserver(ksm *keyman.KeyStateMachine) {
 						done = false
 						nodes, err := ksm.GetNodes(g)
 						if err != nil {
-							Log.Warn("Unable to get nodes for generation", g, ":", err)
+							log.Printf("Unable to get nodes for generation %d: %v", g, err)
 							continue
 						}
 						var peers []globals.Node
@@ -75,19 +76,19 @@ func KSMObserver(ksm *keyman.KeyStateMachine) {
 							if v != globals.ThisNode.UUID {
 								globalNode, err := globals.Nodes.GetNode(v)
 								if err != nil {
-									Log.Errorf("Unable to lookup node %s: %s", v, err)
+									log.Printf("Unable to lookup node %s: %s", v, err)
 									peers = append(peers, globals.Node{})
 								} else {
 									peers = append(peers, globalNode)
 								}
 							}
 						}
-						Distribute(globals.EncryptionKey, peers, int(g))
+						_ = Distribute(globals.EncryptionKey, peers, int(g))
 					}
 					for i := int64(0); i < ksm.GetCurrentGeneration(); i++ {
 						err := globals.HeldKeyPieces.DeleteGeneration(i)
 						if err != nil {
-							Log.Error("Unable to delete generation:", err)
+							log.Printf("Unable to delete generation: %v", err)
 						}
 					}
 					if done {

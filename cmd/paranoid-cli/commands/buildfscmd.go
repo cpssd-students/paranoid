@@ -3,12 +3,12 @@ package commands
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/user"
 	"path"
 
 	"github.com/cpssd-students/paranoid/pkg/libpfs/returncodes"
-	log "github.com/cpssd-students/paranoid/pkg/logger"
 	"github.com/cpssd-students/paranoid/pkg/raft"
 	pb "github.com/cpssd-students/paranoid/proto/raft"
 

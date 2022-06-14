@@ -5,25 +5,25 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
 
 	"github.com/cpssd-students/paranoid/pkg/libpfs/returncodes"
-	log "github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 // UnlinkCommand removes a filename link from an inode.
-func UnlinkCommand(paranoidDirectory, filePath string) (returnCode returncodes.Code, returnError error) {
-	log.V(1).Infof("unlink called on %s in %s", filePath, paranoidDirectory)
+func UnlinkCommand(
+	paranoidDirectory, filePath string,
+) (returnCode returncodes.Code, returnError error) {
+	log.Printf("unlink called on %s in %s", filePath, paranoidDirectory)
 
-	err := GetFileSystemLock(paranoidDirectory, ExclusiveLock)
-	if err != nil {
+	if err := GetFileSystemLock(paranoidDirectory, ExclusiveLock); err != nil {
 		return returncodes.EUNEXPECTED, err
 	}
 
 	defer func() {
-		err := UnLockFileSystem(paranoidDirectory)
-		if err != nil {
+		if err := UnLockFileSystem(paranoidDirectory); err != nil {
 			returnCode = returncodes.EUNEXPECTED
 			returnError = err
 		}

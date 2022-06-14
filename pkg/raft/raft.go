@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"math/rand"
 	"strings"
 	"sync"
@@ -16,7 +17,6 @@ import (
 	"google.golang.org/grpc/credentials"
 
 	"github.com/cpssd-students/paranoid/cmd/pfsd/keyman"
-	"github.com/cpssd-students/paranoid/pkg/logger"
 	"github.com/cpssd-students/paranoid/pkg/raft/raftlog"
 	pb "github.com/cpssd-students/paranoid/proto/raft"
 )
@@ -34,9 +34,6 @@ const (
 
 // MaxAppendEntries that can be send it one append request
 const MaxAppendEntries uint64 = 100
-
-// Log for raft
-var Log *logger.ParanoidLogger
 
 // NetworkServer implements the raft protobuf server interface
 type NetworkServer struct {
@@ -100,7 +97,7 @@ func (s *NetworkServer) AppendEntries(ctx context.Context, req *pb.AppendEntries
 		}
 		preLogEntry, err := s.State.Log.GetLogEntry(req.PrevLogIndex)
 		if err != nil && err != raftlog.ErrIndexBelowStartIndex {
-			Log.Fatal("Unable to get log entry:", err)
+			log.Fatalf("Unable to get log entry: %v", err)
 		} else if err == raftlog.ErrIndexBelowStartIndex {
 			if req.PrevLogIndex != s.State.Log.GetMostRecentIndex() {
 				return &pb.AppendEntriesResponse{
@@ -133,7 +130,7 @@ func (s *NetworkServer) AppendEntries(ctx context.Context, req *pb.AppendEntries
 		if s.State.Log.GetMostRecentIndex() >= logIndex {
 			logEntryAtIndex, err := s.State.Log.GetLogEntry(logIndex)
 			if err != nil && err != raftlog.ErrIndexBelowStartIndex {
-				Log.Fatal("Unable to get log entry:", err)
+				log.Fatalf("Unable to get log entry: %v", err)
 			} else if err == nil {
 				if logEntryAtIndex.Term != req.Term {
 					s.State.Log.DiscardLogEntriesAfter(logIndex)
@@ -251,14 +248,14 @@ func (s *NetworkServer) appendLogEntry(entry *pb.Entry) {
 		Entry: entry,
 	})
 	if err != nil {
-		Log.Error("failed to append log entry:", err)
+		log.Printf("failed to append log entry: %v", err)
 		return
 	}
 
 	if entry.Type == pb.Entry_ConfigurationChange {
 		config := entry.GetConfig()
 		if config == nil {
-			Log.Fatal("Incorrect entry information. No configuration present")
+			log.Fatal("Incorrect entry information. No configuration present")
 		}
 		if config.Type == pb.Configuration_CurrentConfiguration {
 			s.State.Configuration.UpdateCurrentConfiguration(protoNodesToNodes(config.Nodes), s.State.Log.GetMostRecentIndex())
@@ -348,7 +345,7 @@ func (s *NetworkServer) sendLeaderLogEntry(entry *pb.Entry) error {
 func generateNewUUID() string {
 	uuidBytes, err := ioutil.ReadFile("/proc/sys/kernel/random/uuid")
 	if err != nil {
-		Log.Fatal("Error generating new UUID:", err)
+		log.Fatalf("Error generating new UUID: %v", err)
 	}
 	return strings.TrimSpace(string(uuidBytes))
 }
@@ -381,14 +378,14 @@ func (s *NetworkServer) electionTimeOut() {
 		case _, ok := <-s.Quit:
 			if !ok {
 				s.QuitChannelClosed = true
-				Log.Info("Exiting election timeout loop")
+				log.Print("Exiting election timeout loop")
 				return
 			}
 		case <-s.ElectionTimeoutReset:
 			timer.Reset(getRandomElectionTimeout())
 		case <-timer.C:
 			if s.State.Configuration.HasConfiguration() {
-				Log.Info("Starting new election")
+				log.Print("Starting new election")
 				s.State.SetCurrentTerm(s.State.GetCurrentTerm() + 1)
 				s.State.SetCurrentState(CANDIDATE)
 				timer.Reset(getRandomElectionTimeout())
@@ -422,7 +419,7 @@ func (s *NetworkServer) requestPeerVote(node *Node, term uint64, voteChannel cha
 			voteChannel <- nil
 			return
 		}
-		Log.Info("Dialing ", node)
+		log.Printf("Dialing %v", node)
 		conn, err := s.Dial(node, RequestVoteTimeout)
 		defer conn.Close()
 		if err == nil {
@@ -433,7 +430,7 @@ func (s *NetworkServer) requestPeerVote(node *Node, term uint64, voteChannel cha
 				LastLogIndex: s.State.Log.GetMostRecentIndex(),
 				LastLogTerm:  s.State.Log.GetMostRecentTerm(),
 			})
-			Log.Info("Got response from", node)
+			log.Printf("Got response from %s", node)
 			if err == nil {
 				voteChannel <- &voteResponse{response, node.NodeID}
 				return
@@ -459,12 +456,12 @@ func (s *NetworkServer) runElection() {
 	}
 
 	if s.State.Configuration.HasMajority(votesGranted) {
-		Log.Info("Node elected leader with", len(votesGranted), " votes")
+		log.Printf("Node elected leader with %d votes", len(votesGranted))
 		s.State.SetCurrentState(LEADER)
 		return
 	}
 
-	Log.Info("Sending RequestVote RPCs to peers")
+	log.Print("Sending RequestVote RPCs to peers")
 	voteChannel := make(chan *voteResponse)
 	peers := s.State.Configuration.GetPeersList()
 	for i := 0; i < len(peers); i++ {
@@ -482,7 +479,7 @@ func (s *NetworkServer) runElection() {
 		case _, ok := <-s.Quit:
 			if !ok {
 				s.QuitChannelClosed = true
-				Log.Info("Exiting election loop")
+				log.Print("Exiting election loop")
 				return
 			}
 		case vote := <-voteChannel:
@@ -492,7 +489,7 @@ func (s *NetworkServer) runElection() {
 			votesReturned++
 			if vote != nil {
 				if vote.response.Term > s.State.GetCurrentTerm() {
-					Log.Info("Stopping election, higher term encountered.")
+					log.Print("Stopping election, higher term encountered.")
 					s.State.SetCurrentTerm(vote.response.Term)
 					s.State.SetCurrentState(FOLLOWER)
 					return
@@ -500,9 +497,9 @@ func (s *NetworkServer) runElection() {
 
 				if vote.response.VoteGranted == true {
 					votesGranted = append(votesGranted, vote.NodeID)
-					Log.Info("Vote granted. Current votes :", len(votesGranted))
+					log.Printf("Vote granted. Current votes: %d", len(votesGranted))
 					if s.State.Configuration.HasMajority(votesGranted) {
-						Log.Info("Node elected leader with", len(votesGranted), " votes")
+						log.Printf("Node elected leader with %d votes", len(votesGranted))
 						s.State.SetCurrentState(LEADER)
 						return
 					}
@@ -522,7 +519,7 @@ func (s *NetworkServer) manageElections() {
 		case _, ok := <-s.Quit:
 			if !ok {
 				s.QuitChannelClosed = true
-				Log.Info("Exiting election management loop")
+				log.Print("Exiting election management loop")
 				return
 			}
 		case <-s.State.StartElection:
@@ -555,7 +552,7 @@ func (s *NetworkServer) sendHeartBeat(node *Node) {
 					if err == raftlog.ErrIndexBelowStartIndex {
 						prevLogTerm = s.State.Log.GetStartTerm()
 					} else {
-						Log.Fatal("Unable to get log entry at", nextIndex-1, ":", err)
+						log.Fatalf("Unable to get log entry at %d: %v", nextIndex-1, err)
 					}
 				} else {
 					prevLogTerm = prevLogEntry.Term
@@ -568,7 +565,7 @@ func (s *NetworkServer) sendHeartBeat(node *Node) {
 					s.State.SendSnapshot <- *node
 					return
 				}
-				Log.Fatal("Unable to get log entry:", err)
+				log.Fatalf("Unable to get log entry: %v", err)
 			}
 			numLogEntries := uint64(len(nextLogEntries))
 
@@ -638,11 +635,11 @@ func (s *NetworkServer) manageLeading() {
 			if !ok {
 				s.QuitChannelClosed = true
 				s.State.SetCurrentState(INACTIVE)
-				Log.Info("Exiting leading management loop")
+				log.Print("Exiting leading management loop")
 				return
 			}
 		case <-s.State.StartLeading:
-			Log.Info("Started leading for term ", s.State.GetCurrentTerm())
+			log.Printf("Started leading for term %d", s.State.GetCurrentTerm())
 			s.State.Configuration.ResetNodeIndices(s.State.Log.GetMostRecentIndex())
 			peers := s.State.Configuration.GetPeersList()
 			for i := 0; i < len(peers); i++ {
@@ -656,11 +653,11 @@ func (s *NetworkServer) manageLeading() {
 				case _, ok := <-s.Quit:
 					if !ok {
 						s.QuitChannelClosed = true
-						Log.Info("Exiting heartbeat loop")
+						log.Print("Exiting heartbeat loop")
 						return
 					}
 				case <-s.State.StopLeading:
-					Log.Info("Stopped leading")
+					log.Print("Stopped leading")
 					break leadingLoop
 				case <-s.State.SendAppendEntries:
 					timer.Reset(Heartbeat)
@@ -693,11 +690,11 @@ func (s *NetworkServer) manageConfigurationChanges() {
 		case _, ok := <-s.Quit:
 			if !ok {
 				s.QuitChannelClosed = true
-				Log.Info("Exiting configuration management loop")
+				log.Print("Exiting configuration management loop")
 				return
 			}
 		case config := <-s.State.ConfigurationApplied:
-			Log.Info("New configuration applied:", config)
+			log.Printf("New configuration applied: %v", config)
 			if config.Type == pb.Configuration_CurrentConfiguration {
 				inConfig := false
 				for i := 0; i < len(config.Nodes); i++ {
@@ -707,7 +704,7 @@ func (s *NetworkServer) manageConfigurationChanges() {
 					}
 				}
 				if inConfig == false {
-					Log.Info("Node not included in current configuration", s.State.NodeID)
+					log.Printf("Node not included in current configuration %s", s.State.NodeID)
 					s.State.SetCurrentState(FOLLOWER)
 				}
 			} else {
@@ -735,7 +732,7 @@ func (s *NetworkServer) manageEntryApplication() {
 		case _, ok := <-s.Quit:
 			if !ok {
 				s.QuitChannelClosed = true
-				Log.Info("Exiting entry application management loop")
+				log.Print("Exiting entry application management loop")
 				return
 			}
 		case <-s.State.ApplyEntries:

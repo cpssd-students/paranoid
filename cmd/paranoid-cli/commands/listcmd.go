@@ -3,12 +3,11 @@ package commands
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os/user"
 	"path"
 
 	"github.com/urfave/cli"
-
-	log "github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 //List lists all paranoid file systems

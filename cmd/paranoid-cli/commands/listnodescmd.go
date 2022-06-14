@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/rpc"
 	"os"
 	"os/user"
@@ -12,7 +13,6 @@ import (
 	"github.com/urfave/cli"
 
 	"github.com/cpssd-students/paranoid/cmd/pfsd/intercom"
-	log "github.com/cpssd-students/paranoid/pkg/logger"
 	"github.com/cpssd-students/paranoid/pkg/raft"
 )
 
@@ -67,7 +67,7 @@ func getNodes(pfsDir string) {
 	if err != nil {
 		fmt.Printf("Could not connect to PFSD %s. Is it running? See %s for more information.\n",
 			filepath.Base(pfsDir), logPath)
-		log.Warnf("Could not connect to PFSD %s at %s: %v", filepath.Base(pfsDir), socketPath, err)
+		log.Printf("Could not connect to PFSD %s at %s: %v", filepath.Base(pfsDir), socketPath, err)
 		return
 	}
 	err = client.Call("IntercomServer.ListNodes", new(intercom.EmptyMessage), &resp)
@@ -77,7 +77,7 @@ func getNodes(pfsDir string) {
 		} else {
 			fmt.Printf("Error listing nodes connected to %s. See %s for more information.\n",
 				filepath.Base(pfsDir), logPath)
-			log.Warnf("PFSD at %s returned error: %v", filepath.Base(pfsDir), err)
+			log.Printf("PFSD at %s returned error: %v", filepath.Base(pfsDir), err)
 		}
 		return
 	}

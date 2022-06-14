@@ -2,6 +2,7 @@ package raftlog
 
 import (
 	"errors"
+	"log"
 	"os"
 	"path"
 	"strconv"
@@ -15,12 +16,12 @@ func (rl *RaftLog) deleteLogEntry(index uint64) {
 	)
 	fi, err := os.Stat(entryPath)
 	if err != nil {
-		Log.Fatalf("unable to delete log of index %d with error: %s", index, err)
+		log.Fatalf("unable to delete log of index %d with error: %v", index, err)
 	}
 	entrySize := uint64(fi.Size())
 
 	if err = os.Remove(entryPath); err != nil {
-		Log.Fatalf("unable to delete log of index %d with error: %s", index, err)
+		log.Fatalf("unable to delete log of index %d with error: %v", index, err)
 	}
 	rl.setLogSizeBytes(rl.logSizeBytes - entrySize)
 }
@@ -42,7 +43,7 @@ func (rl *RaftLog) DiscardLogEntriesAfter(startIndex uint64) error {
 	if rl.currentIndex > 1 {
 		logEntry, err := rl.GetLogEntryUnsafe(rl.currentIndex - 1)
 		if err != nil {
-			Log.Fatal("error deleting log entries:", err)
+			log.Fatalf("error deleting log entries: %v", err)
 		}
 		rl.mostRecentTerm = logEntry.Term
 	} else {
@@ -60,7 +61,7 @@ func (rl *RaftLog) DiscardLogEntriesBefore(endIndex, endTerm uint64) {
 	for i := rl.startIndex + 1; i <= min(endIndex, rl.currentIndex-1); i++ {
 		logEntry, err := rl.GetLogEntryUnsafe(i)
 		if err != nil {
-			Log.Fatal("error deleting log entries:", err)
+			log.Fatalf("error deleting log entries: %v", err)
 		}
 
 		rl.deleteLogEntry(i)
@@ -81,12 +82,12 @@ func (rl *RaftLog) DiscardAllLogEntries(snapshotIndex, snapshotTerm uint64) {
 
 	err := os.RemoveAll(path.Join(rl.logDir, LogEntryDirectoryName))
 	if err != nil {
-		Log.Fatal("error deleting all log entries:", err)
+		log.Fatalf("error deleting all log entries: %v", err)
 	}
 
 	err = os.Mkdir(path.Join(rl.logDir, LogEntryDirectoryName), 0700)
 	if err != nil {
-		Log.Fatal("error deleting all log entries:", err)
+		log.Fatalf("error deleting all log entries: %v", err)
 	}
 
 	rl.setLogSizeBytes(0)

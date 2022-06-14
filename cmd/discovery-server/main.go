@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"log"
 	"net"
 	"os"
 	"os/user"
@@ -14,7 +15,6 @@ import (
 	"google.golang.org/grpc/credentials"
 
 	"github.com/cpssd-students/paranoid/cmd/discovery-server/dnetserver"
-	"github.com/cpssd-students/paranoid/pkg/logger"
 
 	pb "github.com/cpssd-students/paranoid/proto/discoverynetwork"
 )
@@ -38,43 +38,38 @@ var (
 func createRPCServer() *grpc.Server {
 	var opts []grpc.ServerOption
 	if *certFile != "" && *keyFile != "" {
-		dnetserver.Log.Info("Starting discovery server with TLS.")
+		log.Println("Starting discovery server with TLS.")
 		creds, err := credentials.NewServerTLSFromFile(*certFile, *keyFile)
 		if err != nil {
-			dnetserver.Log.Fatal("Failed to generate TLS credentials:", err)
+			log.Fatalf("Failed to generate TLS credentials: %v", err)
 		}
 		opts = []grpc.ServerOption{grpc.Creds(creds)}
 	} else {
-		dnetserver.Log.Info("Starting discovery server without TLS.")
+		log.Println("Starting discovery server without TLS.")
 	}
 	return grpc.NewServer(opts...)
 }
 
 func main() {
 	flag.Parse()
-	dnetserver.Log = logger.New("main", "discovery-server", *logDir)
 	dnetserver.Pools = make(map[string]*dnetserver.Pool)
-	err := dnetserver.Log.SetOutput(logger.LOGFILE | logger.STDERR)
-	if err != nil {
-		dnetserver.Log.Error("Failed to set logger output:", err)
-	}
 
-	analyseWorkspace(dnetserver.Log)
+	analyseWorkspace()
 
 	renewDuration, err := time.ParseDuration(strconv.Itoa(*renewInterval) + "ms")
 	if err != nil {
-		dnetserver.Log.Error("Failed parsing renew interval", err)
+		log.Printf("Failed parsing renew interval: %v", err)
 	}
 
 	dnetserver.RenewInterval = renewDuration
 
-	dnetserver.Log.Info("Starting Paranoid Discovery Server")
+	log.Println("Starting Paranoid Discovery Server")
 
 	lis, err := net.Listen("tcp", ":"+strconv.Itoa(*port))
 	if err != nil {
-		dnetserver.Log.Fatalf("Failed to listen on port %d: %v.", *port, err)
+		log.Fatalf("Failed to listen on port %d: %v.", *port, err)
 	}
-	dnetserver.Log.Infof("Listening on %s", lis.Addr().String())
+	log.Printf("Listening on %s", lis.Addr().String())
 
 	if *loadState {
 		dnetserver.LoadState()
@@ -82,14 +77,14 @@ func main() {
 	srv := createRPCServer()
 	pb.RegisterDiscoveryNetworkServer(srv, &dnetserver.DiscoveryServer{})
 
-	dnetserver.Log.Info("gRPC server created")
+	log.Println("gRPC server created")
 	srv.Serve(lis)
 }
 
 // analyseWorkspace analyses the state of the workspace directory for the server,
 // if the workspace directory doesnt exist it will be recreated along with needed
 // sub-directories.
-func analyseWorkspace(log *logger.ParanoidLogger) {
+func analyseWorkspace() {
 	usr, err := user.Current()
 	if err != nil {
 		log.Fatal("Couldn't identify user:", err)
@@ -97,35 +92,35 @@ func analyseWorkspace(log *logger.ParanoidLogger) {
 
 	// checking ~/.pfs
 	pfsDirPath := path.Join(usr.HomeDir, ".pfs")
-	checkDir(pfsDirPath, log)
+	checkDir(pfsDirPath)
 
 	// checking ~/.pfs/discovery_meta
 	metaDirPath := path.Join(pfsDirPath, "discovery_meta")
-	checkDir(metaDirPath, log)
+	checkDir(metaDirPath)
 
 	dnetserver.StateDirectoryPath = path.Join(metaDirPath, DiscoveryStateDir)
 	dnetserver.TempDirectoryPath = path.Join(metaDirPath, TempStateDir)
-	checkDir(dnetserver.StateDirectoryPath, log)
-	checkDir(dnetserver.TempDirectoryPath, log)
+	checkDir(dnetserver.StateDirectoryPath)
+	checkDir(dnetserver.TempDirectoryPath)
 }
 
 // checkDir checks a directory and creates it if needed
-func checkDir(dir string, log *logger.ParanoidLogger) {
+func checkDir(dir string) {
 	_, err := os.Stat(dir)
 	if err != nil {
 		if os.IsNotExist(err) {
-			log.Info("Creating: ", dir)
-			err1 := os.Mkdir(dir, 0700)
-			if err1 != nil {
-				log.Fatal("Failed to create: ", dir, " err:", err1)
+			log.Printf("Creating %s", dir)
+
+			if err := os.Mkdir(dir, 0700); err != nil {
+				log.Fatalf("Failed to create %s: %v", dir, err)
 			}
 		} else {
 			log.Fatal("Couldn't stat:", dir, "err:", err)
 		}
 	} else {
-		err = syscall.Access(dir, syscall.O_RDWR)
-		if err != nil {
-			log.Fatal("Don't have read & write access to:", dir)
+
+		if err := syscall.Access(dir, syscall.O_RDWR); err != nil {
+			log.Fatalf("Don't have read & write access to %s: %v", dir, err)
 		}
 	}
 }

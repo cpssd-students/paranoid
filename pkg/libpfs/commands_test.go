@@ -1,8 +1,10 @@
+//go:build !integration
 // +build !integration
 
 package libpfs
 
 import (
+	"log"
 	"math/rand"
 	"os"
 	"syscall"
@@ -11,7 +13,6 @@ import (
 
 	"paranoid/pkg/libpfs/encryption"
 	"paranoid/pkg/libpfs/returncodes"
-	log "paranoid/pkg/logger"
 )
 
 var testDirectory string

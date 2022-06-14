@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"path"
 	"sync"
@@ -125,7 +126,7 @@ func NewKSMFromReader(reader io.Reader) (*KeyStateMachine, error) {
 	dec := gob.NewDecoder(reader)
 	err := dec.Decode(ksm)
 	if err != nil {
-		Log.Error("Failed decoding GOB KeyStateMachine data:", err)
+		log.Printf("Failed decoding GOB KeyStateMachine data: %v", err)
 		return nil, fmt.Errorf("failed decoding from GOB: %s", err)
 	}
 	ksm.Events = make(chan bool, 10)
@@ -137,7 +138,7 @@ func NewKSMFromReader(reader io.Reader) (*KeyStateMachine, error) {
 func NewKSMFromPFSDir(pfsDir string) (*KeyStateMachine, error) {
 	file, err := os.Open(path.Join(pfsDir, "meta", KsmFileName))
 	if err != nil {
-		Log.Errorf("Unable to open %s for reading state: %s", pfsDir, err)
+		log.Printf("Unable to open %s for reading state: %v", pfsDir, err)
 		return nil, fmt.Errorf("unable to open %s: %s", pfsDir, err)
 	}
 	defer file.Close()
@@ -193,7 +194,7 @@ func (ksm *KeyStateMachine) NewGeneration(
 
 	err = ksm.SerialiseToPFSDir()
 	if err != nil {
-		Log.Error("Error serialising key state machine:", err)
+		log.Printf("Error serialising key state machine: %v", err)
 		delete(ksm.Generations, ksm.InProgressGeneration)
 		ksm.InProgressGeneration--
 		return 0, nil, err
@@ -313,7 +314,7 @@ func (ksm *KeyStateMachine) Update(req *pb.KeyStateCommand) error {
 		return fmt.Errorf("failed to commit change to KeyStateMachine: %s", err)
 	}
 
-	Log.Verbosef("KeyPiece exchange tracked: %s -> %s", elem.Owner.NodeId, elem.Holder.NodeId)
+	log.Printf("KeyPiece exchange tracked: %s -> %s", elem.Owner.NodeId, elem.Holder.NodeId)
 	return nil
 }
 
@@ -370,7 +371,7 @@ func (ksm *KeyStateMachine) OwnerComplete(ownerID string, generation int64) erro
 		return fmt.Errorf("failed to commit change to KeyStateMachine: %s", err)
 	}
 
-	Log.Verbosef("Owner complete tracked: %s", ownerID)
+	log.Printf("Owner complete tracked: %s", ownerID)
 	return nil
 }
 
@@ -401,8 +402,8 @@ func (ksm *KeyStateMachine) Serialise(writer io.Writer) error {
 	enc := gob.NewEncoder(writer)
 	err := enc.Encode(ksm)
 	if err != nil {
-		Log.Error("failed encoding KeyStateMachine to GOB:", err)
-		return fmt.Errorf("failed encoding KeyStateMachine to GOB: %v", err)
+		log.Printf("failed encoding KeyStateMachine to GOB: %v", err)
+		return fmt.Errorf("failed encoding KeyStateMachine to GOB: %w", err)
 	}
 	return nil
 }
@@ -412,8 +413,8 @@ func (ksm *KeyStateMachine) SerialiseToPFSDir() error {
 	ksmpath := path.Join(ksm.PfsDir, "meta", KsmFileName)
 	file, err := os.Create(ksmpath + "-new")
 	if err != nil {
-		Log.Errorf("Unable to open %s for writing state: %s", ksm.PfsDir, err)
-		return fmt.Errorf("unable to open %s for writing state: %s", ksm.PfsDir, err)
+		log.Printf("Unable to open %s for writing state: %v", ksm.PfsDir, err)
+		return fmt.Errorf("unable to open %s for writing state: %w", ksm.PfsDir, err)
 	}
 	err = ksm.Serialise(file)
 	file.Close()

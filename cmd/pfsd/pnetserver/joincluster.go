@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 
 	"golang.org/x/crypto/bcrypt"
 
@@ -37,7 +38,7 @@ func (s *ParanoidServer) JoinCluster(
 		CommonName: req.CommonName,
 		NodeID:     req.Uuid,
 	}
-	Log.Infof("Got Ping from Node %v", node)
+	log.Printf("Got Ping from Node %s", node)
 	err := globals.RaftNetworkServer.RequestAddNodeToConfiguration(node)
 	if err != nil {
 		return &pb.EmptyMessage{}, fmt.Errorf("unable to add node to raft cluster: %v", err)

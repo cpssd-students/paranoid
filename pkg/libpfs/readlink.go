@@ -4,24 +4,24 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"path"
 
 	"github.com/cpssd-students/paranoid/pkg/libpfs/returncodes"
-	log "github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 // ReadlinkCommand reads the value of the symbolic link
-func ReadlinkCommand(paranoidDirectory, filePath string) (returnCode returncodes.Code, linkContents string, returnError error) {
-	log.V(1).Infof("readlink called on %s in %s", filePath, paranoidDirectory)
+func ReadlinkCommand(
+	paranoidDirectory, filePath string,
+) (returnCode returncodes.Code, linkContents string, returnError error) {
+	log.Printf("readlink called on %s in %s", filePath, paranoidDirectory)
 
-	err := GetFileSystemLock(paranoidDirectory, SharedLock)
-	if err != nil {
+	if err := GetFileSystemLock(paranoidDirectory, SharedLock); err != nil {
 		return returncodes.EUNEXPECTED, "", err
 	}
 
 	defer func() {
-		err := UnLockFileSystem(paranoidDirectory)
-		if err != nil {
+		if err := UnLockFileSystem(paranoidDirectory); err != nil {
 			returnCode = returncodes.EUNEXPECTED
 			returnError = err
 			linkContents = ""

@@ -3,18 +3,20 @@ package libpfs
 import (
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"path"
 	"syscall"
 	"time"
 
 	"github.com/cpssd-students/paranoid/pkg/libpfs/returncodes"
-	log "github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 //UtimesCommand updates the acess time and modified time of a file
-func UtimesCommand(paranoidDirectory, filePath string, atime, mtime *time.Time) (returnCode returncodes.Code, returnError error) {
-	log.V(1).Infof("utimes called on %s in %s", filePath, paranoidDirectory)
+func UtimesCommand(
+	paranoidDirectory, filePath string, atime, mtime *time.Time,
+) (returnCode returncodes.Code, returnError error) {
+	log.Printf("utimes called on %s in %s", filePath, paranoidDirectory)
 
 	err := GetFileSystemLock(paranoidDirectory, SharedLock)
 	if err != nil {

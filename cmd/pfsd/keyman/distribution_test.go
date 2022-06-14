@@ -1,15 +1,14 @@
+//go:build !integration
 // +build !integration
 
 package keyman
 
 import (
-	"paranoid/pkg/logger"
 	"os"
 	"testing"
 )
 
 func TestMain(m *testing.M) {
-	Log = logger.New("keyman", "pfsd", os.DevNull)
 	os.Exit(m.Run())
 }
 

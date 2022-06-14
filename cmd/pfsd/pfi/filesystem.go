@@ -1,6 +1,7 @@
 package pfi
 
 import (
+	"log"
 	"os"
 	"time"
 
@@ -21,8 +22,10 @@ type ParanoidFileSystem struct {
 
 //GetAttr is called by fuse when the attributes of a
 //file or directory are needed. (pfs stat)
-func (fs *ParanoidFileSystem) GetAttr(name string, context *fuse.Context) (*fuse.Attr, fuse.Status) {
-	Log.Info("GetAttr called on", name)
+func (fs *ParanoidFileSystem) GetAttr(
+	name string, context *fuse.Context,
+) (*fuse.Attr, fuse.Status) {
+	log.Printf("GetAttr called on %s", name)
 
 	// Special case : "" is the root of our filesystem
 	if name == "" {
@@ -33,11 +36,11 @@ func (fs *ParanoidFileSystem) GetAttr(name string, context *fuse.Context) (*fuse
 
 	code, stats, err := libpfs.StatCommand(globals.ParanoidDir, name)
 	if code == returncodes.EUNEXPECTED {
-		Log.Fatal("Error running stat command :", err)
+		log.Fatalf("Error running stat command: %v", err)
 	}
 
 	if err != nil {
-		Log.Error("Error running stat command :", err)
+		log.Printf("Error running stat command: %v", err)
 	}
 
 	if code != returncodes.OK {
@@ -56,16 +59,18 @@ func (fs *ParanoidFileSystem) GetAttr(name string, context *fuse.Context) (*fuse
 }
 
 //OpenDir is called when the contents of a directory are needed.
-func (fs *ParanoidFileSystem) OpenDir(name string, context *fuse.Context) ([]fuse.DirEntry, fuse.Status) {
-	Log.Info("OpenDir called on : " + name)
+func (fs *ParanoidFileSystem) OpenDir(
+	name string, context *fuse.Context,
+) ([]fuse.DirEntry, fuse.Status) {
+	log.Printf("OpenDir called on %s", name)
 
 	code, fileNames, err := libpfs.ReadDirCommand(globals.ParanoidDir, name)
 	if code == returncodes.EUNEXPECTED {
-		Log.Fatal("Error running readdir command :", err)
+		log.Fatalf("Error running readdir command: %v", err)
 	}
 
 	if err != nil {
-		Log.Error("Error running readdir command :", err)
+		log.Printf("Error running readdir command: %v", err)
 	}
 
 	if code != returncodes.OK {
@@ -74,7 +79,7 @@ func (fs *ParanoidFileSystem) OpenDir(name string, context *fuse.Context) ([]fus
 
 	dirEntries := make([]fuse.DirEntry, len(fileNames))
 	for i, dirName := range fileNames {
-		Log.Info("OpenDir has " + dirName)
+		log.Printf("OpenDir has %s", dirName)
 		dirEntries[i] = fuse.DirEntry{Name: dirName}
 	}
 
@@ -84,14 +89,18 @@ func (fs *ParanoidFileSystem) OpenDir(name string, context *fuse.Context) ([]fus
 //Open is called to get a custom file object for a certain file so that
 //Read and Write (among others) opperations can be executed on this
 //custom file object (ParanoidFile, see below)
-func (fs *ParanoidFileSystem) Open(name string, flags uint32, context *fuse.Context) (nodefs.File, fuse.Status) {
-	Log.Info("Open called on : " + name)
+func (fs *ParanoidFileSystem) Open(
+	name string, flags uint32, context *fuse.Context,
+) (nodefs.File, fuse.Status) {
+	log.Printf("Open called on %s ", name)
 	return newParanoidFile(name), fuse.OK
 }
 
 //Create is called when a new file is to be created.
-func (fs *ParanoidFileSystem) Create(name string, flags uint32, mode uint32, context *fuse.Context) (nodefs.File, fuse.Status) {
-	Log.Info("Create called on : " + name)
+func (fs *ParanoidFileSystem) Create(
+	name string, flags uint32, mode uint32, context *fuse.Context,
+) (nodefs.File, fuse.Status) {
+	log.Printf("Create called on %s ", name)
 	var code returncodes.Code
 	var err error
 	if SendOverNetwork {
@@ -101,11 +110,11 @@ func (fs *ParanoidFileSystem) Create(name string, flags uint32, mode uint32, con
 	}
 
 	if code == returncodes.EUNEXPECTED {
-		Log.Fatal("Error running creat command :", err)
+		log.Fatalf("Error running creat command: %v", err)
 	}
 
 	if err != nil {
-		Log.Error("Error running creat command :", err)
+		log.Printf("Error running creat command: %v", err)
 	}
 
 	if code != returncodes.OK {
@@ -116,15 +125,15 @@ func (fs *ParanoidFileSystem) Create(name string, flags uint32, mode uint32, con
 
 //Access is called by fuse to see if it has access to a certain file
 func (fs *ParanoidFileSystem) Access(name string, mode uint32, context *fuse.Context) fuse.Status {
-	Log.Info("Access called on : " + name)
+	log.Printf("Access called on %s", name)
 	if name != "" {
 		code, err := libpfs.AccessCommand(globals.ParanoidDir, name, mode)
 		if code == returncodes.EUNEXPECTED {
-			Log.Fatal("Error running access command :", err)
+			log.Fatalf("Error running access command: %v", err)
 		}
 
 		if err != nil {
-			Log.Error("Error running access command :", err)
+			log.Printf("Error running access command: %v", err)
 		}
 		return GetFuseReturnCode(code)
 	}
@@ -132,8 +141,10 @@ func (fs *ParanoidFileSystem) Access(name string, mode uint32, context *fuse.Con
 }
 
 //Rename is called when renaming a file
-func (fs *ParanoidFileSystem) Rename(oldName string, newName string, context *fuse.Context) fuse.Status {
-	Log.Info("Rename called on : " + oldName + " to be renamed to " + newName)
+func (fs *ParanoidFileSystem) Rename(
+	oldName string, newName string, context *fuse.Context,
+) fuse.Status {
+	log.Printf("Rename called on %s to be renamed to %s", oldName, newName)
 	var code returncodes.Code
 	var err error
 	if SendOverNetwork {
@@ -143,18 +154,20 @@ func (fs *ParanoidFileSystem) Rename(oldName string, newName string, context *fu
 	}
 
 	if code == returncodes.EUNEXPECTED {
-		Log.Fatal("Error running rename command :", err)
+		log.Fatalf("Error running rename command: %v", err)
 	}
 
 	if err != nil {
-		Log.Error("Error running rename command :", err)
+		log.Printf("Error running rename command: %v", err)
 	}
 	return GetFuseReturnCode(code)
 }
 
 //Link creates a hard link from newName to oldName
-func (fs *ParanoidFileSystem) Link(oldName string, newName string, context *fuse.Context) fuse.Status {
-	Log.Info("Link called")
+func (fs *ParanoidFileSystem) Link(
+	oldName string, newName string, context *fuse.Context,
+) fuse.Status {
+	log.Print("Link called")
 	var code returncodes.Code
 	var err error
 	if SendOverNetwork {
@@ -164,18 +177,20 @@ func (fs *ParanoidFileSystem) Link(oldName string, newName string, context *fuse
 	}
 
 	if code == returncodes.EUNEXPECTED {
-		Log.Fatal("Error running link command :", err)
+		log.Fatalf("Error running link command: %v", err)
 	}
 
 	if err != nil {
-		Log.Error("Error running link command :", err)
+		log.Printf("Error running link command: %s", err)
 	}
 	return GetFuseReturnCode(code)
 }
 
 //Symlink creates a symbolic link from newName to oldName
-func (fs *ParanoidFileSystem) Symlink(oldName string, newName string, context *fuse.Context) fuse.Status {
-	Log.Info("Symbolic link called from", oldName, "to", newName)
+func (fs *ParanoidFileSystem) Symlink(
+	oldName string, newName string, context *fuse.Context,
+) fuse.Status {
+	log.Printf("Symlink called from %s to %s", oldName, newName)
 	var code returncodes.Code
 	var err error
 	if SendOverNetwork {
@@ -185,32 +200,32 @@ func (fs *ParanoidFileSystem) Symlink(oldName string, newName string, context *f
 	}
 
 	if code == returncodes.EUNEXPECTED {
-		Log.Fatal("Error running symlink command :", err)
+		log.Fatalf("Error running symlink command: %v", err)
 	}
 
 	if err != nil {
-		Log.Error("Error running symlink command :", err)
+		log.Printf("Error running symlink command: %v", err)
 	}
 	return GetFuseReturnCode(code)
 }
 
 // Readlink to where the file is pointing to
 func (fs *ParanoidFileSystem) Readlink(name string, context *fuse.Context) (string, fuse.Status) {
-	Log.Info("Readlink called on", name)
+	log.Printf("Readlink called on %s", name)
 	code, link, err := libpfs.ReadlinkCommand(globals.ParanoidDir, name)
 	if code == returncodes.EUNEXPECTED {
-		Log.Fatal("Error running readlink command :", err)
+		log.Fatalf("Error running readlink command: %v", err)
 	}
 
 	if err != nil {
-		Log.Error("Error running readlink command :", err)
+		log.Printf("Error running readlink command: %v", err)
 	}
 	return link, GetFuseReturnCode(code)
 }
 
 //Unlink is called when deleting a file
 func (fs *ParanoidFileSystem) Unlink(name string, context *fuse.Context) fuse.Status {
-	Log.Info("Unlink callde on : " + name)
+	log.Printf("Unlink called on %s", name)
 	var code returncodes.Code
 	var err error
 	if SendOverNetwork {
@@ -220,18 +235,18 @@ func (fs *ParanoidFileSystem) Unlink(name string, context *fuse.Context) fuse.St
 	}
 
 	if code == returncodes.EUNEXPECTED {
-		Log.Fatal("Error running unlink command :", err)
+		log.Fatalf("Error running unlink command: %v", err)
 	}
 
 	if err != nil {
-		Log.Error("Error running unlink command :", err)
+		log.Printf("Error running unlink command: %v", err)
 	}
 	return GetFuseReturnCode(code)
 }
 
 //Mkdir is called when creating a directory
 func (fs *ParanoidFileSystem) Mkdir(name string, mode uint32, context *fuse.Context) fuse.Status {
-	Log.Info("Mkdir called on : " + name)
+	log.Printf("Mkdir called on %s", name)
 	var code returncodes.Code
 	var err error
 	if SendOverNetwork {
@@ -241,18 +256,18 @@ func (fs *ParanoidFileSystem) Mkdir(name string, mode uint32, context *fuse.Cont
 	}
 
 	if code == returncodes.EUNEXPECTED {
-		Log.Fatal("Error running mkdir command :", err)
+		log.Fatalf("Error running mkdir command: %v", err)
 	}
 
 	if err != nil {
-		Log.Error("Error running mkdir command :", err)
+		log.Printf("Error running mkdir command: %v", err)
 	}
 	return GetFuseReturnCode(code)
 }
 
 //Rmdir is called when deleting a directory
 func (fs *ParanoidFileSystem) Rmdir(name string, context *fuse.Context) fuse.Status {
-	Log.Info("Rmdir called on : " + name)
+	log.Printf("Rmdir called on %s", name)
 	var code returncodes.Code
 	var err error
 	if SendOverNetwork {
@@ -262,32 +277,35 @@ func (fs *ParanoidFileSystem) Rmdir(name string, context *fuse.Context) fuse.Sta
 	}
 
 	if code == returncodes.EUNEXPECTED {
-		Log.Fatal("Error running rmdir command :", err)
+		log.Fatalf("Error running rmdir command: %v", err)
 	}
 
 	if err != nil {
-		Log.Error("Error running rmdir command :", err)
+		log.Printf("Error running rmdir command: %v", err)
 	}
 	return GetFuseReturnCode(code)
 }
 
 //Truncate is called when a file is to be reduced in length to size.
-func (fs *ParanoidFileSystem) Truncate(name string, size uint64, context *fuse.Context) fuse.Status {
-	Log.Info("Truncate called on : " + name)
-	pfile := newParanoidFile(name)
-	return pfile.Truncate(size)
+func (fs *ParanoidFileSystem) Truncate(
+	name string, size uint64, context *fuse.Context,
+) fuse.Status {
+	log.Printf("Truncate called on %s ", name)
+	return newParanoidFile(name).Truncate(size)
 }
 
 //Utimens update the Access time and modified time of a given file.
-func (fs *ParanoidFileSystem) Utimens(name string, atime *time.Time, mtime *time.Time, context *fuse.Context) fuse.Status {
-	Log.Info("Utimens called on : " + name)
-	pfile := newParanoidFile(name)
-	return pfile.Utimens(atime, mtime)
+func (fs *ParanoidFileSystem) Utimens(
+	name string, atime *time.Time, mtime *time.Time, context *fuse.Context,
+) fuse.Status {
+	log.Printf("Utimens called on %s ", name)
+	return newParanoidFile(name).Utimens(atime, mtime)
 }
 
 //Chmod is called when the permissions of a file are to be changed
-func (fs *ParanoidFileSystem) Chmod(name string, perms uint32, context *fuse.Context) fuse.Status {
-	Log.Info("Chmod called on : " + name)
-	pfile := newParanoidFile(name)
-	return pfile.Chmod(perms)
+func (fs *ParanoidFileSystem) Chmod(
+	name string, perms uint32, context *fuse.Context,
+) fuse.Status {
+	log.Printf("Chmod called on %s ", name)
+	return newParanoidFile(name).Chmod(perms)
 }

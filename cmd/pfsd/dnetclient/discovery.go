@@ -2,6 +2,7 @@ package dnetclient
 
 import (
 	"errors"
+	"log"
 	"net"
 	"strings"
 	"time"
@@ -29,10 +30,10 @@ func SetDiscovery(addr string) {
 			dnsAddr, err = net.LookupCNAME(host)
 		}
 		if err != nil {
-			Log.Error("Could not complete DNS lookup:", err)
+			log.Printf("Could not complete DNS lookup: %v", err)
 		}
 		if dnsAddr == "" { // If no DNS entries exist
-			Log.Fatal("Can not find DNS entry for discovery server:", host)
+			log.Fatalf("Can not find DNS entry for discovery server %s", host)
 		}
 		discoveryCommonName = dnsAddr
 	}
@@ -42,7 +43,8 @@ func SetDiscovery(addr string) {
 func JoinDiscovery(pool, password string) {
 	if err := Join(pool, password); err != nil {
 		if err = retryJoin(pool, password); err != nil {
-			Log.Fatal("Failure dialing discovery server after multiple attempts, Giving up", err)
+			log.Fatalf("Failure dialing discovery server after multiple attempts, Giving up: %v",
+				err)
 		}
 	}
 	globals.Wait.Add(1)

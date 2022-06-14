@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 
 	"github.com/cpssd-students/paranoid/cmd/pfsd/globals"
 	"github.com/cpssd-students/paranoid/cmd/pfsd/keyman"
@@ -20,8 +21,8 @@ func SendKeyPiece(uuid string, generation int64, piece *keyman.KeyPiece, addElem
 
 	conn, err := Dial(node)
 	if err != nil {
-		Log.Error("SendKeyPiece: failed to dial ", node)
-		return fmt.Errorf("failed to dial: %s", node)
+		log.Printf("SendKeyPiece: failed to dial %s: %v", node, err)
+		return fmt.Errorf("failed to dial: %s: %w", node, err)
 	}
 	defer conn.Close()
 
@@ -47,8 +48,8 @@ func SendKeyPiece(uuid string, generation int64, piece *keyman.KeyPiece, addElem
 		AddElement: addElement,
 	})
 	if err != nil {
-		Log.Error("Failed sending KeyPiece to", node, "Error:", err)
-		return fmt.Errorf("Failed sending key piece to %s, Error: %s", node, err)
+		log.Printf("Failed sending KeyPiece to %s: %v", node, err)
+		return fmt.Errorf("Failed sending key piece to %s: %w", node, err)
 	}
 
 	if resp.ClientMustCommit && addElement {
@@ -69,8 +70,8 @@ func SendKeyPiece(uuid string, generation int64, piece *keyman.KeyPiece, addElem
 			raftOwnerNode,
 			generation,
 		); err != nil {
-			Log.Errorf("failed to commit to Raft: %s", err)
-			return fmt.Errorf("failed to commit to Raft: %s", err)
+			log.Printf("failed to commit to Raft: %v", err)
+			return fmt.Errorf("failed to commit to Raft: %w", err)
 		}
 	}
 

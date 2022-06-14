@@ -15,9 +15,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/grpclog"
 
-	"github.com/cpssd-students/paranoid/pkg/logger"
 	"github.com/cpssd-students/paranoid/pkg/raft"
-	"github.com/cpssd-students/paranoid/pkg/raft/raftlog"
 	"github.com/cpssd-students/paranoid/pkg/raft/rafttestutil"
 	pb "github.com/cpssd-students/paranoid/proto/raft"
 )
@@ -300,12 +298,6 @@ func main() {
 	rand.Seed(time.Now().UnixNano())
 	createDemoDirectory()
 	defer removeDemoDirectory()
-	raft.Log = logger.New("raftdemo", "raftdemo", path.Join(os.TempDir(), "raftdemo"))
-	raftlog.Log = logger.New("raftdemo", "raftdemo", path.Join(os.TempDir(), "raftdemo"))
-	err := raft.Log.SetOutput(logger.LOGFILE)
-	if err != nil {
-		log.Println("Could not set file logging:", err)
-	}
 
 	writer, err := createFileWriter(path.Join(os.TempDir(), "raftdemo"), "grpclog")
 	if err != nil {

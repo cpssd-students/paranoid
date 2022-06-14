@@ -5,17 +5,19 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
 	"syscall"
 
 	"github.com/cpssd-students/paranoid/pkg/libpfs/returncodes"
-	log "github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 // SymlinkCommand creates a symbolic link
-func SymlinkCommand(paranoidDirectory, existingFilePath, targetFilePath string) (returnCode returncodes.Code, returnError error) {
-	log.V(1).Infof("symlinking %s with %s in %s",
+func SymlinkCommand(
+	paranoidDirectory, existingFilePath, targetFilePath string,
+) (returnCode returncodes.Code, returnError error) {
+	log.Printf("symlinking %s with %s in %s",
 		existingFilePath, targetFilePath, paranoidDirectory)
 
 	targetParanoidPath := getParanoidPath(paranoidDirectory, targetFilePath)

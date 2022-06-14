@@ -3,6 +3,7 @@ package upnp
 import (
 	"errors"
 	"flag"
+	"log"
 	"math/rand"
 	"net"
 	"strconv"
@@ -11,7 +12,6 @@ import (
 	"github.com/huin/goupnp/dcps/internetgateway1"
 
 	"github.com/cpssd-students/paranoid/cmd/pfsd/globals"
-	"github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 var (
@@ -21,10 +21,8 @@ var (
 	pppPortMappedClient *internetgateway1.WANPPPConnection1
 
 	iface = flag.String("interface", "default",
-		"network interface on which to perform connections. If not set, will use default interface.")
-
-	// Log used for upnp
-	Log *logger.ParanoidLogger
+		"network interface on which to perform connections. "+
+			"If not set, will use default interface.")
 )
 
 const attemptedPortAssignments = 10
@@ -68,7 +66,7 @@ func getUnoccupiedPortsIP(client *internetgateway1.WANIPConnection1) []int {
 	}
 	openPorts := make([]int, 0)
 	for i := 1; i < 65536; i++ {
-		if m[i] == false {
+		if !m[i] {
 			openPorts = append(openPorts, i)
 		}
 	}
@@ -86,7 +84,7 @@ func getUnoccupiedPortsppp(client *internetgateway1.WANPPPConnection1) []int {
 	}
 	openPorts := make([]int, 0)
 	for i := 1; i < 65536; i++ {
-		if m[i] == false {
+		if !m[i] {
 			openPorts = append(openPorts, i)
 		}
 	}
@@ -100,14 +98,17 @@ func AddPortMapping(internalIP string, internalPort int) (int, error) {
 		if len(openPorts) > 0 {
 			for i := 0; i < attemptedPortAssignments; i++ {
 				port := openPorts[rand.Intn(len(openPorts))]
-				Log.Info("Picked port:", port)
-				err := client.AddPortMapping("", uint16(port), "tcp", uint16(internalPort), internalIP, true, "", 0)
-				if err == nil {
-					ipPortMappedClient = client
-					return port, nil
+				log.Printf("Picked port %d", port)
+
+				if err := client.AddPortMapping(
+					"", uint16(port), "tcp", uint16(internalPort), internalIP, true, "", 0,
+				); err != nil {
+					log.Printf("Unable to map port %d: %v", port, err)
+					continue
 				}
 
-				Log.Warn("Unable to map port", port, ". Error:", err)
+				ipPortMappedClient = client
+				return port, nil
 			}
 		}
 	}
@@ -116,14 +117,17 @@ func AddPortMapping(internalIP string, internalPort int) (int, error) {
 		if len(openPorts) > 0 {
 			for i := 0; i < attemptedPortAssignments; i++ {
 				port := openPorts[rand.Intn(len(openPorts))]
-				Log.Info("Picked port:", port)
-				err := client.AddPortMapping("", uint16(port), "tcp", uint16(internalPort), internalIP, true, "", 0)
-				if err == nil {
-					pppPortMappedClient = client
-					return port, nil
+				log.Printf("Picked port %d", port)
+
+				if err := client.AddPortMapping(
+					"", uint16(port), "tcp", uint16(internalPort), internalIP, true, "", 0,
+				); err != nil {
+					log.Printf("Unable to map port %d: %v", port, err)
+					continue
 				}
 
-				Log.Warn("Unable to map port", port, ". Error:", err)
+				pppPortMappedClient = client
+				return port, nil
 			}
 		}
 	}

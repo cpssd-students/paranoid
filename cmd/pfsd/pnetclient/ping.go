@@ -2,6 +2,7 @@ package pnetclient
 
 import (
 	"context"
+	"log"
 
 	"github.com/cpssd-students/paranoid/cmd/pfsd/globals"
 	"github.com/cpssd-students/paranoid/cmd/pfsd/upnp"
@@ -12,14 +13,14 @@ import (
 func Ping() {
 	ip, err := upnp.GetIP()
 	if err != nil {
-		Log.Fatal("Can not ping peers: unable to get IP. Error:", err)
+		log.Printf("Can not ping peers: unable to get IP: %v", err)
 	}
 
 	nodes := globals.Nodes.GetAll()
 	for _, node := range nodes {
 		conn, err := Dial(node)
 		if err != nil {
-			Log.Error("Ping: failed to dial ", node)
+			log.Printf("Ping: failed to dial %s: %v", node, err)
 		}
 		defer conn.Close()
 
@@ -32,7 +33,7 @@ func Ping() {
 			Uuid:       globals.ThisNode.UUID,
 		})
 		if err != nil {
-			Log.Error("Can't ping", node)
+			log.Printf("Can't ping %s: %v", node, err)
 		}
 	}
 }

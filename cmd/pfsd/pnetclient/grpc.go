@@ -10,11 +10,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/cpssd-students/paranoid/cmd/pfsd/globals"
-	"github.com/cpssd-students/paranoid/pkg/logger"
 )
-
-// Log used by the pnetclient
-var Log *logger.ParanoidLogger
 
 // Dial a node and return a connection if successful
 func Dial(node globals.Node) (*grpc.ClientConn, error) {

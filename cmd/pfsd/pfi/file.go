@@ -1,6 +1,7 @@
 package pfi
 
 import (
+	"log"
 	"os"
 	"time"
 
@@ -28,14 +29,14 @@ func newParanoidFile(name string) nodefs.File {
 
 //Read reads a file and returns an array of bytes
 func (f *ParanoidFile) Read(buf []byte, off int64) (fuse.ReadResult, fuse.Status) {
-	Log.Info("Read called on file:", f.Name)
+	log.Printf("Read called on file: %s", f.Name)
 	code, data, err := libpfs.ReadCommand(globals.ParanoidDir, f.Name, off, int64(len(buf)))
 	if code == returncodes.EUNEXPECTED {
-		Log.Fatal("Error running read command :", err)
+		log.Fatalf("Error running read command: %v", err)
 	}
 
 	if err != nil {
-		Log.Error("Error running read command :", err)
+		log.Printf("Error running read command: %v", err)
 	}
 
 	copy(buf, data)
@@ -47,24 +48,28 @@ func (f *ParanoidFile) Read(buf []byte, off int64) (fuse.ReadResult, fuse.Status
 
 //Write writes to a file
 func (f *ParanoidFile) Write(content []byte, off int64) (uint32, fuse.Status) {
-	Log.Info("Write called on file : " + f.Name)
+	log.Printf("Write called on file %s", f.Name)
 	var (
 		code         returncodes.Code
 		err          error
 		bytesWritten int
 	)
 	if SendOverNetwork {
-		code, bytesWritten, err = globals.RaftNetworkServer.RequestWriteCommand(f.Name, off, int64(len(content)), content)
+		code, bytesWritten, err = globals.RaftNetworkServer.RequestWriteCommand(
+			f.Name, off, int64(len(content)), content,
+		)
 	} else {
-		code, bytesWritten, err = libpfs.WriteCommand(globals.ParanoidDir, f.Name, off, int64(len(content)), content)
+		code, bytesWritten, err = libpfs.WriteCommand(
+			globals.ParanoidDir, f.Name, off, int64(len(content)), content,
+		)
 	}
 
 	if code == returncodes.EUNEXPECTED {
-		Log.Fatal("Error running write command :", err)
+		log.Printf("Error running write command: %v", err)
 	}
 
 	if err != nil {
-		Log.Error("Error running write command :", err)
+		log.Printf("Error running write command: %v", err)
 	}
 
 	if code != returncodes.OK {
@@ -76,7 +81,7 @@ func (f *ParanoidFile) Write(content []byte, off int64) (uint32, fuse.Status) {
 
 //Truncate is called when a file is to be reduced in length to size.
 func (f *ParanoidFile) Truncate(size uint64) fuse.Status {
-	Log.Info("Truncate called on file : " + f.Name)
+	log.Printf("Truncate called on file %s", f.Name)
 	var code returncodes.Code
 	var err error
 	if SendOverNetwork {
@@ -86,11 +91,11 @@ func (f *ParanoidFile) Truncate(size uint64) fuse.Status {
 	}
 
 	if code == returncodes.EUNEXPECTED {
-		Log.Fatal("Error running truncate command :", err)
+		log.Fatalf("Error running truncate command: %v", err)
 	}
 
 	if err != nil {
-		Log.Error("Error running truncate command :", err)
+		log.Printf("Error running truncate command: %v", err)
 	}
 
 	return GetFuseReturnCode(code)
@@ -98,7 +103,7 @@ func (f *ParanoidFile) Truncate(size uint64) fuse.Status {
 
 //Utimens updates the access and mofication time of the file.
 func (f *ParanoidFile) Utimens(atime *time.Time, mtime *time.Time) fuse.Status {
-	Log.Info("Utimens called on file : " + f.Name)
+	log.Printf("Utimens called on file %s", f.Name)
 	var code returncodes.Code
 	var err error
 	if SendOverNetwork {
@@ -108,18 +113,18 @@ func (f *ParanoidFile) Utimens(atime *time.Time, mtime *time.Time) fuse.Status {
 	}
 
 	if code == returncodes.EUNEXPECTED {
-		Log.Fatal("Error running utimes command :", err)
+		log.Fatalf("Error running utimes command: %v", err)
 	}
 
 	if err != nil {
-		Log.Error("Error running utimes command :", err)
+		log.Printf("Error running utimes command: %v", err)
 	}
 	return GetFuseReturnCode(code)
 }
 
 //Chmod changes the permission flags of the file
 func (f *ParanoidFile) Chmod(perms uint32) fuse.Status {
-	Log.Info("Chmod called on file : " + f.Name)
+	log.Printf("Chmod called on file %s", f.Name)
 	var code returncodes.Code
 	var err error
 	if SendOverNetwork {
@@ -129,11 +134,11 @@ func (f *ParanoidFile) Chmod(perms uint32) fuse.Status {
 	}
 
 	if code == returncodes.EUNEXPECTED {
-		Log.Fatal("Error running chmod command :", err)
+		log.Fatalf("Error running chmod command: %v", err)
 	}
 
 	if err != nil {
-		Log.Error("Error running chmod command :", err)
+		log.Printf("Error running chmod command: %v", err)
 	}
 	return GetFuseReturnCode(code)
 }

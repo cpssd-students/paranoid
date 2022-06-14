@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"os"
 	"os/signal"
 	"path"
@@ -17,13 +18,13 @@ func stopAllServices() {
 	if globals.UPnPEnabled {
 		err := upnp.ClearPortMapping(globals.ThisNode.Port)
 		if err != nil {
-			log.Info("Could not clear port mapping. Error : ", err)
+			log.Printf("Could not clear port mapping: %v", err)
 		}
 	}
 	close(globals.Quit) // Sends stop signal to all goroutines
 
 	// Save all KeyPieces to disk, to ensure we haven't missed any so far.
-	globals.HeldKeyPieces.SaveToDisk()
+	_ = globals.HeldKeyPieces.SaveToDisk()
 
 	if !globals.NetworkOff {
 		close(globals.RaftNetworkServer.Quit)
@@ -49,31 +50,31 @@ func HandleSignals() {
 }
 
 func handleSIGHUP() {
-	log.Info("SIGHUP received. Restarting.")
+	log.Print("SIGHUP received. Restarting.")
 	stopAllServices()
-	log.Info("All services stopped. Forking process.")
+	log.Print("All services stopped. Forking process.")
 	execSpec := &syscall.ProcAttr{
 		Env: os.Environ(),
 	}
 	pathToSelf, err := osext.Executable()
 	if err != nil {
-		log.Warn("Could not get path to self:", err)
+		log.Printf("Could not get path to self: %v", err)
 		pathToSelf = os.Args[0]
 	}
 	fork, err := syscall.ForkExec(pathToSelf, os.Args, execSpec)
 	if err != nil {
-		log.Error("Could not fork child PFSD instance:", err)
+		log.Printf("Could not fork child PFSD instance: %v", err)
 	} else {
-		log.Info("Forked successfully. New PID:", fork)
+		log.Printf("Forked successfully. New PID: %v", fork)
 	}
 }
 
 func handleSIGTERM() {
-	log.Info("SIGTERM received. Exiting.")
+	log.Print("SIGTERM received. Exiting.")
 	stopAllServices()
 	err := os.Remove(path.Join(globals.ParanoidDir, "meta", "pfsd.pid"))
 	if err != nil {
-		log.Info("Can't remove PID file ", err)
+		log.Printf("Can't remove PID file: %v", err)
 	}
-	log.Info("All services stopped. Have a nice day.")
+	log.Print("All services stopped. Have a nice day.")
 }

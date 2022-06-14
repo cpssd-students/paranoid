@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
 	"path"
@@ -42,10 +43,10 @@ func (s *NetworkServer) setupSnapshotDirectory() {
 	if os.IsNotExist(err) {
 		err := os.Mkdir(path.Join(s.raftInfoDirectory, SnapshotDirectory), 0700)
 		if err != nil {
-			Log.Fatal("failed to create snapshot directory:", err)
+			log.Fatalf("failed to create snapshot directory: %v", err)
 		}
 	} else if err != nil {
-		Log.Fatal("error accessing snapshot directory:", err)
+		log.Fatalf("error accessing snapshot directory: %v", err)
 	}
 }
 
@@ -60,12 +61,12 @@ func getSnapshotMetaInformation(snapShotPath string) (*SnapShotInfo, error) {
 	metaFileContents, err := ioutil.ReadFile(path.Join(snapShotPath, SnapshotMetaFileName))
 	snapShotInfo := &SnapShotInfo{}
 	if err != nil {
-		return snapShotInfo, fmt.Errorf("error reading raft meta information: %s", err)
+		return snapShotInfo, fmt.Errorf("error reading raft meta information: %w", err)
 	}
 
 	err = json.Unmarshal(metaFileContents, &snapShotInfo)
 	if err != nil {
-		return snapShotInfo, fmt.Errorf("error reading raft meta information: %s", err)
+		return snapShotInfo, fmt.Errorf("error reading raft meta information: %w", err)
 	}
 	return snapShotInfo, nil
 }
@@ -79,12 +80,12 @@ func saveSnapshotMetaInformation(snapShotPath string, lastIncludedIndex, lastInc
 
 	snapShotInfoJSON, err := json.Marshal(snapShotInfo)
 	if err != nil {
-		return fmt.Errorf("error saving snapshot meta information: %s", err)
+		return fmt.Errorf("error saving snapshot meta information: %w", err)
 	}
 
 	err = ioutil.WriteFile(path.Join(snapShotPath, SnapshotMetaFileName), snapShotInfoJSON, 0600)
 	if err != nil {
-		return fmt.Errorf("error saving snapshot meta information: %s", err)
+		return fmt.Errorf("error saving snapshot meta information: %w", err)
 	}
 
 	return nil
@@ -94,34 +95,34 @@ func unpackTarFile(tarFilePath, directory string) error {
 	untar := exec.Command("tar", "-xf", tarFilePath, "--directory="+directory)
 	err := untar.Run()
 	if err != nil {
-		return fmt.Errorf("error unarchiving %s: %s", tarFilePath, err)
+		return fmt.Errorf("error unarchiving %s: %w", tarFilePath, err)
 	}
 
 	err = os.RemoveAll(path.Join(directory, "contents"))
 	if err != nil {
-		return fmt.Errorf("error unpacking %s: %s", tarFilePath, err)
+		return fmt.Errorf("error unpacking %s: %w", tarFilePath, err)
 	}
 	err = os.Rename(path.Join(directory, "contents-tar"), path.Join(directory, "contents"))
 	if err != nil {
-		return fmt.Errorf("error unpacking %s: %s", tarFilePath, err)
+		return fmt.Errorf("error unpacking %s: %w", tarFilePath, err)
 	}
 
 	err = os.RemoveAll(path.Join(directory, "names"))
 	if err != nil {
-		return fmt.Errorf("error unpacking %s: %s", tarFilePath, err)
+		return fmt.Errorf("error unpacking %s: %w", tarFilePath, err)
 	}
 	err = os.Rename(path.Join(directory, "names-tar"), path.Join(directory, "names"))
 	if err != nil {
-		return fmt.Errorf("error unpacking %s: %s", tarFilePath, err)
+		return fmt.Errorf("error unpacking %s: %w", tarFilePath, err)
 	}
 
 	err = os.RemoveAll(path.Join(directory, "inodes"))
 	if err != nil {
-		return fmt.Errorf("error unpacking %s: %s", tarFilePath, err)
+		return fmt.Errorf("error unpacking %s: %w", tarFilePath, err)
 	}
 	err = os.Rename(path.Join(directory, "inodes-tar"), path.Join(directory, "inodes"))
 	if err != nil {
-		return fmt.Errorf("error unpacking %s: %s", tarFilePath, err)
+		return fmt.Errorf("error unpacking %s: %w", tarFilePath, err)
 	}
 	return nil
 }
@@ -346,7 +347,7 @@ func (s *NetworkServer) CreateSnapshot(lastIncludedIndex uint64) (err error) {
 		if err != nil {
 			cleanuperror := os.RemoveAll(nextSnapshot)
 			if cleanuperror != nil {
-				Log.Error("error removing temporary snapshot creation files:", cleanuperror)
+				log.Printf("error removing temporary snapshot creation files: %v", cleanuperror)
 			}
 		}
 	}()
@@ -420,7 +421,7 @@ func (s *NetworkServer) RevertToSnapshot(snapshotPath string) error {
 	defer func() {
 		err := libpfs.UnLockFileSystem(s.State.pfsDirectory)
 		if err != nil {
-			Log.Fatalf("error reverting to snapshot: %s", err)
+			log.Fatalf("error reverting to snapshot: %v", err)
 		}
 	}()
 
@@ -438,7 +439,7 @@ func (s *NetworkServer) RevertToSnapshot(snapshotPath string) error {
 
 	err = os.Remove(path.Join(s.State.pfsDirectory, PersistentConfigurationFileName))
 	if err != nil {
-		Log.Warn("Unable to delete snapshot configuration file")
+		log.Print("Unable to delete snapshot configuration file")
 	}
 
 	err = keyman.StateMachine.UpdateFromStateFile(path.Join(s.State.pfsDirectory, "meta", keyman.KsmFileName+"-tar"))
@@ -448,7 +449,7 @@ func (s *NetworkServer) RevertToSnapshot(snapshotPath string) error {
 
 	err = os.Remove(path.Join(s.State.pfsDirectory, "meta", keyman.KsmFileName+"-tar"))
 	if err != nil {
-		Log.Warn("Unable to delete snapshot configuration file:", err)
+		log.Printf("Unable to delete snapshot configuration file: %v", err)
 	}
 
 	currentSnapshot := path.Join(s.raftInfoDirectory, SnapshotDirectory, CurrentSnapshotDirectory)
@@ -476,19 +477,19 @@ func (s *NetworkServer) InstallSnapshot(ctx context.Context, req *pb.SnapshotReq
 	if req.Offset == 0 {
 		err := os.RemoveAll(snapshotPath)
 		if err != nil {
-			Log.Error("Error receiving snapshot:", err)
+			log.Printf("Error receiving snapshot: %v", err)
 			return &pb.SnapshotResponse{Term: s.State.GetCurrentTerm()}, err
 		}
 
 		err = os.Mkdir(snapshotPath, 0700)
 		if err != nil {
-			Log.Error("Error receiving snapshot:", err)
+			log.Printf("Error receiving snapshot: %v", err)
 			return &pb.SnapshotResponse{Term: s.State.GetCurrentTerm()}, err
 		}
 
 		snapshotFile, err := os.Create(path.Join(snapshotPath, TarFileName))
 		if err != nil {
-			Log.Error("Error receiving snapshot:", err)
+			log.Printf("Error receiving snapshot: %v", err)
 			return &pb.SnapshotResponse{Term: s.State.GetCurrentTerm()}, err
 		}
 		snapshotFile.Close()
@@ -496,18 +497,18 @@ func (s *NetworkServer) InstallSnapshot(ctx context.Context, req *pb.SnapshotReq
 
 	snapshotFile, err := os.OpenFile(path.Join(snapshotPath, TarFileName), os.O_WRONLY, 0600)
 	if err != nil {
-		Log.Error("Error receiving snapshot:", err)
+		log.Printf("Error receiving snapshot: %v", err)
 		return &pb.SnapshotResponse{Term: s.State.GetCurrentTerm()}, err
 	}
 	defer snapshotFile.Close()
 
 	bytesWritten, err := snapshotFile.WriteAt(req.Data, int64(req.Offset))
 	if err != nil {
-		Log.Error("Error receiving snapshot:", err)
+		log.Printf("Error receiving snapshot: %v", err)
 		return &pb.SnapshotResponse{Term: s.State.GetCurrentTerm()}, err
 	}
 	if bytesWritten != len(req.Data) {
-		Log.Error("Error receiving snapshot: incorrect number of bytes written to snapshot file")
+		log.Print("Error receiving snapshot: incorrect number of bytes written to snapshot file")
 		return &pb.SnapshotResponse{Term: s.State.GetCurrentTerm()},
 			errors.New("incorrect number of bytes written to snapshot file")
 	}
@@ -529,7 +530,7 @@ func (s *NetworkServer) sendSnapshot(node *Node) {
 
 	conn, err := s.Dial(node, HeartbeatTimeout)
 	if err != nil {
-		Log.Error("error sending snapshot:", err)
+		log.Printf("error sending snapshot: %v", err)
 		return
 	}
 	defer conn.Close()
@@ -538,13 +539,13 @@ func (s *NetworkServer) sendSnapshot(node *Node) {
 	currentSnapshot := path.Join(s.raftInfoDirectory, SnapshotDirectory, CurrentSnapshotDirectory)
 	snapshotMeta, err := getSnapshotMetaInformation(currentSnapshot)
 	if err != nil {
-		Log.Error("Error sending snapshot:", err)
+		log.Printf("Error sending snapshot: %v", err)
 		return
 	}
 
 	snapshotFile, err := os.Open(path.Join(currentSnapshot, TarFileName))
 	if err != nil {
-		Log.Error("Error sending snapshot:", err)
+		log.Printf("Error sending snapshot: %v", err)
 		return
 	}
 	defer snapshotFile.Close()
@@ -558,12 +559,12 @@ func (s *NetworkServer) sendSnapshot(node *Node) {
 		case _, ok := <-s.Quit:
 			if !ok {
 				s.QuitChannelClosed = true
-				Log.Info("Stop sending snapshot to:", node.String())
+				log.Printf("Stop sending snapshot to %s", node)
 				return
 			}
 		default:
 			if s.State.GetCurrentState() != LEADER {
-				Log.Info("Ceasing sending snapshot due to state change")
+				log.Print("Ceasing sending snapshot due to state change")
 				return
 			}
 
@@ -573,7 +574,7 @@ func (s *NetworkServer) sendSnapshot(node *Node) {
 				if err == io.EOF {
 					done = true
 				} else {
-					Log.Error("Error sending snapshot:", err)
+					log.Printf("Error sending snapshot: %v", err)
 					return
 				}
 			}
@@ -593,17 +594,17 @@ func (s *NetworkServer) sendSnapshot(node *Node) {
 					return
 				}
 				if done {
-					Log.Info("Successfully send complete snapshot to:", node.String())
+					log.Printf("Successfully send complete snapshot to %s", node)
 					s.State.Configuration.SetNextIndex(node.NodeID, snapshotMeta.LastIncludedIndex+1)
 					return
 				}
 				snapshotFileOffset = snapshotFileOffset + int64(bytesRead)
 			} else {
 				if installRequestsFailed > MaxInstallSnapshotFails {
-					Log.Error("InstallSnapshot request failed repeatedly:", err)
+					log.Printf("InstallSnapshot request failed repeatedly: %v", err)
 					return
 				}
-				Log.Warn("InstallSnapshot request failed:", err)
+				log.Printf("InstallSnapshot request failed: %v", err)
 				installRequestsFailed++
 			}
 		}
@@ -632,7 +633,7 @@ func (s *NetworkServer) updateCurrentSnapshot() error {
 		snapshotPath := path.Join(s.raftInfoDirectory, SnapshotDirectory, snapshots[i].Name())
 		snapshotMeta, err := getSnapshotMetaInformation(snapshotPath)
 		if err != nil {
-			Log.Warn("error updating current snapshot:", err)
+			log.Printf("error updating current snapshot: %v", err)
 		} else {
 			if snapshotMeta.LastIncludedIndex > mostRecentSnapshotMeta.LastIncludedIndex {
 				mostRecentSnapshot = snapshotPath
@@ -649,7 +650,7 @@ func (s *NetworkServer) updateCurrentSnapshot() error {
 
 		err = os.Rename(mostRecentSnapshot, currentSnapshot)
 		if err != nil {
-			Log.Fatal("Failed to rename new snapshot after deleteing current snapshot:", err)
+			log.Fatalf("Failed to rename new snapshot after deleteing current snapshot: %v", err)
 		}
 
 		if mostRecentSnapshotMeta.SelfCreated {
@@ -657,7 +658,7 @@ func (s *NetworkServer) updateCurrentSnapshot() error {
 		} else {
 			err = s.RevertToSnapshot(currentSnapshot)
 			if err != nil {
-				Log.Fatal("Update current snapshot failed:", err)
+				log.Fatalf("Update current snapshot failed: %v", err)
 			}
 		}
 
@@ -666,7 +667,7 @@ func (s *NetworkServer) updateCurrentSnapshot() error {
 			if snapshotPath != currentSnapshot && snapshotPath != mostRecentSnapshot {
 				err = os.RemoveAll(snapshotPath)
 				if err != nil {
-					Log.Warn("error updating current snapshot:", err)
+					log.Printf("error updating current snapshot: %v", err)
 				}
 			}
 		}
@@ -683,7 +684,7 @@ func (s *NetworkServer) manageSnapshoting() {
 		case _, ok := <-s.Quit:
 			if !ok {
 				s.QuitChannelClosed = true
-				Log.Info("Exiting snapshot management loop")
+				log.Print("Exiting snapshot management loop")
 				return
 			}
 		case <-snapshotTimer.C:
@@ -694,7 +695,7 @@ func (s *NetworkServer) manageSnapshoting() {
 						defer s.Wait.Done()
 						err := s.CreateSnapshot(s.State.GetLastApplied())
 						if err != nil {
-							Log.Error("manage snapshotting:", err)
+							log.Printf("manage snapshotting:", err)
 						}
 					}()
 				}
@@ -703,19 +704,19 @@ func (s *NetworkServer) manageSnapshoting() {
 		case <-s.State.SnapshotCounterAtZero:
 			err := s.updateCurrentSnapshot()
 			if err != nil {
-				Log.Error("manage snapshoting:", err)
+				log.Printf("manage snapshoting: %v", err)
 			}
 		case <-s.State.NewSnapshotCreated:
-			Log.Info("New Snapshot Created")
+			log.Print("New Snapshot Created")
 			if s.State.GetSnapshotCounterValue() == 0 {
 				err := s.updateCurrentSnapshot()
 				if err != nil {
-					Log.Errorf("manage snapshoting: %s", err)
+					log.Printf("manage snapshoting: %v", err)
 				}
 			}
 		case node := <-s.State.SendSnapshot:
 			if s.State.Configuration.GetSendingSnapshot(node.NodeID) == false {
-				Log.Info("Send current snapshot to", node)
+				log.Printf("Send current snapshot to %s", node)
 				s.State.Configuration.SetSendingSnapshot(node.NodeID, true)
 				s.Wait.Add(1)
 				s.State.IncrementSnapshotCounter()

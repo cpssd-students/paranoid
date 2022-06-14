@@ -4,10 +4,11 @@ import (
 	"context"
 	"crypto/rand"
 	"io"
+	"log"
 
 	"golang.org/x/crypto/bcrypt"
-	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	pb "github.com/cpssd-students/paranoid/proto/discoverynetwork"
 )
@@ -46,23 +47,25 @@ func (s *DiscoveryServer) Join(ctx context.Context, req *pb.JoinRequest) (*pb.Jo
 			salt := make([]byte, PasswordSaltLength)
 			n, err := io.ReadFull(rand.Reader, salt)
 			if err != nil {
-				returnError := grpc.Errorf(codes.Internal,
+				returnError := status.Errorf(codes.Internal,
 					"error hashing password: %s",
 					err,
 				)
 				return &pb.JoinResponse{}, returnError
 			}
 			if n != PasswordSaltLength {
-				returnError := grpc.Errorf(codes.Internal,
-					"error hashing password: unable to read salt from random number generator",
-				)
-				return &pb.JoinResponse{}, returnError
+				return &pb.JoinResponse{},
+					status.Errorf(codes.Internal,
+						"error hashing password: unable to read salt from random number generator")
 			}
 
 			if req.Password != "" {
-				hash, err = bcrypt.GenerateFromPassword(append(salt, []byte(req.Password)...), bcrypt.DefaultCost)
+				hash, err = bcrypt.GenerateFromPassword(
+					append(salt, []byte(req.Password)...),
+					bcrypt.DefaultCost,
+				)
 				if err != nil {
-					returnError := grpc.Errorf(codes.Internal,
+					returnError := status.Errorf(codes.Internal,
 						"error hashing password: %s",
 						err,
 					)
@@ -89,7 +92,7 @@ func (s *DiscoveryServer) Join(ctx context.Context, req *pb.JoinRequest) (*pb.Jo
 	}
 
 	Pools[req.Pool].Info.Nodes[req.Node.Uuid] = req.Node
-	Log.Infof("Join: Node %s (%s:%s) joined \n", req.Node.Uuid, req.Node.Ip, req.Node.Port)
+	log.Printf("Join: Node %s (%s:%s) joined \n", req.Node.Uuid, req.Node.Ip, req.Node.Port)
 	saveState(req.Pool)
 
 	return &response, nil

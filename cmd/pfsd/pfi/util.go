@@ -6,16 +6,12 @@ import (
 	"github.com/hanwen/go-fuse/fuse"
 
 	"github.com/cpssd-students/paranoid/pkg/libpfs/returncodes"
-	"github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 var (
 	// SendOverNetwork determines whether the message should be send over network
 	// or locally
 	SendOverNetwork bool
-
-	// Log used for pfi
-	Log *logger.ParanoidLogger
 )
 
 // GetFuseReturnCode from the internal return code

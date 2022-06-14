@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
 	"os/user"
@@ -11,7 +12,6 @@ import (
 
 	"github.com/urfave/cli"
 
-	log "github.com/cpssd-students/paranoid/pkg/logger"
 	"github.com/cpssd-students/paranoid/pkg/raft"
 	pb "github.com/cpssd-students/paranoid/proto/raft"
 )
@@ -52,7 +52,7 @@ func read(directory string, c *cli.Context) {
 func logsToLogfile(logDir, filePath string, c *cli.Context) {
 	files, err := ioutil.ReadDir(logDir)
 	if err != nil {
-		log.V(1).Errorf("failed reading directory %s: %v", logDir, err)
+		log.Printf("failed reading directory %s: %v", logDir, err)
 		_ = cli.ShowCommandHelp(c, "history")
 		os.Exit(1)
 	}

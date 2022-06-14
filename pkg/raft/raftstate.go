@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
 	"sync"
@@ -285,7 +286,7 @@ func (s *State) applyLogEntry(logEntry *pb.LogEntry) *StateMachineResult {
 	case pb.Entry_Demo:
 		demoCommand := logEntry.Entry.GetDemo()
 		if demoCommand == nil {
-			Log.Fatal("Error applying Log to state machine")
+			log.Fatal("Error applying Log to state machine")
 		}
 		s.specialNumber = demoCommand.Number
 	case pb.Entry_ConfigurationChange:
@@ -293,21 +294,21 @@ func (s *State) applyLogEntry(logEntry *pb.LogEntry) *StateMachineResult {
 		if config != nil {
 			s.ConfigurationApplied <- config
 		} else {
-			Log.Fatal("Error applying configuration update")
+			log.Fatal("Error applying configuration update")
 		}
 	case pb.Entry_StateMachineCommand:
 		libpfsCommand := logEntry.Entry.GetCommand()
 		if libpfsCommand == nil {
-			Log.Fatal("Error applying Log to state machine")
+			log.Fatal("Error applying Log to state machine")
 		}
 		if s.pfsDirectory == "" {
-			Log.Fatal("PfsDirectory is not set")
+			log.Fatal("PfsDirectory is not set")
 		}
 		return PerformLibPfsCommand(s.pfsDirectory, libpfsCommand)
 	case pb.Entry_KeyStateCommand:
 		keyCommand := logEntry.Entry.GetKeyCommand()
 		if keyCommand == nil {
-			Log.Fatal("Error applying KeyStateCommand to state machine")
+			log.Fatal("Error applying KeyStateCommand to state machine")
 		}
 		return PerformKSMCommand(keyman.StateMachine, keyCommand)
 	}
@@ -325,7 +326,7 @@ func (s *State) ApplyLogEntries() {
 		for i := s.lastApplied + 1; i <= s.commitIndex; i++ {
 			LogEntry, err := s.Log.GetLogEntry(i)
 			if err != nil {
-				Log.Fatal("Unable to get log entry1:", err)
+				log.Fatalf("Unable to get log entry1: %v", err)
 			}
 			result := s.applyLogEntry(LogEntry)
 			s.setLastAppliedUnsafe(i)
@@ -369,22 +370,22 @@ func (s *State) savePersistentState() {
 
 	persistentStateBytes, err := json.Marshal(perState)
 	if err != nil {
-		Log.Fatal("Error saving persistent state to disk:", err)
+		log.Fatalf("Error saving persistent state to disk: %v", err)
 	}
 
 	if _, err := os.Stat(s.raftInfoDirectory); os.IsNotExist(err) {
-		Log.Fatal("Raft Info Directory does not exist:", err)
+		log.Fatalf("Raft Info Directory does not exist: %v", err)
 	}
 
 	newPeristentFile := path.Join(s.raftInfoDirectory, PersistentStateFileName+"-new")
 	err = ioutil.WriteFile(newPeristentFile, persistentStateBytes, 0600)
 	if err != nil {
-		Log.Fatal("Error writing new persistent state to disk:", err)
+		log.Fatalf("Error writing new persistent state to disk: %v", err)
 	}
 
 	err = os.Rename(newPeristentFile, path.Join(s.raftInfoDirectory, PersistentStateFileName))
 	if err != nil {
-		Log.Fatal("Error saving persistent state to disk:", err)
+		log.Fatalf("Error saving persistent state to disk: %v", err)
 	}
 }
 
@@ -394,13 +395,13 @@ func getPersistentState(persistentStateFile string) *persistentState {
 	}
 	persistentFileContents, err := ioutil.ReadFile(persistentStateFile)
 	if err != nil {
-		Log.Fatal("Error reading persistent state from disk:", err)
+		log.Fatalf("Error reading persistent state from disk: %v", err)
 	}
 
 	perState := &persistentState{}
 	err = json.Unmarshal(persistentFileContents, &perState)
 	if err != nil {
-		Log.Fatal("Error reading persistent state from disk:", err)
+		log.Fatalf("Error reading persistent state from disk: %v", err)
 	}
 	return perState
 }

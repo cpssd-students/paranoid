@@ -3,6 +3,7 @@ package raftlog
 import (
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"path"
 	"strconv"
@@ -46,10 +47,10 @@ func (rl *RaftLog) AppendEntry(en *pb.LogEntry) (index uint64, err error) {
 
 	_, err = file.Write(protoData)
 	if err != nil {
-		Log.Error("unable to write proto to file at index", fileIndex)
+		log.Printf("unable to write proto to file at index %d", fileIndex)
 		err := os.Remove(filePath)
 		if err != nil {
-			Log.Fatal("unable to remove the created logfile:", err)
+			log.Fatalf("unable to remove the created logfile: %v", err)
 		}
 		return 0, errors.New("Failed to write proto to file")
 	}

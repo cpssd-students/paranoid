@@ -52,7 +52,7 @@ func CloseListener(lis *net.Listener) {
 
 // StopRaftServer stops the given raft server
 func StopRaftServer(raftServer *raft.NetworkServer) {
-	if raftServer.QuitChannelClosed == false {
+	if !raftServer.QuitChannelClosed {
 		close(raftServer.Quit)
 	}
 }

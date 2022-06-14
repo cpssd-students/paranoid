@@ -3,26 +3,26 @@ package libpfs
 import (
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"path"
 
 	"github.com/cpssd-students/paranoid/pkg/libpfs/encryption"
 	"github.com/cpssd-students/paranoid/pkg/libpfs/returncodes"
-	log "github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 //WriteCommand writes data to the given file
-func WriteCommand(paranoidDirectory, filePath string, offset, length int64, data []byte) (returnCode returncodes.Code, bytesWrote int, returnError error) {
-	log.V(1).Infof("write to file %s in %s", filePath, paranoidDirectory)
+func WriteCommand(
+	paranoidDirectory, filePath string, offset, length int64, data []byte,
+) (returnCode returncodes.Code, bytesWrote int, returnError error) {
+	log.Printf("write to file %s in %s", filePath, paranoidDirectory)
 
-	err := GetFileSystemLock(paranoidDirectory, SharedLock)
-	if err != nil {
+	if err := GetFileSystemLock(paranoidDirectory, SharedLock); err != nil {
 		return returncodes.EUNEXPECTED, 0, err
 	}
 
 	defer func() {
-		err := UnLockFileSystem(paranoidDirectory)
-		if err != nil {
+		if err := UnLockFileSystem(paranoidDirectory); err != nil {
 			returnCode = returncodes.EUNEXPECTED
 			returnError = err
 			bytesWrote = 0
@@ -67,7 +67,8 @@ func WriteCommand(paranoidDirectory, filePath string, offset, length int64, data
 		}
 	}()
 
-	contentsFile, err := os.OpenFile(path.Join(paranoidDirectory, "contents", inodeName), os.O_RDWR, 0777)
+	contentsFile, err := os.OpenFile(
+		path.Join(paranoidDirectory, "contents", inodeName), os.O_RDWR, 0777)
 	if err != nil {
 		return returncodes.EUNEXPECTED, 0, fmt.Errorf("error opening contents file: %s", err)
 	}

@@ -3,6 +3,7 @@ package pnetserver
 import (
 	"context"
 	"errors"
+	"log"
 	"math/big"
 
 	"google.golang.org/grpc/codes"
@@ -47,7 +48,7 @@ func (s *ParanoidServer) SendKeyPiece(
 		return &pb.SendKeyPieceResponse{},
 			status.Errorf(codes.FailedPrecondition, "failed to save key piece to disk: %s", err)
 	}
-	Log.Info("Received KeyPiece from", req.Key.OwnerNode)
+	log.Printf("Received KeyPiece from %s", req.Key.OwnerNode)
 	if globals.RaftNetworkServer != nil &&
 		globals.RaftNetworkServer.State.Configuration.HasConfiguration() &&
 		req.AddElement {

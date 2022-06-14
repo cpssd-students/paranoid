@@ -1,15 +1,15 @@
 package dnetclient
 
 import (
+	"context"
 	"crypto/tls"
 	"time"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/cpssd-students/paranoid/cmd/pfsd/globals"
-
-	"github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 const peerPingTimeOut time.Duration = time.Minute * 3
@@ -17,23 +17,20 @@ const peerPingInterval time.Duration = time.Minute
 
 var (
 	discoveryCommonName string
-
-	// Log is used to log dnetclient messages
-	Log *logger.ParanoidLogger
 )
 
 func dialDiscovery() (*grpc.ClientConn, error) {
-	var opts []grpc.DialOption
-	opts = append(opts, grpc.WithTimeout(2*time.Second))
+	var creds credentials.TransportCredentials = insecure.NewCredentials()
 	if globals.TLSEnabled {
-		creds := credentials.NewTLS(&tls.Config{
+		creds = credentials.NewTLS(&tls.Config{
 			ServerName:         discoveryCommonName,
 			InsecureSkipVerify: globals.TLSSkipVerify,
 		})
-		opts = append(opts, grpc.WithTransportCredentials(creds))
-	} else {
-		opts = append(opts, grpc.WithInsecure())
 	}
 
-	return grpc.Dial(globals.DiscoveryAddr, opts...)
+	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
+	defer cancel()
+
+	return grpc.DialContext(ctx, globals.DiscoveryAddr, grpc.WithTransportCredentials(creds))
 }

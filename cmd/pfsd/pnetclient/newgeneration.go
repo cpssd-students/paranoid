@@ -2,6 +2,7 @@ package pnetclient
 
 import (
 	"errors"
+	"log"
 
 	"context"
 
@@ -14,11 +15,11 @@ import (
 func NewGeneration(password string) (generation int64, peers []string, err error) {
 	nodes := globals.Nodes.GetAll()
 	for _, node := range nodes {
-		Log.Info("Sending new generation request to node:", node)
+		log.Printf("Sending new generation request to node: %s", node)
 
 		conn, err := Dial(node)
 		if err != nil {
-			Log.Error("NewGeneration: failed to dial", node)
+			log.Printf("NewGeneration: failed to dial %s: %v", node, err)
 		}
 		defer conn.Close()
 
@@ -34,7 +35,7 @@ func NewGeneration(password string) (generation int64, peers []string, err error
 			PoolPassword: password,
 		})
 		if err != nil {
-			Log.Error("Error requesting to create new generation", node, ":", err)
+			log.Printf("Error requesting to create new generation %s: %v", node, err)
 		} else {
 			return resp.GenerationNumber, resp.Peers, nil
 		}

@@ -4,17 +4,19 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"path"
 
 	"github.com/cpssd-students/paranoid/pkg/libpfs/encryption"
 	"github.com/cpssd-students/paranoid/pkg/libpfs/returncodes"
-	log "github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 //ReadCommand reads data from a file
-func ReadCommand(paranoidDirectory, filePath string, offset, length int64) (returnCode returncodes.Code, fileContents []byte, returnError error) {
-	log.V(1).Infof("read called on %s in %s", filePath, paranoidDirectory)
+func ReadCommand(
+	paranoidDirectory, filePath string, offset, length int64,
+) (returnCode returncodes.Code, fileContents []byte, returnError error) {
+	log.Printf("read called on %s in %s", filePath, paranoidDirectory)
 
 	namepath := getParanoidPath(paranoidDirectory, filePath)
 
@@ -69,9 +71,10 @@ func ReadCommand(paranoidDirectory, filePath string, offset, length int64) (retu
 		}
 	}()
 
-	file, err := os.OpenFile(path.Join(paranoidDirectory, "contents", inodeFileName), os.O_RDONLY, 0777)
+	file, err := os.OpenFile(
+		path.Join(paranoidDirectory, "contents", inodeFileName), os.O_RDONLY, 0777)
 	if err != nil {
-		return returncodes.EUNEXPECTED, nil, fmt.Errorf("error opening contents file: %s", err)
+		return returncodes.EUNEXPECTED, nil, fmt.Errorf("error opening contents file: %w", err)
 	}
 	defer file.Close()
 
@@ -91,14 +94,15 @@ func ReadCommand(paranoidDirectory, filePath string, offset, length int64) (retu
 	for {
 		n, readerror, err := readAt(file, bytesRead, offset)
 		if err != nil {
-			return returncodes.EUNEXPECTED, nil, fmt.Errorf("error reading file %s", err)
+			return returncodes.EUNEXPECTED, nil, fmt.Errorf("error reading file %w", err)
 		}
 
 		if n > maxRead {
 			bytesRead = bytesRead[0:maxRead]
 			_, err := fileBuffer.Write(bytesRead)
 			if err != nil {
-				return returncodes.EUNEXPECTED, nil, fmt.Errorf("error writing to file buffer: %s", err)
+				return returncodes.EUNEXPECTED, nil,
+					fmt.Errorf("error writing to file buffer: %w", err)
 			}
 			break
 		}
@@ -109,19 +113,22 @@ func ReadCommand(paranoidDirectory, filePath string, offset, length int64) (retu
 			bytesRead = bytesRead[:n]
 			_, err := fileBuffer.Write(bytesRead)
 			if err != nil {
-				return returncodes.EUNEXPECTED, nil, fmt.Errorf("error writing to file buffer: %s", err)
+				return returncodes.EUNEXPECTED, nil,
+					fmt.Errorf("error writing to file buffer: %w", err)
 			}
 			break
 		}
 
 		if readerror != nil {
-			return returncodes.EUNEXPECTED, nil, fmt.Errorf("error reading from %s: %s", filePath, err)
+			return returncodes.EUNEXPECTED, nil,
+				fmt.Errorf("error reading from %s: %w", filePath, err)
 		}
 
 		bytesRead = bytesRead[:n]
 		_, err = fileBuffer.Write(bytesRead)
 		if err != nil {
-			return returncodes.EUNEXPECTED, nil, fmt.Errorf("error writing to file buffer: %s", err)
+			return returncodes.EUNEXPECTED, nil,
+				fmt.Errorf("error writing to file buffer: %w", err)
 		}
 	}
 	return returncodes.OK, fileBuffer.Bytes(), nil

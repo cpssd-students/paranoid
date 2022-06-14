@@ -2,23 +2,24 @@ package main
 
 import (
 	"encoding/gob"
+	"log"
 	"os"
 	"path"
 	"sync"
 	"time"
 
-	"github.com/cpssd-students/paranoid/pkg/libpfs/encryption"
-
-	"github.com/cpssd-students/paranoid/cmd/pfsd/pnetclient"
-
-	"github.com/cpssd-students/paranoid/cmd/pfsd/keyman"
-
 	"github.com/cpssd-students/paranoid/cmd/pfsd/globals"
+	"github.com/cpssd-students/paranoid/cmd/pfsd/keyman"
+	"github.com/cpssd-students/paranoid/cmd/pfsd/pnetclient"
+	"github.com/cpssd-students/paranoid/pkg/libpfs/encryption"
 )
 
 const unlockQueryInterval time.Duration = time.Second * 10
 const unlockTimeout time.Duration = time.Minute * 10
 const lockWaitDuration time.Duration = time.Minute * 1
+
+// TODO: Do we need this or can we remove the const?
+var _ = lockWaitDuration
 
 type keyResponse struct {
 	uuid  string
@@ -28,7 +29,7 @@ type keyResponse struct {
 func requestKeyPiece(uuid string, generation int64, recievedPieceChan chan keyResponse) {
 	piece, err := pnetclient.RequestKeyPiece(uuid, generation)
 	if err != nil {
-		log.Errorf("Error requesting key piece from node %s: %s", uuid, err)
+		log.Printf("Error requesting key piece from node %s: %s", uuid, err)
 		return
 	}
 	recievedPieceChan <- keyResponse{
@@ -89,11 +90,12 @@ func Unlock() {
 					peers = append(peers[:i], peers[i+1:]...)
 					key, err := keyman.RebuildKey(pieces)
 					if err != nil {
-						log.Warn("Could not rebuild key:", err)
+						log.Printf("Could not rebuild key: %v", err)
 						break
 					}
 					globals.EncryptionKey = key
-					cipherB, err := encryption.GenerateAESCipherBlock(globals.EncryptionKey.GetBytes())
+					cipherB, err := encryption.GenerateAESCipherBlock(
+						globals.EncryptionKey.GetBytes())
 					if err != nil {
 						log.Fatal("unable to generate cipher block:", err)
 					}
@@ -108,7 +110,7 @@ func Unlock() {
 						select {
 						case <-recievedPieceChan:
 						case <-done:
-							log.Info("Successfully unlocked system.")
+							log.Print("Successfully unlocked system.")
 							return
 						}
 					}
@@ -121,7 +123,7 @@ func Unlock() {
 // LoadPieces from the meta directory
 func LoadPieces() {
 	if _, err := os.Stat(path.Join(globals.ParanoidDir, "meta", "pieces")); os.IsNotExist(err) {
-		log.Info("Filesystem not locked. Will not attepmt to load KeyPieces.")
+		log.Print("Filesystem not locked. Will not attepmt to load KeyPieces.")
 		return
 	}
 	piecePath := path.Join(globals.ParanoidDir, "meta", "pieces")
@@ -129,7 +131,7 @@ func LoadPieces() {
 	if err != nil {
 		// If the file doesn't exist, ignore it, because it could just be the first run.
 		if os.IsNotExist(err) {
-			log.Debugf("KeyPiece GOB file %s does not exist.", piecePath)
+			log.Printf("KeyPiece GOB file %s does not exist.", piecePath)
 			return
 		}
 		log.Fatalf("Unable to open %s for reading pieces: %s", piecePath, file.Name())

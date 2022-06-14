@@ -9,8 +9,6 @@ import (
 	"github.com/urfave/cli"
 
 	"github.com/cpssd-students/paranoid/cmd/paranoid-cli/commands"
-
-	log "github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 func main() {
@@ -36,9 +34,6 @@ func main() {
 			os.Exit(1)
 		}
 	}
-
-	log.SetLogDirectory(path.Join(homeDir, ".pfs", "meta"))
-	log.SetOutput(log.LOGFILE)
 
 	app := cli.NewApp()
 	app.Name = "paranoid-cli"
@@ -94,12 +89,14 @@ func main() {
 					Usage: "disable the prompt when attempting to mount a PFS without TLS/SSL",
 				},
 				cli.StringFlag{
-					Name:  "i, interface",
-					Usage: "name a network interface over which to make connections. Defaults to default interface",
+					Name: "i, interface",
+					Usage: "name a network interface over which to make connections. " +
+						"Defaults to default interface",
 				},
 				cli.StringFlag{
-					Name:  "d, discovery-addr",
-					Usage: "Use a custom discovery server. Specified with ip:port. Defaults to public discovery server",
+					Name: "d, discovery-addr",
+					Usage: "Use a custom discovery server. Specified with ip:port. " +
+						"Defaults to public discovery server",
 				},
 				cli.StringFlag{
 					Name:  "pool-password",
@@ -156,12 +153,14 @@ func main() {
 					Usage: "disable the prompt when attempting to mount a PFS without TLS/SSL",
 				},
 				cli.StringFlag{
-					Name:  "i, interface",
-					Usage: "name a network interface over which to make connections. Defaults to default interface",
+					Name: "i, interface",
+					Usage: "name a network interface over which to make connections. " +
+						"Defaults to default interface",
 				},
 				cli.StringFlag{
-					Name:  "d, discovery-addr",
-					Usage: "Use a custom discovery server. Specified with ip:port. Defaults to public discovery server",
+					Name: "d, discovery-addr",
+					Usage: "Use a custom discovery server. Specified with ip:port. " +
+						"Defaults to public discovery server",
 				},
 				cli.StringFlag{
 					Name:  "pool-password",
@@ -195,8 +194,9 @@ func main() {
 		{
 			Name:      "buildfs",
 			ArgsUsage: "pfs-name log-directory",
-			Usage:     "builds a filesystem with the given <pfs-name> from the logfiles whos location is specified by <log-directory>",
-			Action:    commands.Buildfs,
+			Usage: "builds a filesystem with the given <pfs-name> from the logfiles " +
+				"whos location is specified by <log-directory>",
+			Action: commands.Buildfs,
 			Flags: []cli.Flag{
 				cli.BoolFlag{
 					Name:  "networkoff",
@@ -225,5 +225,5 @@ func main() {
 			},
 		},
 	}
-	app.Run(os.Args)
+	_ = app.Run(os.Args)
 }

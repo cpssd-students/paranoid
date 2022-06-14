@@ -3,7 +3,6 @@
 package pnetserver
 
 import (
-	"github.com/cpssd-students/paranoid/pkg/logger"
 	pb "github.com/cpssd-students/paranoid/proto/paranoidnetwork"
 )
 
@@ -11,6 +10,3 @@ import (
 type ParanoidServer struct {
 	pb.UnimplementedParanoidNetworkServer
 }
-
-// Log used by pnetserver
-var Log *logger.ParanoidLogger

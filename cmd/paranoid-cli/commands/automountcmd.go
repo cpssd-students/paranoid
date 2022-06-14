@@ -3,13 +3,12 @@ package commands
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/user"
 	"path"
 
 	"github.com/urfave/cli"
-
-	log "github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 //AutoMount mounts a file system with the last used settings.

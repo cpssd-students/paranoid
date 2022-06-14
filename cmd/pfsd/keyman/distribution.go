@@ -61,7 +61,8 @@ func GeneratePieces(key *Key, numPieces, requiredPieces int64) ([]*KeyPiece, err
 		total := big.NewInt(0)
 		for i := int64(0); i < requiredPieces; i++ {
 			// This computes (coefficient)(x^i)
-			degreeTotal := new(big.Int).Mul(coefficients[i], new(big.Int).Exp(big.NewInt(x), big.NewInt(i), nil))
+			degreeTotal := new(big.Int).
+				Mul(coefficients[i], new(big.Int).Exp(big.NewInt(x), big.NewInt(i), nil))
 			total.Add(total, degreeTotal)
 		}
 		total.Mod(total, prime)
@@ -124,7 +125,8 @@ func RebuildKey(pieces []*KeyPiece) (*Key, error) {
 	keyFingerprint := sha256.Sum256(keyBytes)
 	if keyFingerprint != pieces[0].ParentFingerprint {
 		// Even if the key is wrong, we return it, for debugging purposes.
-		return &Key{keyBytes, keyFingerprint}, &FingerMismatchError{pieces[0].ParentFingerprint, keyFingerprint}
+		return &Key{keyBytes, keyFingerprint},
+			&FingerMismatchError{pieces[0].ParentFingerprint, keyFingerprint}
 	}
 	return &Key{
 		bytes:       keyBytes,

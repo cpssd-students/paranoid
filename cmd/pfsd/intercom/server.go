@@ -2,6 +2,7 @@ package intercom
 
 import (
 	"fmt"
+	"log"
 	"net"
 	"net/rpc"
 	"os"
@@ -19,9 +20,9 @@ const (
 	StatusNetworkOff string = "Networking disabled"
 )
 
-// IntercomServer listens on a Unix socket to respond to questions asked by
+// Server listens on a Unix socket to respond to questions asked by
 // external applications.
-type IntercomServer struct{}
+type Server struct{}
 
 // EmptyMessage with no data
 type EmptyMessage struct{}
@@ -40,12 +41,12 @@ type ListNodesResponse struct {
 }
 
 // ConfirmUp is simple method that paranoid-cli uses to ping PFSD
-func (s *IntercomServer) ConfirmUp(req *EmptyMessage, resp *EmptyMessage) error {
+func (s *Server) ConfirmUp(req *EmptyMessage, resp *EmptyMessage) error {
 	return nil
 }
 
 // Status provides health data for the current node.
-func (s *IntercomServer) Status(req *EmptyMessage, resp *StatusResponse) error {
+func (s *Server) Status(req *EmptyMessage, resp *StatusResponse) error {
 	if globals.NetworkOff {
 		resp.Uptime = time.Since(globals.BootTime)
 		resp.Status = StatusNetworkOff
@@ -54,7 +55,7 @@ func (s *IntercomServer) Status(req *EmptyMessage, resp *StatusResponse) error {
 
 	thisport, err := strconv.Atoi(globals.ThisNode.Port)
 	if err != nil {
-		Log.Error("Could not convert globals.ThisNode.Port to int.")
+		log.Printf("Could not convert globals.ThisNode.Port to int.")
 		return fmt.Errorf("failed converting globals.ThisNode.Port to int: %s", err)
 	}
 
@@ -79,7 +80,7 @@ func (s *IntercomServer) Status(req *EmptyMessage, resp *StatusResponse) error {
 }
 
 // ListNodes that pfsd is connected to
-func (s *IntercomServer) ListNodes(req *EmptyMessage, resp *ListNodesResponse) error {
+func (s *Server) ListNodes(req *EmptyMessage, resp *ListNodesResponse) error {
 	if globals.RaftNetworkServer == nil {
 		return fmt.Errorf("Networking Disabled")
 	}
@@ -93,37 +94,34 @@ func RunServer(metaDir string) {
 	socketPath := path.Join(metaDir, "intercom.sock")
 	err := os.Remove(socketPath)
 	if err != nil && !os.IsNotExist(err) {
-		Log.Fatalf("Failed to remove %s: %s\n", socketPath, err)
+		log.Fatalf("Failed to remove %s: %s\n", socketPath, err)
 	}
-	server := new(IntercomServer)
-	rpc.Register(server)
+	server := new(Server)
+	_ = rpc.Register(server)
 	lis, err := net.Listen("unix", socketPath)
 	if err != nil {
-		Log.Fatalf("Failed to listen on %s: %s\n", socketPath, err)
+		log.Fatalf("Failed to listen on %s: %s\n", socketPath, err)
 	}
 	globals.Wait.Add(1)
 	go func() {
 		defer globals.Wait.Done()
-		Log.Info("Internal communication server listening on", socketPath)
+		log.Printf("Internal communication server listening on %s", socketPath)
 		globals.Wait.Add(1)
 		go func() {
 			rpc.Accept(lis)
 			defer globals.Wait.Done()
 		}()
 
-		select {
-		case _, ok := <-globals.Quit:
-			if !ok {
-				Log.Info("Stopping internal communication server")
-				err := lis.Close()
-				if err != nil {
-					Log.Warn("Could not shut down internal communication server:", err)
-				} else {
-					Log.Info("Internal communication server stopped.")
-				}
+		if ok := <-globals.Quit; !ok {
+			log.Print("Stopping internal communication server")
+			err := lis.Close()
+			if err != nil {
+				log.Printf("Could not shut down internal communication server: %v", err)
+			} else {
+				log.Print("Internal communication server stopped.")
 			}
 		}
 	}()
 	globals.BootTime = time.Now()
-	Log.Info(globals.BootTime)
+	log.Print(globals.BootTime)
 }

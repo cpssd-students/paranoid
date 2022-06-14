@@ -4,11 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
 	"sync"
-
-	"github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 // Constants used by the raftlog
@@ -19,9 +18,6 @@ const (
 
 // ErrIndexBelowStartIndex is returned if the given index is below start index.
 var ErrIndexBelowStartIndex = errors.New("given index is below start index")
-
-// Log used by the raftlog
-var Log *logger.ParanoidLogger
 
 // PersistentLogState stores the state information
 type PersistentLogState struct {
@@ -53,14 +49,13 @@ func New(logDirectory string) *RaftLog {
 	fileDescriptors, err := ioutil.ReadDir(logEntryDirectory)
 	if err != nil {
 		if os.IsNotExist(err) {
-			err := os.MkdirAll(logEntryDirectory, 0700)
-			if err != nil {
-				Log.Fatal("failed to create log directory:", err)
+			if err := os.MkdirAll(logEntryDirectory, 0700); err != nil {
+				log.Fatalf("failed to create log directory: %v", err)
 			}
 		} else if os.IsPermission(err) {
-			Log.Fatal("raft logger does not have permissions for:", logEntryDirectory)
+			log.Fatalf("raft logger does not have permissions for: %v", logEntryDirectory)
 		} else {
-			Log.Fatal("unable to read log directory:", err)
+			log.Fatalf("unable to read log directory: %v", err)
 		}
 	}
 
@@ -71,13 +66,13 @@ func New(logDirectory string) *RaftLog {
 	metaFileContents, err := ioutil.ReadFile(logMetaFile)
 	if err != nil {
 		if !os.IsNotExist(err) {
-			Log.Fatal("unable to read raft log meta information:", err)
+			log.Fatalf("unable to read raft log meta information: %v", err)
 		}
 	} else {
 		metaInfo := &PersistentLogState{}
 		err = json.Unmarshal(metaFileContents, metaInfo)
 		if err != nil {
-			Log.Fatal("unable to read raft log meta information:", err)
+			log.Fatalf("unable to read raft log meta information: %v", err)
 		}
 		rl.startIndex = metaInfo.StartIndex
 		rl.logSizeBytes = metaInfo.LogSizeBytes
@@ -89,7 +84,7 @@ func New(logDirectory string) *RaftLog {
 	if rl.currentIndex > rl.startIndex+1 {
 		logEntry, err := rl.GetLogEntry(rl.currentIndex - 1)
 		if err != nil {
-			Log.Fatal("failed setting up raft logger, could not get most recent term:", err)
+			log.Fatalf("failed setting up raft logger, could not get most recent term: %v", err)
 		}
 		rl.mostRecentTerm = logEntry.Term
 	}
@@ -105,18 +100,18 @@ func (rl *RaftLog) saveMetaInfo() {
 
 	metaInfoJSON, err := json.Marshal(metaInfo)
 	if err != nil {
-		Log.Fatal("unable to save raft log meta information:", err)
+		log.Fatalf("unable to save raft log meta information: %v", err)
 	}
 
 	newMetaFile := path.Join(rl.logDir, LogMetaFileName+"-new")
 	err = ioutil.WriteFile(newMetaFile, metaInfoJSON, 0600)
 	if err != nil {
-		Log.Fatal("unable to save raft log meta information:", err)
+		log.Fatalf("unable to save raft log meta information: %v", err)
 	}
 
 	err = os.Rename(newMetaFile, path.Join(rl.logDir, LogMetaFileName))
 	if err != nil {
-		Log.Fatal("unable to save raft log meta information:", err)
+		log.Fatalf("unable to save raft log meta information: %v", err)
 	}
 }
 

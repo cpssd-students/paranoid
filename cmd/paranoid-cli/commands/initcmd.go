@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/user"
 	"path"
@@ -14,13 +15,12 @@ import (
 	"github.com/cpssd-students/paranoid/cmd/paranoid-cli/tls"
 	"github.com/cpssd-students/paranoid/pkg/libpfs"
 	"github.com/cpssd-students/paranoid/pkg/libpfs/returncodes"
-	log "github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 func cleanupPFS(pfsDir string) {
 	err := os.RemoveAll(pfsDir)
 	if err != nil {
-		log.Warn("Could not successfully clean up PFS directory.")
+		log.Println("Could not successfully clean up PFS directory.")
 	}
 }
 
@@ -96,8 +96,8 @@ func doInit(pfsname, pool, cert, key string, unsecure, unencrypted, networkoff b
 		fmt.Println("FATAL: Cannot save pool information")
 		log.Fatalf("cannot save pool information: %v", err)
 	}
-	fmt.Println("Using pool name", pool)
-	log.Infof("Using pool name %s", pool)
+	fmt.Printf("Using pool name %s", pool)
+	log.Printf("Using pool name %s", pool)
 
 	fileAttributes := &fileSystemAttributes{
 		Encrypted:    !unencrypted,
@@ -141,7 +141,7 @@ func doInit(pfsname, pool, cert, key string, unsecure, unencrypted, networkoff b
 			log.Fatalf("Failed to copy key file: %v", err)
 		}
 	} else {
-		log.Info("Generating certificate.")
+		log.Println("Generating certificate.")
 		fmt.Println("Generating TLS certificate. Please follow the given instructions.")
 		err = tls.GenCertificate(directory)
 		if err != nil {

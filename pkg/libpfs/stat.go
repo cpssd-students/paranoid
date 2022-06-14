@@ -2,13 +2,13 @@ package libpfs
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path"
 	"syscall"
 	"time"
 
 	"github.com/cpssd-students/paranoid/pkg/libpfs/returncodes"
-	log "github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 // StatInfo contains the file metadata
@@ -21,17 +21,17 @@ type StatInfo struct {
 }
 
 // StatCommand returns information about a file as StatInfo object
-func StatCommand(paranoidDirectory, filePath string) (returnCode returncodes.Code, info StatInfo, returnError error) {
-	log.V(1).Infof("stat called on %s in %s", filePath, paranoidDirectory)
+func StatCommand(
+	paranoidDirectory, filePath string,
+) (returnCode returncodes.Code, info StatInfo, returnError error) {
+	log.Printf("stat called on %s in %s", filePath, paranoidDirectory)
 
-	err := GetFileSystemLock(paranoidDirectory, SharedLock)
-	if err != nil {
+	if err := GetFileSystemLock(paranoidDirectory, SharedLock); err != nil {
 		return returncodes.EUNEXPECTED, StatInfo{}, err
 	}
 
 	defer func() {
-		err := UnLockFileSystem(paranoidDirectory)
-		if err != nil {
+		if err := UnLockFileSystem(paranoidDirectory); err != nil {
 			returnCode = returncodes.EUNEXPECTED
 			returnError = err
 			info = StatInfo{}
@@ -58,12 +58,14 @@ func StatCommand(paranoidDirectory, filePath string) (returnCode returncodes.Cod
 
 	contentsFile, err := os.Open(contentsFilePath)
 	if err != nil {
-		return returncodes.EUNEXPECTED, StatInfo{}, fmt.Errorf("error opening contents file: %s", err)
+		return returncodes.EUNEXPECTED, StatInfo{},
+			fmt.Errorf("error opening contents file: %w", err)
 	}
 
 	fi, err := os.Lstat(contentsFilePath)
 	if err != nil {
-		return returncodes.EUNEXPECTED, StatInfo{}, fmt.Errorf("error Lstating file: %s", err)
+		return returncodes.EUNEXPECTED, StatInfo{},
+			fmt.Errorf("error Lstating file: %w", err)
 	}
 
 	stat := fi.Sys().(*syscall.Stat_t)
@@ -71,12 +73,14 @@ func StatCommand(paranoidDirectory, filePath string) (returnCode returncodes.Cod
 	ctime := createTime(stat)
 	mode, err := getFileMode(paranoidDirectory, inodeName)
 	if err != nil {
-		return returncodes.EUNEXPECTED, StatInfo{}, fmt.Errorf("error getting filemode: %s", err)
+		return returncodes.EUNEXPECTED, StatInfo{},
+			fmt.Errorf("error getting filemode: %w", err)
 	}
 
 	fileLength, err := getFileLength(contentsFile)
 	if err != nil {
-		return returncodes.EUNEXPECTED, StatInfo{}, fmt.Errorf("error getting file length: %s", err)
+		return returncodes.EUNEXPECTED, StatInfo{},
+			fmt.Errorf("error getting file length: %w", err)
 	}
 
 	statData := &StatInfo{

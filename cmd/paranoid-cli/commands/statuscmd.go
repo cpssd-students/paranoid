@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/rpc"
 	"os"
 	"os/user"
@@ -12,7 +13,6 @@ import (
 	"github.com/urfave/cli"
 
 	"github.com/cpssd-students/paranoid/cmd/pfsd/intercom"
-	log "github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 // Status displays statistics for the specified PFSD instances.
@@ -65,14 +65,14 @@ func getStatus(pfsDir string) {
 		fmt.Printf("Could not connect to PFSD %s. Is it running? "+
 			"See %s for more information.\n",
 			filepath.Base(pfsDir), logPath)
-		log.Warnf("Could not connect to PFSD %s at %s: %s", filepath.Base(pfsDir), socketPath, err)
+		log.Printf("Could not connect to PFSD %s at %s: %s", filepath.Base(pfsDir), socketPath, err)
 		return
 	}
 	err = client.Call("IntercomServer.Status", new(intercom.EmptyMessage), &resp)
 	if err != nil {
 		fmt.Printf("Error getting status for %s. See %s for more information.\n",
 			filepath.Base(pfsDir), logPath)
-		log.Warnf("PFSD at %s returned error: %s", filepath.Base(pfsDir), err)
+		log.Printf("PFSD at %s returned error: %s", filepath.Base(pfsDir), err)
 		return
 	}
 	printStatusInfo(filepath.Base(pfsDir), resp)

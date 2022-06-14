@@ -2,14 +2,13 @@ package commands
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"os/user"
 	"path"
 	"path/filepath"
 
 	"github.com/urfave/cli"
-
-	log "github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 //Delete deletes a paranoid file system

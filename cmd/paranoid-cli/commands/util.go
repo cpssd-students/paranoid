@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"math/rand"
 	"os"
 	"os/user"
@@ -12,7 +13,6 @@ import (
 
 	"google.golang.org/protobuf/proto"
 
-	log "github.com/cpssd-students/paranoid/pkg/logger"
 	pb "github.com/cpssd-students/paranoid/proto/raft"
 )
 
