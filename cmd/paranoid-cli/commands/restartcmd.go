@@ -18,7 +18,7 @@ import (
 func Restart(c *cli.Context) {
 	args := c.Args()
 	if len(args) < 1 {
-		cli.ShowCommandHelp(c, "restart")
+		_ = cli.ShowCommandHelp(c, "restart")
 		os.Exit(1)
 	}
 

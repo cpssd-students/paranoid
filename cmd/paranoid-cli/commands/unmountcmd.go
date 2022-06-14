@@ -18,7 +18,7 @@ import (
 func Unmount(c *cli.Context) {
 	args := c.Args()
 	if len(args) < 1 {
-		cli.ShowCommandHelp(c, "unmount")
+		_ = cli.ShowCommandHelp(c, "unmount")
 		os.Exit(1)
 	}
 

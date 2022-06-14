@@ -20,7 +20,7 @@ import (
 func History(c *cli.Context) {
 	args := c.Args()
 	if len(args) < 1 {
-		cli.ShowCommandHelp(c, "history")
+		_ = cli.ShowCommandHelp(c, "history")
 		os.Exit(1)
 	}
 
@@ -44,7 +44,7 @@ func read(directory string, c *cli.Context) {
 	less.Stdout = os.Stdout
 	less.Stdin = os.Stdin
 	less.Stderr = os.Stderr
-	less.Run()
+	_ = less.Run()
 }
 
 // logsToLogFile converts the binary logs in the logDir paramenter
@@ -53,7 +53,7 @@ func logsToLogfile(logDir, filePath string, c *cli.Context) {
 	files, err := ioutil.ReadDir(logDir)
 	if err != nil {
 		log.V(1).Errorf("failed reading directory %s: %v", logDir, err)
-		cli.ShowCommandHelp(c, "history")
+		_ = cli.ShowCommandHelp(c, "history")
 		os.Exit(1)
 	}
 	writeFile, err := os.Create(filePath)
@@ -71,7 +71,7 @@ func logsToLogfile(logDir, filePath string, c *cli.Context) {
 			log.Fatalf("unable to parse binary proto: %v", err)
 		}
 
-		writeFile.WriteString(toLine(i+1, numRunesString, p))
+		_, _ = writeFile.WriteString(toLine(i+1, numRunesString, p))
 	}
 }
 

@@ -48,7 +48,8 @@ func getStatus(pfsDir string) {
 	// We check this on the off chance they haven't initialised a single PFS yet.
 	if _, err := os.Stat(pfsDir); err != nil {
 		if os.IsNotExist(err) {
-			fmt.Printf("%s does not exist. Please call 'paranoid-cli init' before running this command.", pfsDir)
+			fmt.Printf("%s does not exist. Please call 'paranoid-cli init' "+
+				"before running this command.", pfsDir)
 			log.Fatalf("PFS directory %s does not exist", pfsDir)
 		} else {
 			fmt.Printf("Could not stat %s: %s.", pfsDir, err)
@@ -61,13 +62,16 @@ func getStatus(pfsDir string) {
 	var resp intercom.StatusResponse
 	client, err := rpc.Dial("unix", socketPath)
 	if err != nil {
-		fmt.Printf("Could not connect to PFSD %s. Is it running? See %s for more information.\n", filepath.Base(pfsDir), logPath)
+		fmt.Printf("Could not connect to PFSD %s. Is it running? "+
+			"See %s for more information.\n",
+			filepath.Base(pfsDir), logPath)
 		log.Warnf("Could not connect to PFSD %s at %s: %s", filepath.Base(pfsDir), socketPath, err)
 		return
 	}
 	err = client.Call("IntercomServer.Status", new(intercom.EmptyMessage), &resp)
 	if err != nil {
-		fmt.Printf("Error getting status for %s. See %s for more information.\n", filepath.Base(pfsDir), logPath)
+		fmt.Printf("Error getting status for %s. See %s for more information.\n",
+			filepath.Base(pfsDir), logPath)
 		log.Warnf("PFSD at %s returned error: %s", filepath.Base(pfsDir), err)
 		return
 	}

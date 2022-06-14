@@ -17,7 +17,7 @@ import (
 func Secure(c *cli.Context) {
 	args := c.Args()
 	if len(args) < 1 {
-		cli.ShowCommandHelp(c, "secure")
+		_ = cli.ShowCommandHelp(c, "secure")
 		os.Exit(0)
 	}
 

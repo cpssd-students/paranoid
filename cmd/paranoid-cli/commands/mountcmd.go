@@ -28,7 +28,7 @@ import (
 func Mount(c *cli.Context) {
 	args := c.Args()
 	if len(args) < 2 {
-		cli.ShowCommandHelp(c, "mount")
+		_ = cli.ShowCommandHelp(c, "mount")
 		os.Exit(1)
 	}
 	doMount(c, args)
@@ -93,7 +93,7 @@ func doMount(c *cli.Context, args []string) {
 	}
 
 	if !attributes.NetworkOff {
-		_, err = net.DialTimeout("tcp", dAddr, time.Duration(5*time.Second))
+		_, err = net.DialTimeout("tcp", dAddr, 5*time.Second)
 		if err != nil {
 			fmt.Println("FATAL: Unable to reach discovery server", err)
 			log.Fatalf("Unable to reach discovery server: %v", err)
@@ -169,7 +169,8 @@ func doMount(c *cli.Context, args []string) {
 				if lastConnectionError != nil {
 					log.Println(lastConnectionError)
 				}
-				fmt.Printf("PFSD failed to start: received no response from PFSD. See %s for more information.\n",
+				fmt.Printf("PFSD failed to start: received no response from PFSD."+
+					"See %s for more information.\n",
 					path.Join(pfsDir, "meta", "logs", "pfsd.log"))
 				return
 			default:
@@ -184,7 +185,8 @@ func doMount(c *cli.Context, args []string) {
 				if err == nil {
 					return
 				}
-				lastConnectionError = fmt.Errorf("Could not call pfsd confirm up over unix socket: %s", err)
+				lastConnectionError = fmt.Errorf(
+					"Could not call pfsd confirm up over unix socket: %s", err)
 				time.Sleep(time.Second)
 			}
 		}

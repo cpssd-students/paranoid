@@ -20,7 +20,7 @@ import (
 func Buildfs(c *cli.Context) {
 	args := c.Args()
 	if len(args) != 2 {
-		cli.ShowCommandHelp(c, "buildfs")
+		_ = cli.ShowCommandHelp(c, "buildfs")
 		os.Exit(1)
 	}
 

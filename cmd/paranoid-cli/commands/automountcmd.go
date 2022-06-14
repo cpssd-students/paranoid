@@ -16,7 +16,7 @@ import (
 func AutoMount(c *cli.Context) {
 	args := c.Args()
 	if len(args) < 1 {
-		cli.ShowCommandHelp(c, "automount")
+		_ = cli.ShowCommandHelp(c, "automount")
 		os.Exit(1)
 	}
 

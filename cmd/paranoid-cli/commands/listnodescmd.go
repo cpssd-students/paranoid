@@ -29,7 +29,8 @@ func ListNodes(c *cli.Context) {
 	if !args.Present() {
 		dirs, err := ioutil.ReadDir(path.Join(usr.HomeDir, ".pfs", "filesystems"))
 		if err != nil {
-			fmt.Printf("FATAL: Unable to get list of paranoid file systems. Does %s exist?", path.Join(usr.HomeDir, ".pfs"))
+			fmt.Printf("FATAL: Unable to get list of paranoid file systems. Does %s exist?",
+				path.Join(usr.HomeDir, ".pfs"))
 			log.Fatalf("could not get list of paranoid file systems: %v", err)
 		}
 		for _, dir := range dirs {
@@ -49,7 +50,9 @@ func getNodes(pfsDir string) {
 	// We check this on the off chance they haven't initialised a single PFS yet.
 	if _, err := os.Stat(pfsDir); err != nil {
 		if os.IsNotExist(err) {
-			fmt.Printf("%s does not exist. Please call 'paranoid-cli init' before running this command.", pfsDir)
+			fmt.Printf(
+				"%s does not exist. Please call 'paranoid-cli init' before running this command.",
+				pfsDir)
 			log.Fatal("PFS directory does not exist.")
 		} else {
 			fmt.Printf("Could not stat %s. Error returned: %s.", pfsDir, err)
@@ -62,7 +65,8 @@ func getNodes(pfsDir string) {
 	var resp intercom.ListNodesResponse
 	client, err := rpc.Dial("unix", socketPath)
 	if err != nil {
-		fmt.Printf("Could not connect to PFSD %s. Is it running? See %s for more information.\n", filepath.Base(pfsDir), logPath)
+		fmt.Printf("Could not connect to PFSD %s. Is it running? See %s for more information.\n",
+			filepath.Base(pfsDir), logPath)
 		log.Warnf("Could not connect to PFSD %s at %s: %v", filepath.Base(pfsDir), socketPath, err)
 		return
 	}
@@ -71,7 +75,8 @@ func getNodes(pfsDir string) {
 		if err.Error() == "Networking Disabled" {
 			fmt.Println("Networking is disabled")
 		} else {
-			fmt.Printf("Error listing nodes connected to %s. See %s for more information.\n", filepath.Base(pfsDir), logPath)
+			fmt.Printf("Error listing nodes connected to %s. See %s for more information.\n",
+				filepath.Base(pfsDir), logPath)
 			log.Warnf("PFSD at %s returned error: %v", filepath.Base(pfsDir), err)
 		}
 		return

@@ -10,7 +10,7 @@ import (
 	"path"
 	"time"
 
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 
 	log "github.com/cpssd-students/paranoid/pkg/logger"
 	pb "github.com/cpssd-students/paranoid/proto/raft"
@@ -77,28 +77,4 @@ func fileToProto(file os.FileInfo, directory string) (entry *pb.LogEntry, err er
 		return nil, errors.New("Failed to Unmarshal file data")
 	}
 	return entry, nil
-}
-
-func getFsMeta(usr *user.User, pfsName string) (string, string, string, string) {
-	pfsDir := path.Join(usr.HomeDir, ".pfs", "filesystems", pfsName)
-	if _, err := os.Stat(pfsDir); err != nil {
-		fmt.Printf("%s does not exist. Please call 'paranoid-cli init' before running this command.", pfsDir)
-		log.Fatal("PFS directory does not exist.")
-	}
-
-	uuid, err := ioutil.ReadFile(path.Join(pfsDir, "meta", "uuid"))
-
-	if err != nil {
-		fmt.Println("Error Reading supplied file:")
-		log.Fatal("Cant Reading uuid file")
-	}
-
-	ip, _ := ioutil.ReadFile(path.Join(pfsDir, "meta", "ip"))
-	port, _ := ioutil.ReadFile(path.Join(pfsDir, "meta", "port"))
-	pool, _ := ioutil.ReadFile(path.Join(pfsDir, "meta", "pool"))
-	if err != nil {
-		fmt.Println("Could not find Ip address of the file server")
-		log.Fatalf("Unable to read Ip and Port of discovery server: %v", err)
-	}
-	return string(ip), string(port), string(uuid), string(pool)
 }
