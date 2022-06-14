@@ -1,11 +1,13 @@
 package pnetclient
 
 import (
+	"context"
 	"crypto/tls"
 	"time"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
 
 	"paranoid/cmd/pfsd/globals"
 	"paranoid/pkg/logger"
@@ -16,18 +18,16 @@ var Log *logger.ParanoidLogger
 
 // Dial a node and return a connection if successful
 func Dial(node globals.Node) (*grpc.ClientConn, error) {
-	var opts []grpc.DialOption
-	opts = append(opts, grpc.WithTimeout(5*time.Second))
+	var creds credentials.TransportCredentials = insecure.NewCredentials()
 	if globals.TLSEnabled {
-		creds := credentials.NewTLS(&tls.Config{
+		creds = credentials.NewTLS(&tls.Config{
 			ServerName:         node.CommonName,
 			InsecureSkipVerify: globals.TLSSkipVerify,
 		})
-		opts = append(opts, grpc.WithTransportCredentials(creds))
-	} else {
-		opts = append(opts, grpc.WithInsecure())
 	}
+	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
 
-	conn, err := grpc.Dial(node.String(), opts...)
-	return conn, err
+	return grpc.DialContext(ctx, node.String(), grpc.WithTransportCredentials(creds))
 }

@@ -16,7 +16,8 @@ import (
 const KsmFileName string = "key_state"
 
 // ErrGenerationDeprecated is self explanatory. Just read it.
-var ErrGenerationDeprecated = errors.New("given generation was created before the current generation was set")
+var ErrGenerationDeprecated = errors.New(
+	"given generation was created before the current generation was set")
 
 // StateMachine is an instance of KeyStateMachine
 var StateMachine *KeyStateMachine
@@ -167,7 +168,12 @@ func (ksm *KeyStateMachine) UpdateFromStateFile(filePath string) error {
 }
 
 // NewGeneration creates a new generation when a new node is added.
-func (ksm *KeyStateMachine) NewGeneration(newNode string) (generationNumber int64, peers []string, err error) {
+func (ksm *KeyStateMachine) NewGeneration(
+	newNode string,
+) (
+	generationNumber int64, peers []string, err error,
+) {
+
 	ksm.lock.Lock()
 	defer ksm.lock.Unlock()
 
@@ -228,7 +234,7 @@ func (ksm *KeyStateMachine) NeedsReplication(uuid string, generationNumber int64
 			break
 		}
 	}
-	if nodeFound == false {
+	if !nodeFound {
 		return false
 	}
 
@@ -246,10 +252,8 @@ func (ksm *KeyStateMachine) NeedsReplication(uuid string, generationNumber int64
 	}
 
 	minNodesRequired := len(generation.Nodes)/2 + 1
-	if count < minNodesRequired {
-		return true
-	}
-	return false
+
+	return count < minNodesRequired
 }
 
 // Update the KeyStateMachine

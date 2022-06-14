@@ -65,8 +65,11 @@ func SendKeyPiece(uuid string, generation int64, piece *keyman.KeyPiece, addElem
 			CommonName: keyProto.GetOwnerNode().CommonName,
 			NodeId:     keyProto.GetOwnerNode().Uuid,
 		}
-		err := globals.RaftNetworkServer.RequestKeyStateUpdate(raftThisNodeProto, raftOwnerNode, generation)
-		if err != nil {
+		if err := globals.RaftNetworkServer.RequestKeyStateUpdate(
+			raftThisNodeProto,
+			raftOwnerNode,
+			generation,
+		); err != nil {
 			Log.Errorf("failed to commit to Raft: %s", err)
 			return fmt.Errorf("failed to commit to Raft: %s", err)
 		}

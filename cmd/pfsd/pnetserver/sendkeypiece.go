@@ -1,6 +1,7 @@
 package pnetserver
 
 import (
+	"errors"
 	"math/big"
 
 	"paranoid/cmd/pfsd/globals"
@@ -9,12 +10,14 @@ import (
 	raftpb "paranoid/proto/raft"
 
 	"golang.org/x/net/context"
-	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // SendKeyPiece implements the SendKeyPiece RPC
-func (s *ParanoidServer) SendKeyPiece(ctx context.Context, req *pb.KeyPieceSend) (*pb.SendKeyPieceResponse, error) {
+func (s *ParanoidServer) SendKeyPiece(
+	ctx context.Context, req *pb.KeyPieceSend,
+) (*pb.SendKeyPieceResponse, error) {
 	var prime big.Int
 	prime.SetBytes(req.Key.Prime)
 	// We must convert a slice to an array
@@ -41,17 +44,23 @@ func (s *ParanoidServer) SendKeyPiece(ctx context.Context, req *pb.KeyPieceSend)
 
 	err := globals.HeldKeyPieces.AddPiece(req.Key.Generation, req.Key.OwnerNode.Uuid, piece)
 	if err != nil {
-		return &pb.SendKeyPieceResponse{}, grpc.Errorf(codes.FailedPrecondition, "failed to save key piece to disk: %s", err)
+		return &pb.SendKeyPieceResponse{},
+			status.Errorf(codes.FailedPrecondition, "failed to save key piece to disk: %s", err)
 	}
 	Log.Info("Received KeyPiece from", req.Key.OwnerNode)
-	if globals.RaftNetworkServer != nil && globals.RaftNetworkServer.State.Configuration.HasConfiguration() && req.AddElement {
-		err := globals.RaftNetworkServer.RequestKeyStateUpdate(raftOwner, raftHolder, req.Key.Generation)
-		if err != nil {
-			if err == keyman.ErrGenerationDeprecated {
+	if globals.RaftNetworkServer != nil &&
+		globals.RaftNetworkServer.State.Configuration.HasConfiguration() &&
+		req.AddElement {
+
+		if err := globals.RaftNetworkServer.RequestKeyStateUpdate(
+			raftOwner, raftHolder, req.Key.Generation,
+		); err != nil {
+			if errors.Is(err, keyman.ErrGenerationDeprecated) {
 				return &pb.SendKeyPieceResponse{}, err
 			}
 
-			return &pb.SendKeyPieceResponse{}, grpc.Errorf(codes.FailedPrecondition, "failed to commit to Raft: %s", err)
+			return &pb.SendKeyPieceResponse{},
+				status.Errorf(codes.FailedPrecondition, "failed to commit to Raft: %s", err)
 		}
 	} else {
 		return &pb.SendKeyPieceResponse{ClientMustCommit: true}, nil

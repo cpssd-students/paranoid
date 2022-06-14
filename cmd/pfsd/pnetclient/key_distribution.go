@@ -18,7 +18,7 @@ func Distribute(key *keyman.Key, peers []globals.Node, generation int) error {
 		return fmt.Errorf("could not chunk key: %s", err)
 	}
 	// We always keep the first piece and distribute the rest
-	globals.HeldKeyPieces.AddPiece(int64(generation), globals.ThisNode.UUID, pieces[0])
+	_ = globals.HeldKeyPieces.AddPiece(int64(generation), globals.ThisNode.UUID, pieces[0])
 	count := int64(1)
 
 	for i := 1; i < len(pieces); i++ {
@@ -31,8 +31,10 @@ func Distribute(key *keyman.Key, peers []globals.Node, generation int) error {
 	}
 
 	if count >= requiredPieces {
-		err := globals.RaftNetworkServer.RequestOwnerComplete(globals.ThisNode.UUID, int64(generation))
-		if err != nil {
+		if err := globals.RaftNetworkServer.RequestOwnerComplete(
+			globals.ThisNode.UUID,
+			int64(generation),
+		); err != nil {
 			Log.Error("Error marking generation complete:", err)
 		} else {
 			Log.Info("Successfully completed generation", generation)

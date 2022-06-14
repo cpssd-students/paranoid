@@ -9,7 +9,6 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"errors"
-	"fmt"
 	"math/big"
 )
 
@@ -32,7 +31,7 @@ type FingerMismatchError struct {
 }
 
 func (e *FingerMismatchError) Error() string {
-	return fmt.Sprintf("key fingerprint does not match keypiece fingerprint")
+	return "key fingerprint does not match keypiece fingerprint"
 }
 
 // GeneratePieces from key. The number is defined by numPieces. requiredPieces

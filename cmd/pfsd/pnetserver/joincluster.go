@@ -13,15 +13,21 @@ import (
 )
 
 // JoinCluster receives requests from nodes asking to join raft cluster
-func (s *ParanoidServer) JoinCluster(ctx context.Context, req *pb.JoinClusterRequest) (*pb.EmptyMessage, error) {
+func (s *ParanoidServer) JoinCluster(
+	ctx context.Context, req *pb.JoinClusterRequest,
+) (*pb.EmptyMessage, error) {
 	if req.PoolPassword == "" {
 		if len(globals.PoolPasswordHash) != 0 {
-			return &pb.EmptyMessage{}, errors.New("cluster is password protected but no password was given")
+			return &pb.EmptyMessage{},
+				errors.New("cluster is password protected but no password was given")
 		}
 	} else {
-		err := bcrypt.CompareHashAndPassword(globals.PoolPasswordHash, append(globals.PoolPasswordSalt, []byte(req.PoolPassword)...))
-		if err != nil {
-			return &pb.EmptyMessage{}, fmt.Errorf("unable to add node to raft cluster, password error: %v", err)
+		if err := bcrypt.CompareHashAndPassword(
+			globals.PoolPasswordHash,
+			append(globals.PoolPasswordSalt, []byte(req.PoolPassword)...),
+		); err != nil {
+			return &pb.EmptyMessage{},
+				fmt.Errorf("unable to add node to raft cluster, password error: %v", err)
 		}
 	}
 
