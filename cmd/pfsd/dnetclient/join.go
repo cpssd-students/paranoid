@@ -21,7 +21,7 @@ func Join(pool, password string) error {
 	}
 	defer conn.Close()
 
-	dclient := pb.NewDiscoveryNetworkClient(conn)
+	dclient := pb.NewDiscoveryNetworkServiceClient(conn)
 
 	response, err := dclient.Join(context.Background(),
 		&pb.JoinRequest{

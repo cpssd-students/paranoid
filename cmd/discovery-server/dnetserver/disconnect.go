@@ -13,7 +13,7 @@ import (
 // Disconnect method for Discovery Server
 func (s *DiscoveryServer) Disconnect(
 	ctx context.Context, req *pb.DisconnectRequest,
-) (*pb.EmptyMessage, error) {
+) (*pb.DisconnectResponse, error) {
 	PoolLock.RLock()
 	defer PoolLock.RUnlock()
 
@@ -22,13 +22,13 @@ func (s *DiscoveryServer) Disconnect(
 		defer Pools[req.Pool].PoolLock.Unlock()
 		err := checkPoolPassword(req.Pool, req.Password, req.Node)
 		if err != nil {
-			return &pb.EmptyMessage{}, err
+			return &pb.DisconnectResponse{}, err
 		}
 	} else {
 		log.Printf("Disconnect: Node %s (%s:%s) pool %s was not found",
 			req.Node.Uuid, req.Node.Ip, req.Node.Port, req.Pool)
 		returnError := status.Errorf(codes.NotFound, "pool %s was not found", req.Pool)
-		return &pb.EmptyMessage{}, returnError
+		return &pb.DisconnectResponse{}, returnError
 	}
 
 	if _, ok := Pools[req.Pool].Info.Nodes[req.Node.Uuid]; ok {
@@ -36,11 +36,11 @@ func (s *DiscoveryServer) Disconnect(
 		saveState(req.Pool)
 		log.Printf("Disconnect: Node %s (%s:%s) disconnected",
 			req.Node.Uuid, req.Node.Ip, req.Node.Port)
-		return &pb.EmptyMessage{}, nil
+		return &pb.DisconnectResponse{}, nil
 	}
 
 	log.Printf("Disconnect: Node %s (%s:%s) was not found",
 		req.Node.Uuid, req.Node.Ip, req.Node.Port)
 	returnError := status.Errorf(codes.NotFound, "node was not found")
-	return &pb.EmptyMessage{}, returnError
+	return &pb.DisconnectResponse{}, returnError
 }

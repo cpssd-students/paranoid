@@ -18,124 +18,125 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// DiscoveryNetworkClient is the client API for DiscoveryNetwork service.
+// DiscoveryNetworkServiceClient is the client API for DiscoveryNetworkService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type DiscoveryNetworkClient interface {
+type DiscoveryNetworkServiceClient interface {
 	// Discovery Calls
 	Join(ctx context.Context, in *JoinRequest, opts ...grpc.CallOption) (*JoinResponse, error)
-	Disconnect(ctx context.Context, in *DisconnectRequest, opts ...grpc.CallOption) (*EmptyMessage, error)
+	Disconnect(ctx context.Context, in *DisconnectRequest, opts ...grpc.CallOption) (*DisconnectResponse, error)
 }
 
-type discoveryNetworkClient struct {
+type discoveryNetworkServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewDiscoveryNetworkClient(cc grpc.ClientConnInterface) DiscoveryNetworkClient {
-	return &discoveryNetworkClient{cc}
+func NewDiscoveryNetworkServiceClient(cc grpc.ClientConnInterface) DiscoveryNetworkServiceClient {
+	return &discoveryNetworkServiceClient{cc}
 }
 
-func (c *discoveryNetworkClient) Join(ctx context.Context, in *JoinRequest, opts ...grpc.CallOption) (*JoinResponse, error) {
+func (c *discoveryNetworkServiceClient) Join(ctx context.Context, in *JoinRequest, opts ...grpc.CallOption) (*JoinResponse, error) {
 	out := new(JoinResponse)
-	err := c.cc.Invoke(ctx, "/paranoid.discoverynetwork.v1.DiscoveryNetwork/Join", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/paranoid.discoverynetwork.v1.DiscoveryNetworkService/Join", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *discoveryNetworkClient) Disconnect(ctx context.Context, in *DisconnectRequest, opts ...grpc.CallOption) (*EmptyMessage, error) {
-	out := new(EmptyMessage)
-	err := c.cc.Invoke(ctx, "/paranoid.discoverynetwork.v1.DiscoveryNetwork/Disconnect", in, out, opts...)
+func (c *discoveryNetworkServiceClient) Disconnect(ctx context.Context, in *DisconnectRequest, opts ...grpc.CallOption) (*DisconnectResponse, error) {
+	out := new(DisconnectResponse)
+	err := c.cc.Invoke(ctx, "/paranoid.discoverynetwork.v1.DiscoveryNetworkService/Disconnect", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// DiscoveryNetworkServer is the server API for DiscoveryNetwork service.
-// All implementations must embed UnimplementedDiscoveryNetworkServer
+// DiscoveryNetworkServiceServer is the server API for DiscoveryNetworkService service.
+// All implementations must embed UnimplementedDiscoveryNetworkServiceServer
 // for forward compatibility
-type DiscoveryNetworkServer interface {
+type DiscoveryNetworkServiceServer interface {
 	// Discovery Calls
 	Join(context.Context, *JoinRequest) (*JoinResponse, error)
-	Disconnect(context.Context, *DisconnectRequest) (*EmptyMessage, error)
-	mustEmbedUnimplementedDiscoveryNetworkServer()
+	Disconnect(context.Context, *DisconnectRequest) (*DisconnectResponse, error)
+	mustEmbedUnimplementedDiscoveryNetworkServiceServer()
 }
 
-// UnimplementedDiscoveryNetworkServer must be embedded to have forward compatible implementations.
-type UnimplementedDiscoveryNetworkServer struct {
+// UnimplementedDiscoveryNetworkServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedDiscoveryNetworkServiceServer struct {
 }
 
-func (UnimplementedDiscoveryNetworkServer) Join(context.Context, *JoinRequest) (*JoinResponse, error) {
+func (UnimplementedDiscoveryNetworkServiceServer) Join(context.Context, *JoinRequest) (*JoinResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Join not implemented")
 }
-func (UnimplementedDiscoveryNetworkServer) Disconnect(context.Context, *DisconnectRequest) (*EmptyMessage, error) {
+func (UnimplementedDiscoveryNetworkServiceServer) Disconnect(context.Context, *DisconnectRequest) (*DisconnectResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Disconnect not implemented")
 }
-func (UnimplementedDiscoveryNetworkServer) mustEmbedUnimplementedDiscoveryNetworkServer() {}
+func (UnimplementedDiscoveryNetworkServiceServer) mustEmbedUnimplementedDiscoveryNetworkServiceServer() {
+}
 
-// UnsafeDiscoveryNetworkServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to DiscoveryNetworkServer will
+// UnsafeDiscoveryNetworkServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to DiscoveryNetworkServiceServer will
 // result in compilation errors.
-type UnsafeDiscoveryNetworkServer interface {
-	mustEmbedUnimplementedDiscoveryNetworkServer()
+type UnsafeDiscoveryNetworkServiceServer interface {
+	mustEmbedUnimplementedDiscoveryNetworkServiceServer()
 }
 
-func RegisterDiscoveryNetworkServer(s grpc.ServiceRegistrar, srv DiscoveryNetworkServer) {
-	s.RegisterService(&DiscoveryNetwork_ServiceDesc, srv)
+func RegisterDiscoveryNetworkServiceServer(s grpc.ServiceRegistrar, srv DiscoveryNetworkServiceServer) {
+	s.RegisterService(&DiscoveryNetworkService_ServiceDesc, srv)
 }
 
-func _DiscoveryNetwork_Join_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _DiscoveryNetworkService_Join_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(JoinRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DiscoveryNetworkServer).Join(ctx, in)
+		return srv.(DiscoveryNetworkServiceServer).Join(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/paranoid.discoverynetwork.v1.DiscoveryNetwork/Join",
+		FullMethod: "/paranoid.discoverynetwork.v1.DiscoveryNetworkService/Join",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DiscoveryNetworkServer).Join(ctx, req.(*JoinRequest))
+		return srv.(DiscoveryNetworkServiceServer).Join(ctx, req.(*JoinRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _DiscoveryNetwork_Disconnect_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _DiscoveryNetworkService_Disconnect_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DisconnectRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DiscoveryNetworkServer).Disconnect(ctx, in)
+		return srv.(DiscoveryNetworkServiceServer).Disconnect(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/paranoid.discoverynetwork.v1.DiscoveryNetwork/Disconnect",
+		FullMethod: "/paranoid.discoverynetwork.v1.DiscoveryNetworkService/Disconnect",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DiscoveryNetworkServer).Disconnect(ctx, req.(*DisconnectRequest))
+		return srv.(DiscoveryNetworkServiceServer).Disconnect(ctx, req.(*DisconnectRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// DiscoveryNetwork_ServiceDesc is the grpc.ServiceDesc for DiscoveryNetwork service.
+// DiscoveryNetworkService_ServiceDesc is the grpc.ServiceDesc for DiscoveryNetworkService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var DiscoveryNetwork_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "paranoid.discoverynetwork.v1.DiscoveryNetwork",
-	HandlerType: (*DiscoveryNetworkServer)(nil),
+var DiscoveryNetworkService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "paranoid.discoverynetwork.v1.DiscoveryNetworkService",
+	HandlerType: (*DiscoveryNetworkServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "Join",
-			Handler:    _DiscoveryNetwork_Join_Handler,
+			Handler:    _DiscoveryNetworkService_Join_Handler,
 		},
 		{
 			MethodName: "Disconnect",
-			Handler:    _DiscoveryNetwork_Disconnect_Handler,
+			Handler:    _DiscoveryNetworkService_Disconnect_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

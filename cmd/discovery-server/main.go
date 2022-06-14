@@ -74,7 +74,7 @@ func main() {
 		dnetserver.LoadState()
 	}
 	srv := createRPCServer()
-	pb.RegisterDiscoveryNetworkServer(srv, &dnetserver.DiscoveryServer{})
+	pb.RegisterDiscoveryNetworkServiceServer(srv, &dnetserver.DiscoveryServer{})
 
 	log.Println("gRPC server created")
 	_ = srv.Serve(lis)

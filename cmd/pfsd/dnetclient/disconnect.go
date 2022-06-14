@@ -19,7 +19,7 @@ func Disconnect(pool, password string) error {
 	}
 	defer conn.Close()
 
-	dclient := pb.NewDiscoveryNetworkClient(conn)
+	dclient := pb.NewDiscoveryNetworkServiceClient(conn)
 
 	_, err = dclient.Disconnect(context.Background(),
 		&pb.DisconnectRequest{

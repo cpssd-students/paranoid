@@ -4,18 +4,19 @@ package paranoid.discoverynetwork.v1;
 
 option go_package = "github.com/cpssd-students/paranoid/proto/paranoid/discoverynetwork/v1;discoverynetwork";
 
-service DiscoveryNetwork {
+service DiscoveryNetworkService {
   // Discovery Calls
   rpc Join (JoinRequest) returns (JoinResponse) {}
-  rpc Disconnect (DisconnectRequest) returns (EmptyMessage) {}
+  rpc Disconnect (DisconnectRequest) returns (DisconnectResponse) {}
 }
 
-message EmptyMessage {}
 message DisconnectRequest {
   string pool = 1; // required
   string password = 2; // optional
   Node node = 3; // required
 }
+
+message DisconnectResponse {}
 
 message JoinRequest {
   string pool = 1; // required

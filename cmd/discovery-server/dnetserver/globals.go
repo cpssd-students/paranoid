@@ -16,7 +16,7 @@ import (
 
 // DiscoveryServer struct
 type DiscoveryServer struct {
-	pb.UnimplementedDiscoveryNetworkServer
+	pb.UnimplementedDiscoveryNetworkServiceServer
 }
 
 // PoolInfo struct to hold the pool data
