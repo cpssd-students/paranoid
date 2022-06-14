@@ -36,8 +36,8 @@ In order to contribute to the project you must create a fork. The easiest way
 is to do the following:
 
 1. Fork the project using Github's web UI.
-2. Clone your fork into `$GOPATH/src/github.com/pp2p/paranoid`
-3. Add `upstream` remote (`git remote add upstream git@github.com:pp2p/paranoid`)
+2. Clone your fork into `$GOPATH/src/github.com/cpssd-students/paranoid`
+3. Add `upstream` remote (`git remote add upstream git@github.com:cpssd-students/paranoid`)
 
 ## Branching ##
 

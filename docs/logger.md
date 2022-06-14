@@ -2,18 +2,18 @@ logger(3) - paranoid standard logging
 =====================================
 
 ## DESCRIPTION ##
-logger (github.com/pp2p/paranoid/logger) allows to log messages in a standard format throughout the project.
+logger (paranoid/pkg/logger) allows to log messages in a standard format throughout the project.
 It supports writing to stderr, log file, or both. It also allows you to add in your own writers.
 
 
-To get the documentation for the logger run `godoc -http :6060` and visit  
-> http://localhost:6060/pkg/github.com/pp2p/paranoid/logger/
+To get the documentation for the logger run `godoc -http :6060` and visit
+> http://localhost:6060/pkg/paranoid/pkg/logger/
 
 ## USAGE ##
 ```go
 // Import the logger
 import(
-  "github.com/pp2p/paranoid/logger"
+  "paranoid/pkg/logger"
 )
 
 // Initialize an instance of logger

@@ -1,9 +1,9 @@
 Paranoid
 ========
-[![GoDoc](https://godoc.org/github.com/pp2p/paranoid?status.svg)](https://godoc.org/github.com/pp2p/paranoid)
-[![CircleCI](https://circleci.com/gh/pp2p/paranoid/tree/master.svg?style=shield)](https://circleci.com/gh/pp2p/paranoid/tree/master)
-[![Go Report Card](https://goreportcard.com/badge/github.com/pp2p/paranoid)](https://goreportcard.com/report/github.com/pp2p/paranoid)
-[![GitHub release](https://img.shields.io/github/release/pp2p/paranoid.svg)](https://github.com/pp2p/paranoid/releases)
+[![GoDoc](https://godoc.org/github.com/cpssd-students/paranoid?status.svg)](https://godoc.org/github.com/cpssd-students/paranoid)
+[![CircleCI](https://circleci.com/gh/cpssd-students/paranoid/tree/master.svg?style=shield)](https://circleci.com/gh/cpssd-students/paranoid/tree/master)
+[![Go Report Card](https://goreportcard.com/badge/github.com/cpssd-students/paranoid)](https://goreportcard.com/report/github.com/cpssd-students/paranoid)
+[![GitHub release](https://img.shields.io/github/release/cpssd-students/paranoid.svg)](https://github.com/cpssd-students/cpssd-students/releases)
 
 Distributed Secure Peer-to-Peer filesystem
 
@@ -30,9 +30,10 @@ To run the integration tests recursively for the entire project run `go test ./.
 ---
 
 ## Known Issues:
-Main list can be found on the [issues](https://github.com/pp2p/issues) page.
+Main list can be found on the [issues](https://github.com/cpssd-students/issues) page.
 Other than that we are missing:
 
+- __Doesn't even build right now.__
 - OSX Compatibility
 - Windows Compatibility
 - Modularity (ability to use your own components)
