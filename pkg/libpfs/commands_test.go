@@ -12,7 +12,9 @@ import (
 	"github.com/cpssd-students/paranoid/pkg/libpfs/returncodes"
 )
 
-var testDirectory string
+var (
+	testDirectory, _ = os.MkdirTemp("", "libpfs_test_")
+)
 
 func TestMain(m *testing.M) {
 	defer removeTestDir()
