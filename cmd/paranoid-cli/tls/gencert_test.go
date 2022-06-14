@@ -1,4 +1,4 @@
-// +build !integration
+//go:build !integration
 
 package tls
 
@@ -14,17 +14,17 @@ import (
 
 func TestGenerateCert(t *testing.T) {
 	testPath := path.Join(os.TempDir(), "testCertGen")
-	os.RemoveAll(testPath)
-	os.Mkdir(testPath, 0777)
-	os.Mkdir(path.Join(testPath, "meta"), 0777)
+	_ = os.RemoveAll(testPath)
+	_ = os.Mkdir(testPath, 0777)
+	_ = os.Mkdir(path.Join(testPath, "meta"), 0777)
 	// Since GenCertificate takes input from os.Stdin, we need to create
 	// a fake stdin.
 	fakeStdin, err := os.OpenFile(path.Join(testPath, "fakeStdin"),
 		os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0777)
-	defer fakeStdin.Close()
 	if err != nil {
 		t.Fatal("Failed to create fake stdin file:", err)
 	}
+	defer fakeStdin.Close()
 	_, err = fakeStdin.WriteString("365\nParanoid Inc.\ntest.paranoid.com\n")
 	if err != nil {
 		t.Fatal("Failed to write to fake stdin file:", err)

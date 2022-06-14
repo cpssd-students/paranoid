@@ -104,7 +104,7 @@ func TestWriteReadDelete(t *testing.T) {
 		t.Error("Bad protobuf received from read: ", e)
 	}
 
-	entries, err := rl.GetEntriesSince(1)
+	entries, _ := rl.GetEntriesSince(1)
 	if len(entries) != 2 {
 		t.Fatal("Incorrect entries returned")
 	}

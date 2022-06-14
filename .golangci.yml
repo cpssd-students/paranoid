@@ -1,0 +1,7 @@
+# We want to slowly enable all linters and fix the changes.
+linters:
+  enable-all: false # Once the code is stable, set this to true
+  disable:
+    # We never ensured the line lenght, this means that some of our code
+    # has very long lines. 
+    - lll 

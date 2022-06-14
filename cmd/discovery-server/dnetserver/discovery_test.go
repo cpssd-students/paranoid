@@ -6,25 +6,24 @@ package dnetserver
 import (
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
 	"testing"
 
-	"github.com/cpssd-students/paranoid/pkg/logger"
 	pb "github.com/cpssd-students/paranoid/proto/discoverynetwork"
 )
 
 func TestMain(m *testing.M) {
-	Log = logger.New("discoveryTest", "discoveryTest", os.DevNull)
 	Pools = make(map[string]*Pool)
 	StateDirectoryPath = path.Join(os.TempDir(), "server_state")
 	err := os.RemoveAll(StateDirectoryPath)
 	if err != nil {
-		Log.Fatal("Test setup failed:", err)
+		log.Fatalf("Test setup failed: %v", err)
 	}
 	err = os.Mkdir(StateDirectoryPath, 0700)
 	if err != nil {
-		Log.Fatal("Test setup failed:", err)
+		log.Fatalf("Test setup failed: %v", err)
 	}
 	os.Exit(m.Run())
 }
@@ -62,7 +61,7 @@ func TestStateSave(t *testing.T) {
 	var persistentState PoolInfo
 	err = json.Unmarshal(stateFileData, &persistentState)
 	if err != nil {
-		Log.Fatal("Failed to un-marshal state file:", err)
+		t.Fatal("Failed to un-marshal state file:", err)
 	}
 
 	if len(persistentState.Nodes) != 1 {

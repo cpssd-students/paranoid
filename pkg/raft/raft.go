@@ -15,6 +15,7 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/cpssd-students/paranoid/cmd/pfsd/keyman"
 	"github.com/cpssd-students/paranoid/pkg/raft/raftlog"
@@ -54,7 +55,6 @@ type NetworkServer struct {
 
 	appendEntriesLock sync.Mutex
 	addEntryLock      sync.Mutex
-	clientRequest     *pb.Entry
 }
 
 // AppendEntries implementation
@@ -62,7 +62,7 @@ func (s *NetworkServer) AppendEntries(ctx context.Context, req *pb.AppendEntries
 	s.appendEntriesLock.Lock()
 	defer s.appendEntriesLock.Unlock()
 
-	if s.State.Configuration.InConfiguration(req.LeaderId) == false {
+	if !s.State.Configuration.InConfiguration(req.LeaderId) {
 		if s.State.Configuration.MyConfigurationGood() {
 			return &pb.AppendEntriesResponse{
 				Term:    s.State.GetCurrentTerm(),
@@ -133,7 +133,7 @@ func (s *NetworkServer) AppendEntries(ctx context.Context, req *pb.AppendEntries
 				log.Fatalf("Unable to get log entry: %v", err)
 			} else if err == nil {
 				if logEntryAtIndex.Term != req.Term {
-					s.State.Log.DiscardLogEntriesAfter(logIndex)
+					_ = s.State.Log.DiscardLogEntriesAfter(logIndex)
 					s.appendLogEntry(req.Entries[i])
 				}
 			}
@@ -160,7 +160,7 @@ func (s *NetworkServer) AppendEntries(ctx context.Context, req *pb.AppendEntries
 
 // RequestVote implementation
 func (s *NetworkServer) RequestVote(ctx context.Context, req *pb.RequestVoteRequest) (*pb.RequestVoteResponse, error) {
-	if s.State.Configuration.InConfiguration(req.CandidateId) == false {
+	if !s.State.Configuration.InConfiguration(req.CandidateId) {
 		if s.State.Configuration.MyConfigurationGood() {
 			return &pb.RequestVoteResponse{
 				Term:        s.State.GetCurrentTerm(),
@@ -294,7 +294,7 @@ func (s *NetworkServer) addLogEntryLeader(entry *pb.Entry) error {
 
 // ClientToLeaderRequest implementation
 func (s *NetworkServer) ClientToLeaderRequest(ctx context.Context, req *pb.EntryRequest) (*pb.EmptyMessage, error) {
-	if s.State.Configuration.InConfiguration(req.SenderId) == false {
+	if !s.State.Configuration.InConfiguration(req.SenderId) {
 		return &pb.EmptyMessage{}, errors.New("Node is not in the configuration")
 	}
 
@@ -396,20 +396,18 @@ func (s *NetworkServer) electionTimeOut() {
 
 // Dial a node
 func (s *NetworkServer) Dial(node *Node, timeoutMiliseconds time.Duration) (*grpc.ClientConn, error) {
-	var opts []grpc.DialOption
-	opts = append(opts, grpc.WithTimeout(timeoutMiliseconds))
+	var creds credentials.TransportCredentials = insecure.NewCredentials()
 	if s.TLSEnabled {
-		creds := credentials.NewTLS(&tls.Config{
+		creds = credentials.NewTLS(&tls.Config{
 			ServerName:         s.nodeDetails.CommonName,
 			InsecureSkipVerify: s.TLSSkipVerify,
 		})
-		opts = append(opts, grpc.WithTransportCredentials(creds))
-	} else {
-		opts = append(opts, grpc.WithInsecure())
 	}
 
-	conn, err := grpc.Dial(node.String(), opts...)
-	return conn, err
+	ctx, cancel := context.WithTimeout(context.Background(), timeoutMiliseconds)
+	defer cancel()
+
+	return grpc.DialContext(ctx, node.String(), grpc.WithTransportCredentials(creds))
 }
 
 func (s *NetworkServer) requestPeerVote(node *Node, term uint64, voteChannel chan *voteResponse) {
@@ -421,20 +419,21 @@ func (s *NetworkServer) requestPeerVote(node *Node, term uint64, voteChannel cha
 		}
 		log.Printf("Dialing %v", node)
 		conn, err := s.Dial(node, RequestVoteTimeout)
+		if err != nil {
+			continue
+		}
 		defer conn.Close()
+		client := pb.NewRaftNetworkClient(conn)
+		response, err := client.RequestVote(context.Background(), &pb.RequestVoteRequest{
+			Term:         s.State.GetCurrentTerm(),
+			CandidateId:  s.State.NodeID,
+			LastLogIndex: s.State.Log.GetMostRecentIndex(),
+			LastLogTerm:  s.State.Log.GetMostRecentTerm(),
+		})
+		log.Printf("Got response from %s", node)
 		if err == nil {
-			client := pb.NewRaftNetworkClient(conn)
-			response, err := client.RequestVote(context.Background(), &pb.RequestVoteRequest{
-				Term:         s.State.GetCurrentTerm(),
-				CandidateId:  s.State.NodeID,
-				LastLogIndex: s.State.Log.GetMostRecentIndex(),
-				LastLogTerm:  s.State.Log.GetMostRecentTerm(),
-			})
-			log.Printf("Got response from %s", node)
-			if err == nil {
-				voteChannel <- &voteResponse{response, node.NodeID}
-				return
-			}
+			voteChannel <- &voteResponse{response, node.NodeID}
+			return
 		}
 	}
 }
@@ -495,7 +494,7 @@ func (s *NetworkServer) runElection() {
 					return
 				}
 
-				if vote.response.VoteGranted == true {
+				if vote.response.VoteGranted {
 					votesGranted = append(votesGranted, vote.NodeID)
 					log.Printf("Vote granted. Current votes: %d", len(votesGranted))
 					if s.State.Configuration.HasMajority(votesGranted) {
@@ -535,87 +534,88 @@ func (s *NetworkServer) sendHeartBeat(node *Node) {
 	nextIndex := s.State.Configuration.GetNextIndex(node.NodeID)
 	sendingSnapshot := s.State.Configuration.GetSendingSnapshot(node.NodeID)
 
-	if s.State.Log.GetStartIndex() >= nextIndex && sendingSnapshot == false {
+	if s.State.Log.GetStartIndex() >= nextIndex && !sendingSnapshot {
 		s.State.SendSnapshot <- *node
 		sendingSnapshot = true
 	}
 
 	conn, err := s.Dial(node, HeartbeatTimeout)
+	if err != nil {
+		return
+	}
 	defer conn.Close()
-	if err == nil {
-		client := pb.NewRaftNetworkClient(conn)
-		if s.State.Log.GetMostRecentIndex() >= nextIndex && sendingSnapshot == false {
-			prevLogTerm := uint64(0)
-			if nextIndex-1 > 0 {
-				prevLogEntry, err := s.State.Log.GetLogEntry(nextIndex - 1)
-				if err != nil {
-					if err == raftlog.ErrIndexBelowStartIndex {
-						prevLogTerm = s.State.Log.GetStartTerm()
-					} else {
-						log.Fatalf("Unable to get log entry at %d: %v", nextIndex-1, err)
-					}
-				} else {
-					prevLogTerm = prevLogEntry.Term
-				}
-			}
-
-			nextLogEntries, err := s.State.Log.GetLogEntries(nextIndex, MaxAppendEntries)
+	client := pb.NewRaftNetworkClient(conn)
+	if s.State.Log.GetMostRecentIndex() >= nextIndex && !sendingSnapshot {
+		prevLogTerm := uint64(0)
+		if nextIndex-1 > 0 {
+			prevLogEntry, err := s.State.Log.GetLogEntry(nextIndex - 1)
 			if err != nil {
 				if err == raftlog.ErrIndexBelowStartIndex {
-					s.State.SendSnapshot <- *node
-					return
+					prevLogTerm = s.State.Log.GetStartTerm()
+				} else {
+					log.Fatalf("Unable to get log entry at %d: %v", nextIndex-1, err)
 				}
-				log.Fatalf("Unable to get log entry: %v", err)
+			} else {
+				prevLogTerm = prevLogEntry.Term
 			}
-			numLogEntries := uint64(len(nextLogEntries))
+		}
 
-			response, err := client.AppendEntries(context.Background(), &pb.AppendEntriesRequest{
-				Term:         s.State.GetCurrentTerm(),
-				LeaderId:     s.State.NodeID,
-				PrevLogIndex: nextIndex - 1,
-				PrevLogTerm:  prevLogTerm,
-				Entries:      nextLogEntries,
-				LeaderCommit: s.State.GetCommitIndex(),
-			})
-			if err == nil {
-				if response.Term > s.State.GetCurrentTerm() {
-					s.State.StopLeading <- true
-				} else if response.Success == false {
+		nextLogEntries, err := s.State.Log.GetLogEntries(nextIndex, MaxAppendEntries)
+		if err != nil {
+			if err == raftlog.ErrIndexBelowStartIndex {
+				s.State.SendSnapshot <- *node
+				return
+			}
+			log.Fatalf("Unable to get log entry: %v", err)
+		}
+		numLogEntries := uint64(len(nextLogEntries))
+
+		response, err := client.AppendEntries(context.Background(), &pb.AppendEntriesRequest{
+			Term:         s.State.GetCurrentTerm(),
+			LeaderId:     s.State.NodeID,
+			PrevLogIndex: nextIndex - 1,
+			PrevLogTerm:  prevLogTerm,
+			Entries:      nextLogEntries,
+			LeaderCommit: s.State.GetCommitIndex(),
+		})
+		if err == nil {
+			if response.Term > s.State.GetCurrentTerm() {
+				s.State.StopLeading <- true
+			} else if !response.Success {
+				if s.State.GetCurrentState() == LEADER {
+					if response.NextIndex == 0 {
+						s.State.Configuration.SetNextIndex(node.NodeID, nextIndex-1)
+					} else {
+						s.State.Configuration.SetNextIndex(node.NodeID, response.NextIndex)
+					}
+				}
+			} else if response.Success {
+				if s.State.GetCurrentState() == LEADER {
+					s.State.Configuration.SetNextIndex(node.NodeID, nextIndex+numLogEntries)
+					s.State.Configuration.SetMatchIndex(node.NodeID, nextIndex+numLogEntries-1)
+					s.State.calculateNewCommitIndex()
+				}
+			}
+		}
+	} else {
+		response, err := client.AppendEntries(context.Background(), &pb.AppendEntriesRequest{
+			Term:         s.State.GetCurrentTerm(),
+			LeaderId:     s.State.NodeID,
+			PrevLogIndex: s.State.Log.GetMostRecentIndex(),
+			PrevLogTerm:  s.State.Log.GetMostRecentTerm(),
+			Entries:      []*pb.Entry{},
+			LeaderCommit: s.State.GetCommitIndex(),
+		})
+		if err == nil {
+			if response.Term > s.State.GetCurrentTerm() {
+				s.State.StopLeading <- true
+			} else {
+				if !response.Success {
 					if s.State.GetCurrentState() == LEADER {
 						if response.NextIndex == 0 {
 							s.State.Configuration.SetNextIndex(node.NodeID, nextIndex-1)
 						} else {
 							s.State.Configuration.SetNextIndex(node.NodeID, response.NextIndex)
-						}
-					}
-				} else if response.Success {
-					if s.State.GetCurrentState() == LEADER {
-						s.State.Configuration.SetNextIndex(node.NodeID, nextIndex+numLogEntries)
-						s.State.Configuration.SetMatchIndex(node.NodeID, nextIndex+numLogEntries-1)
-						s.State.calculateNewCommitIndex()
-					}
-				}
-			}
-		} else {
-			response, err := client.AppendEntries(context.Background(), &pb.AppendEntriesRequest{
-				Term:         s.State.GetCurrentTerm(),
-				LeaderId:     s.State.NodeID,
-				PrevLogIndex: s.State.Log.GetMostRecentIndex(),
-				PrevLogTerm:  s.State.Log.GetMostRecentTerm(),
-				Entries:      []*pb.Entry{},
-				LeaderCommit: s.State.GetCommitIndex(),
-			})
-			if err == nil {
-				if response.Term > s.State.GetCurrentTerm() {
-					s.State.StopLeading <- true
-				} else {
-					if response.Success == false {
-						if s.State.GetCurrentState() == LEADER {
-							if response.NextIndex == 0 {
-								s.State.Configuration.SetNextIndex(node.NodeID, nextIndex-1)
-							} else {
-								s.State.Configuration.SetNextIndex(node.NodeID, response.NextIndex)
-							}
 						}
 					}
 				}
@@ -703,7 +703,7 @@ func (s *NetworkServer) manageConfigurationChanges() {
 						break
 					}
 				}
-				if inConfig == false {
+				if !inConfig {
 					log.Printf("Node not included in current configuration %s", s.State.NodeID)
 					s.State.SetCurrentState(FOLLOWER)
 				}
@@ -718,7 +718,7 @@ func (s *NetworkServer) manageConfigurationChanges() {
 							Nodes: config.Nodes,
 						},
 					}
-					s.addLogEntryLeader(newConfig)
+					_ = s.addLogEntryLeader(newConfig)
 				}
 			}
 		}

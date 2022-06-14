@@ -20,14 +20,14 @@ var testDirectory string
 func TestMain(m *testing.M) {
 	defer removeTestDir()
 
-	log.Info("Running tests with no encryption")
+	log.Print("Running tests with no encryption")
 	encryption.Encrypted = false
 	noEncryption := m.Run()
 	if noEncryption != 0 {
 		os.Exit(noEncryption)
 	}
 
-	log.Info("Running tests with encryption")
+	log.Print("Running tests with encryption")
 	encryption.Encrypted = true
 	encryptionKey := []byte("86F7E437FAA5A7FCE15D1DDCB9EAEAEA")
 	cipherBlock, err := encryption.GenerateAESCipherBlock(encryptionKey)
@@ -607,7 +607,7 @@ func TestComplexReadWrite(t *testing.T) {
 	setupTestDirectory()
 
 	seed := time.Now().UnixNano()
-	log.Info("Test seed: ", seed)
+	t.Logf("Test seed %s", seed)
 	rand.Seed(seed)
 
 	code, err := CreatCommand(testDirectory, "test.txt", os.FileMode(0777))

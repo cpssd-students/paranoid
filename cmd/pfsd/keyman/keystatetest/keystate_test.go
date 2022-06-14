@@ -1,18 +1,14 @@
-//go:build !integration
-// +build !integration
-
 package keystatetest
 
 import (
+	"log"
 	"os"
 	"path"
 	"reflect"
 	"testing"
 
 	"github.com/cpssd-students/paranoid/cmd/pfsd/keyman"
-	"github.com/cpssd-students/paranoid/pkg/libpfs"
 	"github.com/cpssd-students/paranoid/pkg/raft"
-	"github.com/cpssd-students/paranoid/pkg/raft/raftlog"
 	"github.com/cpssd-students/paranoid/pkg/raft/rafttestutil"
 	pb "github.com/cpssd-students/paranoid/proto/raft"
 )

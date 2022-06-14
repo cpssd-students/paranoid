@@ -332,7 +332,7 @@ func (s *NetworkServer) CreateSnapshot(lastIncludedIndex uint64) (err error) {
 	currentSnapshot := path.Join(s.raftInfoDirectory, SnapshotDirectory, CurrentSnapshotDirectory)
 	nextSnapshot := path.Join(s.raftInfoDirectory, SnapshotDirectory, generateNewUUID())
 
-	if s.State.GetPerformingSnapshot() == true {
+	if s.State.GetPerformingSnapshot() {
 		return errors.New("snapshot creation already in progress")
 	}
 	s.State.SetPerformingSnapshot(true)
@@ -513,11 +513,11 @@ func (s *NetworkServer) InstallSnapshot(ctx context.Context, req *pb.SnapshotReq
 			errors.New("incorrect number of bytes written to snapshot file")
 	}
 
-	if req.Done == false {
+	if !req.Done {
 		return &pb.SnapshotResponse{Term: s.State.GetCurrentTerm()}, nil
 	}
 
-	saveSnapshotMetaInformation(snapshotPath, req.LastIncludedIndex, req.LastIncludedTerm, false)
+	_ = saveSnapshotMetaInformation(snapshotPath, req.LastIncludedIndex, req.LastIncludedTerm, false)
 	s.State.NewSnapshotCreated <- true
 
 	return &pb.SnapshotResponse{Term: s.State.GetCurrentTerm()}, nil
@@ -688,14 +688,14 @@ func (s *NetworkServer) manageSnapshoting() {
 				return
 			}
 		case <-snapshotTimer.C:
-			if s.State.GetPerformingSnapshot() == false {
+			if !s.State.GetPerformingSnapshot() {
 				if s.State.Log.GetLogSizeBytes() > SnapshotLogsize {
 					s.Wait.Add(1)
 					go func() {
 						defer s.Wait.Done()
 						err := s.CreateSnapshot(s.State.GetLastApplied())
 						if err != nil {
-							log.Printf("manage snapshotting:", err)
+							log.Printf("manage snapshotting: %v", err)
 						}
 					}()
 				}
@@ -715,7 +715,7 @@ func (s *NetworkServer) manageSnapshoting() {
 				}
 			}
 		case node := <-s.State.SendSnapshot:
-			if s.State.Configuration.GetSendingSnapshot(node.NodeID) == false {
+			if !s.State.Configuration.GetSendingSnapshot(node.NodeID) {
 				log.Printf("Send current snapshot to %s", node)
 				s.State.Configuration.SetSendingSnapshot(node.NodeID, true)
 				s.Wait.Add(1)
