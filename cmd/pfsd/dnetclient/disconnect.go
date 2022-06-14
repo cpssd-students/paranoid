@@ -1,9 +1,8 @@
 package dnetclient
 
 import (
+	"context"
 	"errors"
-
-	"golang.org/x/net/context"
 
 	"github.com/cpssd-students/paranoid/cmd/pfsd/globals"
 

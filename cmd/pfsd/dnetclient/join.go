@@ -1,11 +1,10 @@
 package dnetclient
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"time"
-
-	"golang.org/x/net/context"
 
 	"github.com/cpssd-students/paranoid/cmd/pfsd/globals"
 

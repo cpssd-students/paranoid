@@ -1,8 +1,9 @@
 package pnetserver
 
 import (
+	"context"
+
 	"golang.org/x/crypto/bcrypt"
-	"golang.org/x/net/context"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 

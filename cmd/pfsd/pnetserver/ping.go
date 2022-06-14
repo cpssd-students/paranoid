@@ -1,10 +1,10 @@
 package pnetserver
 
 import (
+	"context"
+
 	"github.com/cpssd-students/paranoid/cmd/pfsd/globals"
 	pb "github.com/cpssd-students/paranoid/proto/paranoidnetwork"
-
-	"golang.org/x/net/context"
 )
 
 // Ping implements the Ping RPC

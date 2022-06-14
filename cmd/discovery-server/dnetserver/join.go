@@ -1,11 +1,11 @@
 package dnetserver
 
 import (
+	"context"
 	"crypto/rand"
 	"io"
 
 	"golang.org/x/crypto/bcrypt"
-	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 

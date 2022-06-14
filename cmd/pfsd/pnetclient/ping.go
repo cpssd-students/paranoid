@@ -1,7 +1,7 @@
 package pnetclient
 
 import (
-	"golang.org/x/net/context"
+	"context"
 
 	"github.com/cpssd-students/paranoid/cmd/pfsd/globals"
 	"github.com/cpssd-students/paranoid/cmd/pfsd/upnp"
