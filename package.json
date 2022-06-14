@@ -1,0 +1,8 @@
+{
+    "private": true,
+    "workspaces": [
+        "./cmd/paranoid-gui"
+    ],
+    "type": "module",
+    "engineStrict": true
+}
