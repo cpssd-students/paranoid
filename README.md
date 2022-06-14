@@ -1,9 +1,9 @@
 Paranoid
 ========
 [![GoDoc](https://godoc.org/github.com/cpssd-students/paranoid?status.svg)](https://godoc.org/github.com/cpssd-students/paranoid)
-[![CircleCI](https://circleci.com/gh/cpssd-students/paranoid/tree/master.svg?style=shield)](https://circleci.com/gh/cpssd-students/paranoid/tree/master)
+[![Go](https://github.com/cpssd-students/paranoid/actions/workflows/go.yaml/badge.svg)](https://github.com/cpssd-students/paranoid/actions/workflows/go.yaml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/cpssd-students/paranoid)](https://goreportcard.com/report/github.com/cpssd-students/paranoid)
-[![GitHub release](https://img.shields.io/github/release/cpssd-students/paranoid.svg)](https://github.com/cpssd-students/cpssd-students/releases)
+[![GitHub release](https://img.shields.io/github/release/cpssd-students/paranoid.svg)](https://github.com/cpssd-students/paranoid/releases)
 
 Distributed Secure Peer-to-Peer filesystem
 
