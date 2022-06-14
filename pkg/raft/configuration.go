@@ -120,7 +120,7 @@ func (c *Configuration) UpdateCurrentConfiguration(nodes []Node, lastLogIndex ui
 	if len(nodes) == len(c.futureConfiguration) {
 		futureToCurrent := true
 		for i := 0; i < len(nodes); i++ {
-			if c.inFutureConfigurationUnsafe(nodes[i].NodeID) == false {
+			if !c.inFutureConfigurationUnsafe(nodes[i].NodeID) {
 				futureToCurrent = false
 				break
 			}
@@ -145,7 +145,9 @@ func (c *Configuration) UpdateCurrentConfiguration(nodes []Node, lastLogIndex ui
 // UpdateFromConfigurationFile updates the configuration based on the provided
 // file path and the last log index. If the configuration cannot be updated,
 // an error is returned
-func (c *Configuration) UpdateFromConfigurationFile(configurationFilePath string, lastLogIndex uint64) error {
+func (c *Configuration) UpdateFromConfigurationFile(
+	configurationFilePath string, lastLogIndex uint64,
+) error {
 	c.configLock.Lock()
 	defer c.configLock.Unlock()
 
@@ -248,7 +250,8 @@ func (c *Configuration) InConfiguration(nodeID string) bool {
 	return c.inCurrentConfiguration(nodeID) || c.inFutureConfiguration(nodeID)
 }
 
-//MyConfigurationGood checks if the configuration contains the current node and has more than one member
+//MyConfigurationGood checks if the configuration contains the current node and
+// has more than one member.
 func (c *Configuration) MyConfigurationGood() bool {
 	if c.InConfiguration(c.myNodeID) {
 		if c.GetTotalPossibleVotes() > 1 {
@@ -272,7 +275,7 @@ func (c *Configuration) GetTotalPossibleVotes() int {
 
 	votes := len(c.currentConfiguration)
 	for i := 0; i < len(c.futureConfiguration); i++ {
-		if c.inCurrentConfigurationUnsafe(c.futureConfiguration[i].NodeID) == false {
+		if !c.inCurrentConfigurationUnsafe(c.futureConfiguration[i].NodeID) {
 			votes++
 		}
 	}
@@ -293,7 +296,7 @@ func (c *Configuration) GetPeersList() []Node {
 	}
 	for i := 0; i < len(c.futureConfiguration); i++ {
 		if c.futureConfiguration[i].NodeID != c.myNodeID {
-			if c.inCurrentConfigurationUnsafe(c.futureConfiguration[i].NodeID) == false {
+			if !c.inCurrentConfigurationUnsafe(c.futureConfiguration[i].NodeID) {
 				peers = append(peers, c.futureConfiguration[i])
 			}
 		}
@@ -456,7 +459,9 @@ func (c *Configuration) SetSendingSnapshot(nodeID string, x bool) {
 
 //CalculateNewCommitIndex calculates a new commit index in the manner described
 // in the Raft paper
-func (c *Configuration) CalculateNewCommitIndex(lastCommitIndex, term uint64, log *raftlog.RaftLog) uint64 {
+func (c *Configuration) CalculateNewCommitIndex(
+	lastCommitIndex, term uint64, log *raftlog.RaftLog,
+) uint64 {
 	c.configLock.Lock()
 	defer c.configLock.Unlock()
 
@@ -534,15 +539,19 @@ func (c *Configuration) savePersistentConfiguration() {
 		Log.Fatal("Error writing new persistent configuration to disk:", err)
 	}
 
-	err = os.Rename(newPeristentFile, path.Join(c.raftInfoDirectory, PersistentConfigurationFileName))
-	if err != nil {
+	if err = os.Rename(
+		newPeristentFile,
+		path.Join(c.raftInfoDirectory, PersistentConfigurationFileName),
+	); err != nil {
 		Log.Fatal("Error saving persistent configuration to disk:", err)
 	}
 }
 
 func (c *Configuration) saveOriginalConfiguration() {
-	err := os.Rename(path.Join(c.raftInfoDirectory, PersistentConfigurationFileName), path.Join(c.raftInfoDirectory, OriginalConfigurationFileName))
-	if err != nil {
+	if err := os.Rename(
+		path.Join(c.raftInfoDirectory, PersistentConfigurationFileName),
+		path.Join(c.raftInfoDirectory, OriginalConfigurationFileName),
+	); err != nil {
 		Log.Fatal("Error saving original configuration to disk:", err)
 	}
 	c.savePersistentConfiguration()
@@ -565,7 +574,12 @@ func getPersistentConfiguration(persistentConfigurationFile string) *persistentC
 	return perConfig
 }
 
-func newConfiguration(raftInfoDirectory string, testConfiguration *StartConfiguration, myNodeDetails Node, saveOriginalConfiguration bool) *Configuration {
+func newConfiguration(
+	raftInfoDirectory string,
+	testConfiguration *StartConfiguration,
+	myNodeDetails Node,
+	saveOriginalConfiguration bool,
+) *Configuration {
 	var config *Configuration
 	loadedPersistentState := false
 	if testConfiguration != nil {
@@ -578,7 +592,8 @@ func newConfiguration(raftInfoDirectory string, testConfiguration *StartConfigur
 			currentMatchIndex:    make([]uint64, len(testConfiguration.Peers)+1),
 		}
 	} else {
-		persistentConfig := getPersistentConfiguration(path.Join(raftInfoDirectory, PersistentConfigurationFileName))
+		persistentConfig := getPersistentConfiguration(
+			path.Join(raftInfoDirectory, PersistentConfigurationFileName))
 		if persistentConfig != nil {
 			loadedPersistentState = true
 			config = &Configuration{
@@ -591,8 +606,9 @@ func newConfiguration(raftInfoDirectory string, testConfiguration *StartConfigur
 
 				futureConfigurationActive: persistentConfig.FutureConfigurationActive,
 				futureConfiguration:       persistentConfig.FutureConfiguration,
-				futureNextIndex:           make([]uint64, len(persistentConfig.FutureConfiguration)),
-				futureMatchIndex:          make([]uint64, len(persistentConfig.FutureConfiguration)),
+
+				futureNextIndex:  make([]uint64, len(persistentConfig.FutureConfiguration)),
+				futureMatchIndex: make([]uint64, len(persistentConfig.FutureConfiguration)),
 			}
 		} else {
 			config = &Configuration{

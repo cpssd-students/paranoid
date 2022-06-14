@@ -2,13 +2,13 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io"
 	"log"
 	"math/rand"
 	"net"
 	"os"
 	"path"
-	"strconv"
 	"sync"
 	"time"
 
@@ -26,11 +26,14 @@ import (
 const (
 	DemoDuration          time.Duration = 50 * time.Second
 	PrintTime                           = 5 * time.Second
-	RandomNumberGenMin                  = 3000 * time.Millisecond
-	RandomNumberGenMax                  = 10000 * time.Millisecond
-	RandomDropIntervalMin               = 5000 * time.Millisecond
-	RandomDropIntervalMax               = 10000 * time.Millisecond
+	MinRandomNumberGen                  = 3000 * time.Millisecond
+	MaxRandomNumberGen                  = 10000 * time.Millisecond
+	MinRandomDropInterval               = 5000 * time.Millisecond
+	MaxRandomDropInterval               = 10000 * time.Millisecond
 )
+
+// TODO: Either use the MaxRandomNumberGen or remove it
+var _ = MaxRandomNumberGen
 
 var (
 	waitGroup sync.WaitGroup
@@ -38,15 +41,15 @@ var (
 )
 
 func getRandomInterval() time.Duration {
-	interval := int64(RandomDropIntervalMax) - int64(RandomDropIntervalMin)
+	interval := int64(MaxRandomDropInterval) - int64(MinRandomDropInterval)
 	randx := rand.Int63n(interval)
-	return RandomNumberGenMin + time.Duration(randx)
+	return MinRandomNumberGen + time.Duration(randx)
 }
 
 func getRandomDropInterval() time.Duration {
-	interval := int64(RandomDropIntervalMax) - int64(RandomDropIntervalMin)
+	interval := int64(MaxRandomDropInterval) - int64(MinRandomDropInterval)
 	randx := rand.Int63n(interval)
-	return RandomDropIntervalMin + time.Duration(randx)
+	return MinRandomDropInterval + time.Duration(randx)
 }
 
 func getRandomDrop() time.Duration {
@@ -75,16 +78,19 @@ func manageNode(raftServer *raft.NetworkServer) {
 				return
 			}
 			randomNumber := rand.Intn(1000)
-			log.Println(raftServer.State.NodeID, "requesting that", randomNumber, "be added to the log")
+			log.Printf("%s requesting that %d be added to the log\n",
+				raftServer.State.NodeID, randomNumber)
 			_, err := raftServer.RequestAddLogEntry(&pb.Entry{
 				Type: pb.Entry_Demo,
 				Uuid: rafttestutil.GenerateNewUUID(),
 				Demo: &pb.DemoCommand{Number: uint64(randomNumber)},
 			})
 			if err == nil {
-				log.Println(raftServer.State.NodeID, "successfully added", randomNumber, "to the log")
+				log.Printf("%s successfully added %d to the log\n",
+					raftServer.State.NodeID, randomNumber)
 			} else {
-				log.Println(raftServer.State.NodeID, "could not add", randomNumber, "to the log:", err)
+				log.Printf("%s could not add %d to the log: %v\n",
+					raftServer.State.NodeID, randomNumber, err)
 			}
 			randomNumTimer.Reset(getRandomInterval())
 		}
@@ -109,7 +115,7 @@ func printLogs(cluster []*raft.NetworkServer) {
 					if err != nil {
 						log.Fatalln("Error reading log entry:", err)
 					}
-					logsString = logsString + " " + strconv.Itoa(int(logEntry.Entry.GetDemo().Number))
+					logsString = fmt.Sprintf("%s %d", logsString, logEntry.Entry.GetDemo().Number)
 				}
 				log.Println(cluster[i].State.NodeID, "Logs:", logsString)
 			}
@@ -128,7 +134,10 @@ func performDemoOne(node1RaftServer, node2RaftServer, node3RaftServer *raft.Netw
 	waitGroup.Wait()
 }
 
-func performDemoTwo(node1srv *grpc.Server, node1RaftServer, node2RaftServer, node3RaftServer *raft.NetworkServer) {
+func performDemoTwo(
+	node1srv *grpc.Server,
+	node1RaftServer, node2RaftServer, node3RaftServer *raft.NetworkServer,
+) {
 	log.Println("Running raft node crash demo")
 	waitGroup.Add(4)
 	go manageNode(node1RaftServer)
@@ -145,7 +154,14 @@ func performDemoTwo(node1srv *grpc.Server, node1RaftServer, node2RaftServer, nod
 	waitGroup.Wait()
 }
 
-func bringBackUp(currentlyDown []bool, nodePorts []string, nodeServers []*grpc.Server, nodeListners []*net.Listener, raftServers []*raft.NetworkServer, nodeNum int) {
+func bringBackUp(
+	currentlyDown []bool,
+	nodePorts []string,
+	nodeServers []*grpc.Server,
+	nodeListners []*net.Listener,
+	raftServers []*raft.NetworkServer,
+	nodeNum int,
+) {
 	rafttestutil.CloseListener(nodeListners[nodeNum])
 	time.Sleep(getRandomDrop())
 	rafttestutil.CloseListener(nodeListners[nodeNum])
@@ -157,11 +173,16 @@ func bringBackUp(currentlyDown []bool, nodePorts []string, nodeServers []*grpc.S
 	}
 	log.Println(raftServers[nodeNum].State.NodeID, "coming back up")
 	nodeListners[nodeNum] = &lis
-	go nodeServers[nodeNum].Serve(lis)
+	go func() { _ = nodeServers[nodeNum].Serve(lis) }()
 	currentlyDown[nodeNum] = false
 }
 
-func performDemoThree(nodePorts []string, nodeServers []*grpc.Server, nodeListners []*net.Listener, raftServers []*raft.NetworkServer) {
+func performDemoThree(
+	nodePorts []string,
+	nodeServers []*grpc.Server,
+	nodeListners []*net.Listener,
+	raftServers []*raft.NetworkServer,
+) {
 	log.Println("Running raft message drop demo")
 	waitGroup.Add(4)
 	go manageNode(raftServers[0])
@@ -178,11 +199,12 @@ func performDemoThree(nodePorts []string, nodeServers []*grpc.Server, nodeListne
 			goto end
 		case <-nodeDownTimer.C:
 			nodeDown := rand.Intn(3)
-			if nodeDowns[nodeDown] == false {
+			if !nodeDowns[nodeDown] {
 				nodeDowns[nodeDown] = true
 				log.Println(raftServers[nodeDown].State.NodeID, "dropping messages")
 				rafttestutil.CloseListener(nodeListners[nodeDown])
-				go bringBackUp(nodeDowns, nodePorts, nodeServers, nodeListners, raftServers, nodeDown)
+				go bringBackUp(
+					nodeDowns, nodePorts, nodeServers, nodeListners, raftServers, nodeDown)
 			}
 			nodeDownTimer.Reset(getRandomDropInterval())
 		}
@@ -203,24 +225,45 @@ func setupDemo(demoNum int) {
 	defer rafttestutil.CloseListener(node3Lis)
 	node3 := rafttestutil.SetUpNode("node3", "localhost", node3Port, "_")
 
-	node1RaftDirectory := rafttestutil.CreateRaftDirectory(path.Join(os.TempDir(), "rafttest1", "node1"))
+	node1RaftDirectory := rafttestutil.CreateRaftDirectory(
+		path.Join(os.TempDir(), "rafttest1", "node1"))
 	var node1RaftServer *raft.NetworkServer
 	defer rafttestutil.RemoveRaftDirectory(node1RaftDirectory, node1RaftServer)
-	node1RaftServer, node1srv := raft.StartRaft(node1Lis, node1, "", node1RaftDirectory, &raft.StartConfiguration{Peers: []raft.Node{node2, node3}})
+	node1RaftServer, node1srv := raft.StartRaft(
+		node1Lis,
+		node1,
+		"",
+		node1RaftDirectory,
+		&raft.StartConfiguration{Peers: []raft.Node{node2, node3}},
+	)
 	defer node1srv.Stop()
 	defer rafttestutil.StopRaftServer(node1RaftServer)
 
-	node2RaftDirectory := rafttestutil.CreateRaftDirectory(path.Join(os.TempDir(), "rafttest1", "node2"))
+	node2RaftDirectory := rafttestutil.CreateRaftDirectory(
+		path.Join(os.TempDir(), "rafttest1", "node2"))
 	var node2RaftServer *raft.NetworkServer
 	defer rafttestutil.RemoveRaftDirectory(node2RaftDirectory, node2RaftServer)
-	node2RaftServer, node2srv := raft.StartRaft(node2Lis, node2, "", node2RaftDirectory, &raft.StartConfiguration{Peers: []raft.Node{node1, node3}})
+	node2RaftServer, node2srv := raft.StartRaft(
+		node2Lis,
+		node2,
+		"",
+		node2RaftDirectory,
+		&raft.StartConfiguration{Peers: []raft.Node{node1, node3}},
+	)
 	defer node2srv.Stop()
 	defer rafttestutil.StopRaftServer(node2RaftServer)
 
-	node3RaftDirectory := rafttestutil.CreateRaftDirectory(path.Join(os.TempDir(), "rafttest1", "node3"))
+	node3RaftDirectory := rafttestutil.CreateRaftDirectory(
+		path.Join(os.TempDir(), "rafttest1", "node3"))
 	var node3RaftServer *raft.NetworkServer
 	defer rafttestutil.RemoveRaftDirectory(node3RaftDirectory, node3RaftServer)
-	node3RaftServer, node3srv := raft.StartRaft(node3Lis, node3, "", node3RaftDirectory, &raft.StartConfiguration{Peers: []raft.Node{node1, node2}})
+	node3RaftServer, node3srv := raft.StartRaft(
+		node3Lis,
+		node3,
+		"",
+		node3RaftDirectory,
+		&raft.StartConfiguration{Peers: []raft.Node{node1, node2}},
+	)
 	defer node3srv.Stop()
 	defer rafttestutil.StopRaftServer(node3RaftServer)
 
@@ -268,7 +311,7 @@ func main() {
 	if err != nil {
 		log.Println("Could not redirect grpc output")
 	} else {
-		grpclog.SetLogger(log.New(writer, "", log.LstdFlags))
+		grpclog.SetLoggerV2(grpclog.NewLoggerV2(writer, writer, writer))
 	}
 
 	flag.Parse()
