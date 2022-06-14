@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	"github.com/cpssd-students/paranoid/cmd/pfsd/globals"
-	pb "github.com/cpssd-students/paranoid/proto/paranoidnetwork"
+	pb "github.com/cpssd-students/paranoid/proto/paranoid/paranoidnetwork/v1"
 )
 
 // RequestKeyPiece implements the RequestKeyPiece RPC

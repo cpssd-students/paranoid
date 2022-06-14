@@ -17,7 +17,7 @@ import (
 	"github.com/cpssd-students/paranoid/cmd/pfsd/keyman"
 	"github.com/cpssd-students/paranoid/pkg/libpfs"
 	"github.com/cpssd-students/paranoid/pkg/libpfs/returncodes"
-	pb "github.com/cpssd-students/paranoid/proto/raft"
+	pb "github.com/cpssd-students/paranoid/proto/paranoid/raft/v1"
 )
 
 // String constants

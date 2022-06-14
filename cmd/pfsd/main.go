@@ -25,8 +25,8 @@ import (
 	"github.com/cpssd-students/paranoid/cmd/pfsd/upnp"
 	"github.com/cpssd-students/paranoid/pkg/libpfs/encryption"
 	"github.com/cpssd-students/paranoid/pkg/raft"
-	pb "github.com/cpssd-students/paranoid/proto/paranoidnetwork"
-	rpb "github.com/cpssd-students/paranoid/proto/raft"
+	pb "github.com/cpssd-students/paranoid/proto/paranoid/paranoidnetwork/v1"
+	rpb "github.com/cpssd-students/paranoid/proto/paranoid/raft/v1"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"

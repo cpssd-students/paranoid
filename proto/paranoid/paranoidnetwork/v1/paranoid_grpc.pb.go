@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             (unknown)
-// source: proto/paranoidnetwork/paranoid.proto
+// source: paranoid/paranoidnetwork/v1/paranoid.proto
 
 package paranoidnetwork
 
@@ -44,7 +44,7 @@ func NewParanoidNetworkClient(cc grpc.ClientConnInterface) ParanoidNetworkClient
 
 func (c *paranoidNetworkClient) Ping(ctx context.Context, in *Node, opts ...grpc.CallOption) (*EmptyMessage, error) {
 	out := new(EmptyMessage)
-	err := c.cc.Invoke(ctx, "/paranoid.ParanoidNetwork/Ping", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/paranoid.paranoidnetwork.v1.ParanoidNetwork/Ping", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func (c *paranoidNetworkClient) Ping(ctx context.Context, in *Node, opts ...grpc
 
 func (c *paranoidNetworkClient) JoinCluster(ctx context.Context, in *JoinClusterRequest, opts ...grpc.CallOption) (*EmptyMessage, error) {
 	out := new(EmptyMessage)
-	err := c.cc.Invoke(ctx, "/paranoid.ParanoidNetwork/JoinCluster", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/paranoid.paranoidnetwork.v1.ParanoidNetwork/JoinCluster", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +62,7 @@ func (c *paranoidNetworkClient) JoinCluster(ctx context.Context, in *JoinCluster
 
 func (c *paranoidNetworkClient) NewGeneration(ctx context.Context, in *NewGenerationRequest, opts ...grpc.CallOption) (*NewGenerationResponse, error) {
 	out := new(NewGenerationResponse)
-	err := c.cc.Invoke(ctx, "/paranoid.ParanoidNetwork/NewGeneration", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/paranoid.paranoidnetwork.v1.ParanoidNetwork/NewGeneration", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +71,7 @@ func (c *paranoidNetworkClient) NewGeneration(ctx context.Context, in *NewGenera
 
 func (c *paranoidNetworkClient) SendKeyPiece(ctx context.Context, in *KeyPieceSend, opts ...grpc.CallOption) (*SendKeyPieceResponse, error) {
 	out := new(SendKeyPieceResponse)
-	err := c.cc.Invoke(ctx, "/paranoid.ParanoidNetwork/SendKeyPiece", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/paranoid.paranoidnetwork.v1.ParanoidNetwork/SendKeyPiece", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +80,7 @@ func (c *paranoidNetworkClient) SendKeyPiece(ctx context.Context, in *KeyPieceSe
 
 func (c *paranoidNetworkClient) RequestKeyPiece(ctx context.Context, in *KeyPieceRequest, opts ...grpc.CallOption) (*KeyPiece, error) {
 	out := new(KeyPiece)
-	err := c.cc.Invoke(ctx, "/paranoid.ParanoidNetwork/RequestKeyPiece", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/paranoid.paranoidnetwork.v1.ParanoidNetwork/RequestKeyPiece", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -146,7 +146,7 @@ func _ParanoidNetwork_Ping_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/paranoid.ParanoidNetwork/Ping",
+		FullMethod: "/paranoid.paranoidnetwork.v1.ParanoidNetwork/Ping",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ParanoidNetworkServer).Ping(ctx, req.(*Node))
@@ -164,7 +164,7 @@ func _ParanoidNetwork_JoinCluster_Handler(srv interface{}, ctx context.Context, 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/paranoid.ParanoidNetwork/JoinCluster",
+		FullMethod: "/paranoid.paranoidnetwork.v1.ParanoidNetwork/JoinCluster",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ParanoidNetworkServer).JoinCluster(ctx, req.(*JoinClusterRequest))
@@ -182,7 +182,7 @@ func _ParanoidNetwork_NewGeneration_Handler(srv interface{}, ctx context.Context
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/paranoid.ParanoidNetwork/NewGeneration",
+		FullMethod: "/paranoid.paranoidnetwork.v1.ParanoidNetwork/NewGeneration",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ParanoidNetworkServer).NewGeneration(ctx, req.(*NewGenerationRequest))
@@ -200,7 +200,7 @@ func _ParanoidNetwork_SendKeyPiece_Handler(srv interface{}, ctx context.Context,
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/paranoid.ParanoidNetwork/SendKeyPiece",
+		FullMethod: "/paranoid.paranoidnetwork.v1.ParanoidNetwork/SendKeyPiece",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ParanoidNetworkServer).SendKeyPiece(ctx, req.(*KeyPieceSend))
@@ -218,7 +218,7 @@ func _ParanoidNetwork_RequestKeyPiece_Handler(srv interface{}, ctx context.Conte
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/paranoid.ParanoidNetwork/RequestKeyPiece",
+		FullMethod: "/paranoid.paranoidnetwork.v1.ParanoidNetwork/RequestKeyPiece",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ParanoidNetworkServer).RequestKeyPiece(ctx, req.(*KeyPieceRequest))
@@ -230,7 +230,7 @@ func _ParanoidNetwork_RequestKeyPiece_Handler(srv interface{}, ctx context.Conte
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var ParanoidNetwork_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "paranoid.ParanoidNetwork",
+	ServiceName: "paranoid.paranoidnetwork.v1.ParanoidNetwork",
 	HandlerType: (*ParanoidNetworkServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -255,5 +255,5 @@ var ParanoidNetwork_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "proto/paranoidnetwork/paranoid.proto",
+	Metadata: "paranoid/paranoidnetwork/v1/paranoid.proto",
 }

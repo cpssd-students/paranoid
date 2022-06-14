@@ -13,7 +13,7 @@ import (
 	"github.com/urfave/cli"
 
 	"github.com/cpssd-students/paranoid/pkg/raft"
-	pb "github.com/cpssd-students/paranoid/proto/raft"
+	pb "github.com/cpssd-students/paranoid/proto/paranoid/raft/v1"
 )
 
 // History subcommand

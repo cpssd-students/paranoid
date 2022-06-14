@@ -10,7 +10,7 @@ import (
 
 	"github.com/cpssd-students/paranoid/cmd/pfsd/globals"
 	"github.com/cpssd-students/paranoid/pkg/raft"
-	pb "github.com/cpssd-students/paranoid/proto/paranoidnetwork"
+	pb "github.com/cpssd-students/paranoid/proto/paranoid/paranoidnetwork/v1"
 )
 
 // JoinCluster receives requests from nodes asking to join raft cluster

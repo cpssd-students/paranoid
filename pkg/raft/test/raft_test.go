@@ -12,7 +12,7 @@ import (
 
 	"github.com/cpssd-students/paranoid/pkg/raft"
 	"github.com/cpssd-students/paranoid/pkg/raft/rafttestutil"
-	pb "github.com/cpssd-students/paranoid/proto/raft"
+	pb "github.com/cpssd-students/paranoid/proto/paranoid/raft/v1"
 )
 
 func TestRaftElection(t *testing.T) {

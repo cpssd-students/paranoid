@@ -7,7 +7,7 @@ import (
 	"context"
 
 	"github.com/cpssd-students/paranoid/cmd/pfsd/globals"
-	pb "github.com/cpssd-students/paranoid/proto/paranoidnetwork"
+	pb "github.com/cpssd-students/paranoid/proto/paranoid/paranoidnetwork/v1"
 )
 
 // NewGeneration is used to create a new KeyPair generation in the cluster,

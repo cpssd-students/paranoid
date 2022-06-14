@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/cpssd-students/paranoid/cmd/pfsd/globals"
-	pb "github.com/cpssd-students/paranoid/proto/paranoidnetwork"
+	pb "github.com/cpssd-students/paranoid/proto/paranoid/paranoidnetwork/v1"
 )
 
 // Ping implements the Ping RPC

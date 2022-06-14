@@ -19,7 +19,7 @@ import (
 
 	"github.com/cpssd-students/paranoid/cmd/pfsd/keyman"
 	"github.com/cpssd-students/paranoid/pkg/raft/raftlog"
-	pb "github.com/cpssd-students/paranoid/proto/raft"
+	pb "github.com/cpssd-students/paranoid/proto/paranoid/raft/v1"
 )
 
 // Raft constants

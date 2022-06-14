@@ -2,9 +2,9 @@
 
 syntax = "proto3";
 
-package paranoid;
+package paranoid.paranoidnetwork.v1;
 
-option go_package = "paranoid/proto/paranoidnetwork;paranoidnetwork";
+option go_package = "github.com/cpssd-students/paranoid/proto/paranoid/paranoidnetwork;paranoidnetwork";
 
 service ParanoidNetwork {
     // Utility calls

@@ -2,9 +2,9 @@
 
 syntax = "proto3";
 
-package raft;
+package paranoid.raft.v1;
 
-option go_package = "paranoid/proto/raft;raft";
+option go_package = "github.com/cpssd-students/paranoid/proto/paranoid/raft/v1;raft";
 
 service RaftNetwork {
     rpc AppendEntries (AppendEntriesRequest) returns (AppendEntriesResponse) {}

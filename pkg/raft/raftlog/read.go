@@ -11,7 +11,7 @@ import (
 	"google.golang.org/protobuf/proto"
 
 	"github.com/cpssd-students/paranoid/pkg/libpfs/encryption"
-	pb "github.com/cpssd-students/paranoid/proto/raft"
+	pb "github.com/cpssd-students/paranoid/proto/paranoid/raft/v1"
 )
 
 // GetLogEntryUnsafe returns an unsafe log entry

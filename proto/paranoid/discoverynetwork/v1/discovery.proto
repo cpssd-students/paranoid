@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package discoverynetwork;
+package paranoid.discoverynetwork.v1;
 
-option go_package = "paranoid/proto/discoverynetwork";
+option go_package = "github.com/cpssd-students/paranoid/proto/paranoid/discoverynetwork/v1;discoverynetwork";
 
 service DiscoveryNetwork {
   // Discovery Calls

@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             (unknown)
-// source: proto/discoverynetwork/discovery.proto
+// source: paranoid/discoverynetwork/v1/discovery.proto
 
 package discoverynetwork
 
@@ -37,7 +37,7 @@ func NewDiscoveryNetworkClient(cc grpc.ClientConnInterface) DiscoveryNetworkClie
 
 func (c *discoveryNetworkClient) Join(ctx context.Context, in *JoinRequest, opts ...grpc.CallOption) (*JoinResponse, error) {
 	out := new(JoinResponse)
-	err := c.cc.Invoke(ctx, "/discoverynetwork.DiscoveryNetwork/Join", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/paranoid.discoverynetwork.v1.DiscoveryNetwork/Join", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +46,7 @@ func (c *discoveryNetworkClient) Join(ctx context.Context, in *JoinRequest, opts
 
 func (c *discoveryNetworkClient) Disconnect(ctx context.Context, in *DisconnectRequest, opts ...grpc.CallOption) (*EmptyMessage, error) {
 	out := new(EmptyMessage)
-	err := c.cc.Invoke(ctx, "/discoverynetwork.DiscoveryNetwork/Disconnect", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/paranoid.discoverynetwork.v1.DiscoveryNetwork/Disconnect", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +96,7 @@ func _DiscoveryNetwork_Join_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/discoverynetwork.DiscoveryNetwork/Join",
+		FullMethod: "/paranoid.discoverynetwork.v1.DiscoveryNetwork/Join",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(DiscoveryNetworkServer).Join(ctx, req.(*JoinRequest))
@@ -114,7 +114,7 @@ func _DiscoveryNetwork_Disconnect_Handler(srv interface{}, ctx context.Context, 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/discoverynetwork.DiscoveryNetwork/Disconnect",
+		FullMethod: "/paranoid.discoverynetwork.v1.DiscoveryNetwork/Disconnect",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(DiscoveryNetworkServer).Disconnect(ctx, req.(*DisconnectRequest))
@@ -126,7 +126,7 @@ func _DiscoveryNetwork_Disconnect_Handler(srv interface{}, ctx context.Context, 
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var DiscoveryNetwork_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "discoverynetwork.DiscoveryNetwork",
+	ServiceName: "paranoid.discoverynetwork.v1.DiscoveryNetwork",
 	HandlerType: (*DiscoveryNetworkServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -139,5 +139,5 @@ var DiscoveryNetwork_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "proto/discoverynetwork/discovery.proto",
+	Metadata: "paranoid/discoverynetwork/v1/discovery.proto",
 }

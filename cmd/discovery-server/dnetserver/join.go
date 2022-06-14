@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	pb "github.com/cpssd-students/paranoid/proto/discoverynetwork"
+	pb "github.com/cpssd-students/paranoid/proto/paranoid/discoverynetwork/v1"
 )
 
 const (

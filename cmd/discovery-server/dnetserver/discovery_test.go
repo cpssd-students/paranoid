@@ -11,7 +11,7 @@ import (
 	"path"
 	"testing"
 
-	pb "github.com/cpssd-students/paranoid/proto/discoverynetwork"
+	pb "github.com/cpssd-students/paranoid/proto/paranoid/discoverynetwork/v1"
 )
 
 func TestMain(m *testing.M) {

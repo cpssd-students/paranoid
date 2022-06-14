@@ -11,8 +11,8 @@ import (
 
 	"github.com/cpssd-students/paranoid/cmd/pfsd/globals"
 	"github.com/cpssd-students/paranoid/cmd/pfsd/keyman"
-	pb "github.com/cpssd-students/paranoid/proto/paranoidnetwork"
-	raftpb "github.com/cpssd-students/paranoid/proto/raft"
+	pb "github.com/cpssd-students/paranoid/proto/paranoid/paranoidnetwork/v1"
+	raftpb "github.com/cpssd-students/paranoid/proto/paranoid/raft/v1"
 )
 
 // SendKeyPiece implements the SendKeyPiece RPC

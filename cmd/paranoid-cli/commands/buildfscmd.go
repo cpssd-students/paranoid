@@ -10,7 +10,7 @@ import (
 
 	"github.com/cpssd-students/paranoid/pkg/libpfs/returncodes"
 	"github.com/cpssd-students/paranoid/pkg/raft"
-	pb "github.com/cpssd-students/paranoid/proto/raft"
+	pb "github.com/cpssd-students/paranoid/proto/paranoid/raft/v1"
 
 	progress "github.com/cheggaaa/pb"
 	"github.com/urfave/cli"

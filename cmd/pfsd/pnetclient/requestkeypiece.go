@@ -9,7 +9,7 @@ import (
 
 	"github.com/cpssd-students/paranoid/cmd/pfsd/globals"
 	"github.com/cpssd-students/paranoid/cmd/pfsd/keyman"
-	pb "github.com/cpssd-students/paranoid/proto/paranoidnetwork"
+	pb "github.com/cpssd-students/paranoid/proto/paranoid/paranoidnetwork/v1"
 )
 
 // RequestKeyPiece from a node based on its UUID

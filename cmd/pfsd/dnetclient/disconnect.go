@@ -7,7 +7,7 @@ import (
 
 	"github.com/cpssd-students/paranoid/cmd/pfsd/globals"
 
-	pb "github.com/cpssd-students/paranoid/proto/discoverynetwork"
+	pb "github.com/cpssd-students/paranoid/proto/paranoid/discoverynetwork/v1"
 )
 
 // Disconnect function used to disconnect from the server
