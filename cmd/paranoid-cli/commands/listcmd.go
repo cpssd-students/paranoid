@@ -8,7 +8,7 @@ import (
 
 	"github.com/urfave/cli"
 
-	log "paranoid/pkg/logger"
+	log "github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 //List lists all paranoid file systems

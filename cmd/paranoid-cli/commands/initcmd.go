@@ -11,10 +11,10 @@ import (
 
 	"github.com/urfave/cli"
 
-	"paranoid/cmd/paranoid-cli/tls"
-	"paranoid/pkg/libpfs"
-	"paranoid/pkg/libpfs/returncodes"
-	log "paranoid/pkg/logger"
+	"github.com/cpssd-students/paranoid/cmd/paranoid-cli/tls"
+	"github.com/cpssd-students/paranoid/pkg/libpfs"
+	"github.com/cpssd-students/paranoid/pkg/libpfs/returncodes"
+	log "github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 func cleanupPFS(pfsDir string) {

@@ -8,7 +8,7 @@ import (
 	"path"
 	"sync"
 
-	"paranoid/pkg/raft/raftlog"
+	"github.com/cpssd-students/paranoid/pkg/raft/raftlog"
 )
 
 // Different constants

@@ -10,11 +10,10 @@ import (
 
 	"google.golang.org/grpc"
 
-	"paranoid/cmd/pfsd/keyman"
-	"paranoid/pkg/libpfs"
-	"paranoid/pkg/libpfs/returncodes"
-
-	pb "paranoid/proto/raft"
+	"github.com/cpssd-students/paranoid/cmd/pfsd/keyman"
+	"github.com/cpssd-students/paranoid/pkg/libpfs"
+	"github.com/cpssd-students/paranoid/pkg/libpfs/returncodes"
+	pb "github.com/cpssd-students/paranoid/proto/raft"
 )
 
 // ActionType is the base type of the different action

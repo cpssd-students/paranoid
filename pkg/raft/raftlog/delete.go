@@ -8,15 +8,18 @@ import (
 )
 
 func (rl *RaftLog) deleteLogEntry(index uint64) {
-	entryPath := path.Join(rl.logDir, LogEntryDirectoryName, strconv.FormatUint(storageIndexToFileIndex(index), 10))
+	entryPath := path.Join(
+		rl.logDir,
+		LogEntryDirectoryName,
+		strconv.FormatUint(storageIndexToFileIndex(index), 10),
+	)
 	fi, err := os.Stat(entryPath)
 	if err != nil {
 		Log.Fatalf("unable to delete log of index %d with error: %s", index, err)
 	}
 	entrySize := uint64(fi.Size())
 
-	err = os.Remove(entryPath)
-	if err != nil {
+	if err = os.Remove(entryPath); err != nil {
 		Log.Fatalf("unable to delete log of index %d with error: %s", index, err)
 	}
 	rl.setLogSizeBytes(rl.logSizeBytes - entrySize)

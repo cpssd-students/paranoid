@@ -9,8 +9,9 @@ import (
 	"strconv"
 	"time"
 
-	"paranoid/cmd/pfsd/globals"
-	"paranoid/pkg/raft"
+	"github.com/cpssd-students/paranoid/pkg/raft"
+
+	"github.com/cpssd-students/paranoid/cmd/pfsd/globals"
 )
 
 // Message constants

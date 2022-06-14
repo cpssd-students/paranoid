@@ -7,8 +7,9 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
-	"paranoid/pkg/logger"
-	"paranoid/cmd/pfsd/globals"
+	"github.com/cpssd-students/paranoid/cmd/pfsd/globals"
+
+	"github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 const peerPingTimeOut time.Duration = time.Minute * 3

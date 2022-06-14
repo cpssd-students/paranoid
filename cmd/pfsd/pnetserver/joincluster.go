@@ -1,15 +1,15 @@
 package pnetserver
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
-	"paranoid/cmd/pfsd/globals"
-	"paranoid/pkg/raft"
-	pb "paranoid/proto/paranoidnetwork"
-
 	"golang.org/x/crypto/bcrypt"
-	"golang.org/x/net/context"
+
+	"github.com/cpssd-students/paranoid/cmd/pfsd/globals"
+	"github.com/cpssd-students/paranoid/pkg/raft"
+	pb "github.com/cpssd-students/paranoid/proto/paranoidnetwork"
 )
 
 // JoinCluster receives requests from nodes asking to join raft cluster

@@ -11,7 +11,7 @@ import (
 
 	"github.com/urfave/cli"
 
-	log "paranoid/pkg/logger"
+	log "github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 //Unmount unmounts a paranoid file system

@@ -11,14 +11,14 @@ import (
 	"sync"
 	"time"
 
-	"paranoid/cmd/pfsd/keyman"
-	"paranoid/pkg/logger"
-	"paranoid/pkg/raft/raftlog"
-	pb "paranoid/proto/raft"
-
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+
+	"github.com/cpssd-students/paranoid/cmd/pfsd/keyman"
+	"github.com/cpssd-students/paranoid/pkg/logger"
+	"github.com/cpssd-students/paranoid/pkg/raft/raftlog"
+	pb "github.com/cpssd-students/paranoid/proto/raft"
 )
 
 // Raft constants

@@ -7,9 +7,9 @@ import (
 
 	"golang.org/x/net/context"
 
-	"paranoid/cmd/pfsd/globals"
+	"github.com/cpssd-students/paranoid/cmd/pfsd/globals"
 
-	pb "paranoid/proto/discoverynetwork"
+	pb "github.com/cpssd-students/paranoid/proto/discoverynetwork"
 )
 
 // Join function to call in order to join the server

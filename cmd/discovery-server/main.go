@@ -13,10 +13,10 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
-	"paranoid/cmd/discovery-server/dnetserver"
-	"paranoid/pkg/logger"
+	"github.com/cpssd-students/paranoid/cmd/discovery-server/dnetserver"
+	"github.com/cpssd-students/paranoid/pkg/logger"
 
-	pb "paranoid/proto/discoverynetwork"
+	pb "github.com/cpssd-students/paranoid/proto/discoverynetwork"
 )
 
 const (

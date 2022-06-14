@@ -1,11 +1,11 @@
 package pnetclient
 
 import (
-	"paranoid/cmd/pfsd/globals"
-	"paranoid/cmd/pfsd/upnp"
-	pb "paranoid/proto/paranoidnetwork"
-
 	"golang.org/x/net/context"
+
+	"github.com/cpssd-students/paranoid/cmd/pfsd/globals"
+	"github.com/cpssd-students/paranoid/cmd/pfsd/upnp"
+	pb "github.com/cpssd-students/paranoid/proto/paranoidnetwork"
 )
 
 // Ping the peers

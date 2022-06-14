@@ -8,8 +8,8 @@ import (
 	"path"
 	"strings"
 
-	"paranoid/pkg/libpfs/returncodes"
-	log "paranoid/pkg/logger"
+	"github.com/cpssd-students/paranoid/pkg/libpfs/returncodes"
+	log "github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 //makeDir creates a new directory with permissions 0777 with the name newDir in parentDir.

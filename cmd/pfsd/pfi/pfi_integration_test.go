@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 package pfi
@@ -10,9 +11,10 @@ import (
 
 	"github.com/hanwen/go-fuse/fuse"
 	"github.com/hanwen/go-fuse/fuse/pathfs"
-	"paranoid/pkg/libpfs"
-	"paranoid/pkg/logger"
-	"paranoid/cmd/pfsd/globals"
+
+	"github.com/cpssd-students/paranoid/cmd/pfsd/globals"
+	"github.com/cpssd-students/paranoid/pkg/libpfs"
+	"github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 func createTestDir(t *testing.T, name string) {

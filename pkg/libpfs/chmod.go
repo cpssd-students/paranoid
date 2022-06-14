@@ -9,8 +9,8 @@ import (
 	"path"
 	"syscall"
 
-	"paranoid/pkg/libpfs/returncodes"
-	log "paranoid/pkg/logger"
+	"github.com/cpssd-students/paranoid/pkg/libpfs/returncodes"
+	log "github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 // PermMask is the default mask used for permissions

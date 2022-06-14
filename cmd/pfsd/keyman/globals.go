@@ -1,7 +1,7 @@
 package keyman
 
 import (
-	"paranoid/pkg/logger"
+	"github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 // Log the messages from keyman

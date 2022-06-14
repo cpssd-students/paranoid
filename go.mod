@@ -1,4 +1,4 @@
-module paranoid
+module github.com/cpssd-students/paranoid
 
 go 1.18
 

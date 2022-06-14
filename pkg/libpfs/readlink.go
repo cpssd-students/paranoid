@@ -6,8 +6,8 @@ import (
 	"io/ioutil"
 	"path"
 
-	"paranoid/pkg/libpfs/returncodes"
-	log "paranoid/pkg/logger"
+	"github.com/cpssd-students/paranoid/pkg/libpfs/returncodes"
+	log "github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 // ReadlinkCommand reads the value of the symbolic link

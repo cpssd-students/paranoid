@@ -5,7 +5,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 
-	pb "paranoid/proto/discoverynetwork"
+	pb "github.com/cpssd-students/paranoid/proto/discoverynetwork"
 )
 
 // Disconnect method for Discovery Server

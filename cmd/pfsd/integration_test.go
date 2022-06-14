@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 package main
@@ -13,9 +14,11 @@ import (
 	"testing"
 	"time"
 
-	"paranoid/pkg/libpfs"
-	"paranoid/pkg/logger"
-	"paranoid/cmd/pfsd/globals"
+	"github.com/cpssd-students/paranoid/pkg/logger"
+"github.com/cpssd-students/paranoid/
+	"github.com/cpssd-students/paranoid/cmd/pfsd/globals"
+
+	"github.com/cpssd-students/paranoid/pkg/libpfs"
 )
 
 func createTestDir(t *testing.T, name string) {

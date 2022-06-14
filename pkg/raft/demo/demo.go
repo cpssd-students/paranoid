@@ -12,14 +12,14 @@ import (
 	"sync"
 	"time"
 
-	"paranoid/pkg/logger"
-	"paranoid/pkg/raft"
-	"paranoid/pkg/raft/raftlog"
-	"paranoid/pkg/raft/rafttestutil"
-	pb "paranoid/proto/raft"
-
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/grpclog"
+
+	"github.com/cpssd-students/paranoid/pkg/logger"
+	"github.com/cpssd-students/paranoid/pkg/raft"
+	"github.com/cpssd-students/paranoid/pkg/raft/raftlog"
+	"github.com/cpssd-students/paranoid/pkg/raft/rafttestutil"
+	pb "github.com/cpssd-students/paranoid/proto/raft"
 )
 
 // Constants used in the demo

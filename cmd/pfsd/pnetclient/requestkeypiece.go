@@ -1,15 +1,14 @@
 package pnetclient
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"math/big"
 
-	"paranoid/cmd/pfsd/globals"
-	"paranoid/cmd/pfsd/keyman"
-	pb "paranoid/proto/paranoidnetwork"
-
-	"golang.org/x/net/context"
+	"github.com/cpssd-students/paranoid/cmd/pfsd/globals"
+	"github.com/cpssd-students/paranoid/cmd/pfsd/keyman"
+	pb "github.com/cpssd-students/paranoid/proto/paranoidnetwork"
 )
 
 // RequestKeyPiece from a node based on its UUID

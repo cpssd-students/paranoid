@@ -8,9 +8,9 @@ import (
 	"path"
 	"sync"
 
-	"paranoid/cmd/pfsd/keyman"
-	"paranoid/pkg/raft/raftlog"
-	pb "paranoid/proto/raft"
+	"github.com/cpssd-students/paranoid/cmd/pfsd/keyman"
+	"github.com/cpssd-students/paranoid/pkg/raft/raftlog"
+	pb "github.com/cpssd-students/paranoid/proto/raft"
 )
 
 // NodeType provides information about the type of node

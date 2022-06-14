@@ -1,15 +1,14 @@
 package pnetclient
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
-	"paranoid/cmd/pfsd/globals"
-	"paranoid/cmd/pfsd/keyman"
-	pb "paranoid/proto/paranoidnetwork"
-	raftpb "paranoid/proto/raft"
-
-	"golang.org/x/net/context"
+	"github.com/cpssd-students/paranoid/cmd/pfsd/globals"
+	"github.com/cpssd-students/paranoid/cmd/pfsd/keyman"
+	pb "github.com/cpssd-students/paranoid/proto/paranoidnetwork"
+	raftpb "github.com/cpssd-students/paranoid/proto/raft"
 )
 
 // SendKeyPiece to the node specified by the UUID

@@ -7,10 +7,10 @@ import (
 	"os/user"
 	"path"
 
-	"paranoid/pkg/libpfs/returncodes"
-	log "paranoid/pkg/logger"
-	"paranoid/pkg/raft"
-	pb "paranoid/proto/raft"
+	"github.com/cpssd-students/paranoid/pkg/libpfs/returncodes"
+	log "github.com/cpssd-students/paranoid/pkg/logger"
+	"github.com/cpssd-students/paranoid/pkg/raft"
+	pb "github.com/cpssd-students/paranoid/proto/raft"
 
 	progress "github.com/cheggaaa/pb"
 	"github.com/urfave/cli"

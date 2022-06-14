@@ -9,8 +9,8 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 
-	"paranoid/cmd/pfsd/globals"
-	"paranoid/pkg/logger"
+	"github.com/cpssd-students/paranoid/cmd/pfsd/globals"
+	"github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 // Log used by the pnetclient

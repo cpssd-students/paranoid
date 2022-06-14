@@ -1,8 +1,8 @@
 package pnetserver
 
 import (
-	"paranoid/cmd/pfsd/globals"
-	pb "paranoid/proto/paranoidnetwork"
+	"github.com/cpssd-students/paranoid/cmd/pfsd/globals"
+	pb "github.com/cpssd-students/paranoid/proto/paranoidnetwork"
 
 	"golang.org/x/net/context"
 )

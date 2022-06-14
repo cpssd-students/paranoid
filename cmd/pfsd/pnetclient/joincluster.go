@@ -5,9 +5,8 @@ import (
 
 	"context"
 
-	"paranoid/cmd/pfsd/globals"
-
-	pb "paranoid/proto/paranoidnetwork"
+	"github.com/cpssd-students/paranoid/cmd/pfsd/globals"
+	pb "github.com/cpssd-students/paranoid/proto/paranoidnetwork"
 )
 
 //JoinCluster is used to request to join a raft cluster

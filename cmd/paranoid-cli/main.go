@@ -8,9 +8,9 @@ import (
 
 	"github.com/urfave/cli"
 
-	"paranoid/cmd/paranoid-cli/commands"
+	"github.com/cpssd-students/paranoid/cmd/paranoid-cli/commands"
 
-	log "paranoid/pkg/logger"
+	log "github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 func main() {

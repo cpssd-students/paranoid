@@ -8,7 +8,7 @@ import (
 	"path"
 	"sync"
 
-	"paranoid/pkg/logger"
+	"github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 // Constants used by the raftlog

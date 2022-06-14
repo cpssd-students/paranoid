@@ -7,8 +7,8 @@ import (
 	"syscall"
 	"time"
 
-	"paranoid/pkg/libpfs/returncodes"
-	log "paranoid/pkg/logger"
+	"github.com/cpssd-students/paranoid/pkg/libpfs/returncodes"
+	log "github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 // StatInfo contains the file metadata

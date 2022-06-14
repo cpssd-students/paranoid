@@ -1,6 +1,7 @@
 package raft
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -12,12 +13,10 @@ import (
 	"strconv"
 	"time"
 
-	"paranoid/cmd/pfsd/keyman"
-	"paranoid/pkg/libpfs"
-	"paranoid/pkg/libpfs/returncodes"
-	pb "paranoid/proto/raft"
-
-	"golang.org/x/net/context"
+	"github.com/cpssd-students/paranoid/cmd/pfsd/keyman"
+	"github.com/cpssd-students/paranoid/pkg/libpfs"
+	"github.com/cpssd-students/paranoid/pkg/libpfs/returncodes"
+	pb "github.com/cpssd-students/paranoid/proto/raft"
 )
 
 // String constants

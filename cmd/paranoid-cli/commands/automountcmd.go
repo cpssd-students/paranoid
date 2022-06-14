@@ -9,7 +9,7 @@ import (
 
 	"github.com/urfave/cli"
 
-	log "paranoid/pkg/logger"
+	log "github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 //AutoMount mounts a file system with the last used settings.

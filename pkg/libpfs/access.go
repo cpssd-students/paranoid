@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 
-	"paranoid/pkg/libpfs/returncodes"
-	log "paranoid/pkg/logger"
+	"github.com/cpssd-students/paranoid/pkg/libpfs/returncodes"
+	log "github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 //AccessCommand is used by fuse to check if it has access to a given file.

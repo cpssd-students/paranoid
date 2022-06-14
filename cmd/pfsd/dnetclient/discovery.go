@@ -6,8 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"paranoid/cmd/pfsd/globals"
-	"paranoid/cmd/pfsd/pnetclient"
+	"github.com/cpssd-students/paranoid/cmd/pfsd/pnetclient"
+
+	"github.com/cpssd-students/paranoid/cmd/pfsd/globals"
 )
 
 // SetDiscovery sets up the discovery server to use

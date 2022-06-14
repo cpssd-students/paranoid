@@ -11,9 +11,9 @@ import (
 
 	"github.com/urfave/cli"
 
-	"paranoid/cmd/pfsd/intercom"
-	log "paranoid/pkg/logger"
-	"paranoid/pkg/raft"
+	"github.com/cpssd-students/paranoid/cmd/pfsd/intercom"
+	log "github.com/cpssd-students/paranoid/pkg/logger"
+	"github.com/cpssd-students/paranoid/pkg/raft"
 )
 
 // ListNodes subcommand shows the statistics about nodes

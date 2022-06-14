@@ -8,9 +8,9 @@ import (
 	"os"
 	"path"
 
-	"paranoid/pkg/libpfs/encryption"
-	"paranoid/pkg/libpfs/returncodes"
-	log "paranoid/pkg/logger"
+	"github.com/cpssd-students/paranoid/pkg/libpfs/encryption"
+	"github.com/cpssd-students/paranoid/pkg/libpfs/returncodes"
+	log "github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 //CreatCommand creates a new file with the name filePath in the pfs paranoidDirectory

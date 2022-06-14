@@ -10,9 +10,9 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 
-	"paranoid/pkg/logger"
+	"github.com/cpssd-students/paranoid/pkg/logger"
 
-	pb "paranoid/proto/discoverynetwork"
+	pb "github.com/cpssd-students/paranoid/proto/discoverynetwork"
 )
 
 // Log used by discovery-server

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net"
 	"net/rpc"
 	"os"
@@ -17,10 +18,9 @@ import (
 
 	"github.com/urfave/cli"
 
-	"paranoid/cmd/pfsd/intercom"
-	"paranoid/pkg/libpfs"
-	"paranoid/pkg/libpfs/returncodes"
-	log "paranoid/pkg/logger"
+	"github.com/cpssd-students/paranoid/cmd/pfsd/intercom"
+	"github.com/cpssd-students/paranoid/pkg/libpfs"
+	"github.com/cpssd-students/paranoid/pkg/libpfs/returncodes"
 )
 
 // Mount subcommand talks to other programs to mount the pfs filesystem.
@@ -132,7 +132,7 @@ func doMount(c *cli.Context, args []string) {
 		certPath := path.Join(pfsDir, "meta", "cert.pem")
 		keyPath := path.Join(pfsDir, "meta", "key.pem")
 		if pathExists(certPath) && pathExists(keyPath) {
-			log.Info("Starting PFSD in secure mode.")
+			log.Println("Starting PFSD in secure mode.")
 			pfsFlags = append(pfsFlags, fmt.Sprintf("-cert=%s", certPath))
 			pfsFlags = append(pfsFlags, fmt.Sprintf("-key=%s", keyPath))
 		} else {
@@ -167,7 +167,7 @@ func doMount(c *cli.Context, args []string) {
 			select {
 			case <-after:
 				if lastConnectionError != nil {
-					log.Error(lastConnectionError)
+					log.Println(lastConnectionError)
 				}
 				fmt.Printf("PFSD failed to start: received no response from PFSD. See %s for more information.\n",
 					path.Join(pfsDir, "meta", "logs", "pfsd.log"))

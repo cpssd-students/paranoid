@@ -6,8 +6,8 @@ import (
 	"io/ioutil"
 	"os"
 
-	"paranoid/pkg/libpfs/returncodes"
-	log "paranoid/pkg/logger"
+	"github.com/cpssd-students/paranoid/pkg/libpfs/returncodes"
+	log "github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 // RenameCommand is called when renaming a file

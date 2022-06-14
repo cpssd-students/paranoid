@@ -9,8 +9,8 @@ import (
 
 	"github.com/urfave/cli"
 
-	"paranoid/cmd/paranoid-cli/tls"
-	log "paranoid/pkg/logger"
+	"github.com/cpssd-students/paranoid/cmd/paranoid-cli/tls"
+	log "github.com/cpssd-students/paranoid/pkg/logger"
 )
 
 // Secure subcommand
@@ -36,7 +36,7 @@ func Secure(c *cli.Context) {
 	}
 	if !pathExists(pfsDir) {
 		fmt.Println("FATAL: Paranoid filesystem does not exist:", pfsname)
-		log.Fatalf("paranoid filesystem %s does not exist", pfsname)
+		log.Fatalf("github.com/cpssd-students/paranoid filesystem %s does not exist", pfsname)
 	}
 
 	certPath := path.Join(pfsDir, "meta", "cert.pem")

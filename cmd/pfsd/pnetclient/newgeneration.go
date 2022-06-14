@@ -2,10 +2,11 @@ package pnetclient
 
 import (
 	"errors"
-	"paranoid/cmd/pfsd/globals"
-	pb "paranoid/proto/paranoidnetwork"
 
-	"golang.org/x/net/context"
+	"context"
+
+	"github.com/cpssd-students/paranoid/cmd/pfsd/globals"
+	pb "github.com/cpssd-students/paranoid/proto/paranoidnetwork"
 )
 
 // NewGeneration is used to create a new KeyPair generation in the cluster,

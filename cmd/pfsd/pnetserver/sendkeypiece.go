@@ -1,17 +1,17 @@
 package pnetserver
 
 import (
+	"context"
 	"errors"
 	"math/big"
 
-	"paranoid/cmd/pfsd/globals"
-	"paranoid/cmd/pfsd/keyman"
-	pb "paranoid/proto/paranoidnetwork"
-	raftpb "paranoid/proto/raft"
-
-	"golang.org/x/net/context"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+
+	"github.com/cpssd-students/paranoid/cmd/pfsd/globals"
+	"github.com/cpssd-students/paranoid/cmd/pfsd/keyman"
+	pb "github.com/cpssd-students/paranoid/proto/paranoidnetwork"
+	raftpb "github.com/cpssd-students/paranoid/proto/raft"
 )
 
 // SendKeyPiece implements the SendKeyPiece RPC
