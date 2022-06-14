@@ -16,10 +16,10 @@ import (
 // JoinCluster receives requests from nodes asking to join raft cluster
 func (s *ParanoidServer) JoinCluster(
 	ctx context.Context, req *pb.JoinClusterRequest,
-) (*pb.EmptyMessage, error) {
+) (*pb.JoinClusterResponse, error) {
 	if req.PoolPassword == "" {
 		if len(globals.PoolPasswordHash) != 0 {
-			return &pb.EmptyMessage{},
+			return &pb.JoinClusterResponse{},
 				errors.New("cluster is password protected but no password was given")
 		}
 	} else {
@@ -27,7 +27,7 @@ func (s *ParanoidServer) JoinCluster(
 			globals.PoolPasswordHash,
 			append(globals.PoolPasswordSalt, []byte(req.PoolPassword)...),
 		); err != nil {
-			return &pb.EmptyMessage{},
+			return &pb.JoinClusterResponse{},
 				fmt.Errorf("unable to add node to raft cluster, password error: %v", err)
 		}
 	}
@@ -41,7 +41,7 @@ func (s *ParanoidServer) JoinCluster(
 	log.Printf("Got Ping from Node %s", node)
 	err := globals.RaftNetworkServer.RequestAddNodeToConfiguration(node)
 	if err != nil {
-		return &pb.EmptyMessage{}, fmt.Errorf("unable to add node to raft cluster: %v", err)
+		return &pb.JoinClusterResponse{}, fmt.Errorf("unable to add node to raft cluster: %v", err)
 	}
-	return &pb.EmptyMessage{}, nil
+	return &pb.JoinClusterResponse{}, nil
 }

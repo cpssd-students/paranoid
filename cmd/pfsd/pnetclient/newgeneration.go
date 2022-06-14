@@ -23,7 +23,7 @@ func NewGeneration(password string) (generation int64, peers []string, err error
 		}
 		defer conn.Close()
 
-		client := pb.NewParanoidNetworkClient(conn)
+		client := pb.NewParanoidNetworkServiceClient(conn)
 
 		resp, err := client.NewGeneration(context.Background(), &pb.NewGenerationRequest{
 			RequestingNode: &pb.Node{

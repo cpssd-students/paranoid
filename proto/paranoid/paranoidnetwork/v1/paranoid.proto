@@ -6,23 +6,27 @@ package paranoid.paranoidnetwork.v1;
 
 option go_package = "github.com/cpssd-students/paranoid/proto/paranoid/paranoidnetwork;paranoidnetwork";
 
-service ParanoidNetwork {
+service ParanoidNetworkService {
     // Utility calls
 
    	// Used for health checking and discovery. Sends the IP and port of the
     // PFSD instance running on the client.
-    rpc Ping (Node) returns (EmptyMessage) {}
+    rpc Ping (PingRequest) returns (PingResponse);
     // Used by a new node to let other nodes it is available to join the cluster.
-    rpc JoinCluster (JoinClusterRequest) returns (EmptyMessage) {}
+    rpc JoinCluster (JoinClusterRequest) returns (JoinClusterResponse) {}
     // Used by a new node to create a new key generation before joining the cluster.
     rpc NewGeneration (NewGenerationRequest) returns (NewGenerationResponse) {}
 
     // Cryptography calls
-    rpc SendKeyPiece (KeyPieceSend) returns (SendKeyPieceResponse) {}
-    rpc RequestKeyPiece (KeyPieceRequest) returns (KeyPiece) {}
+    rpc SendKeyPiece (SendKeyPieceRequest) returns (SendKeyPieceResponse) {}
+    rpc RequestKeyPiece (RequestKeyPieceRequest) returns (RequestKeyPieceResponse) {}
 }
 
-message EmptyMessage {}
+message PingRequest {
+    Node node = 1;
+}
+
+message PingResponse {}
 
 message Node {
     string ip = 1;  // required
@@ -40,6 +44,8 @@ message JoinClusterRequest {
     string pool_password = 5; // optional
 }
 
+message JoinClusterResponse {}
+
 message NewGenerationRequest {
     Node requesting_node = 1;   // required
     string pool_password = 2;   // required
@@ -50,9 +56,22 @@ message NewGenerationResponse {
     repeated string peers = 2;        // required
 }
 
-message KeyPieceRequest {
+message SendKeyPieceRequest {
+    KeyPiece key = 1; // required
+    bool add_element = 2; // required
+}
+
+message SendKeyPieceResponse {
+    bool client_must_commit = 1;    // required
+}
+
+message RequestKeyPieceRequest {
     Node node = 1; // required
     int64 generation = 2; // required    
+}
+
+message RequestKeyPieceResponse {
+    KeyPiece key = 1; // required
 }
 
 message KeyPiece {
@@ -66,13 +85,4 @@ message KeyPiece {
 
     // The KeyStateMachine generation this key belongs to
     int64 generation = 6;   // required
-}
-
-message KeyPieceSend {
-    KeyPiece key = 1; // required
-    bool add_element = 2; // required
-}
-
-message SendKeyPieceResponse {
-    bool client_must_commit = 1;    // required
 }

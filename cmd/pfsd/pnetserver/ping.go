@@ -9,15 +9,15 @@ import (
 )
 
 // Ping implements the Ping RPC
-func (s *ParanoidServer) Ping(ctx context.Context, req *pb.Node) (*pb.EmptyMessage, error) {
+func (s *ParanoidServer) Ping(ctx context.Context, req *pb.PingRequest) (*pb.PingResponse, error) {
 	node := globals.Node{
-		IP:         req.Ip,
-		Port:       req.Port,
-		CommonName: req.CommonName,
-		UUID:       req.Uuid,
+		IP:         req.Node.Ip,
+		Port:       req.Node.Port,
+		CommonName: req.Node.CommonName,
+		UUID:       req.Node.Uuid,
 	}
 	log.Printf("Got Ping from %s", node)
 	globals.Nodes.Add(node)
-	globals.RaftNetworkServer.ChangeNodeLocation(req.Uuid, req.Ip, req.Port)
-	return &pb.EmptyMessage{}, nil
+	globals.RaftNetworkServer.ChangeNodeLocation(req.Node.Uuid, req.Node.Ip, req.Node.Port)
+	return &pb.PingResponse{}, nil
 }

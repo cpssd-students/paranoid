@@ -125,7 +125,7 @@ func startRPCServer(lis *net.Listener, password string) {
 	}
 	srv = grpc.NewServer(opts...)
 
-	pb.RegisterParanoidNetworkServer(srv, &pnetserver.ParanoidServer{})
+	pb.RegisterParanoidNetworkServiceServer(srv, &pnetserver.ParanoidServer{})
 	nodeDetails := raft.Node{
 		IP:         globals.ThisNode.IP,
 		Port:       globals.ThisNode.Port,

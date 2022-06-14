@@ -25,7 +25,7 @@ func RequestKeyPiece(uuid string, generation int64) (*keyman.KeyPiece, error) {
 	}
 	defer conn.Close()
 
-	client := pb.NewParanoidNetworkClient(conn)
+	client := pb.NewParanoidNetworkServiceClient(conn)
 
 	thisNodeProto := &pb.Node{
 		Ip:         globals.ThisNode.IP,
@@ -33,26 +33,25 @@ func RequestKeyPiece(uuid string, generation int64) (*keyman.KeyPiece, error) {
 		CommonName: globals.ThisNode.CommonName,
 		Uuid:       globals.ThisNode.UUID,
 	}
-	pieceProto, err := client.RequestKeyPiece(context.Background(), &pb.KeyPieceRequest{
+	res, err := client.RequestKeyPiece(context.Background(), &pb.RequestKeyPieceRequest{
 		Node:       thisNodeProto,
 		Generation: generation,
-	},
-	)
+	})
 	if err != nil {
 		log.Printf("Failed requesting KeyPiece from %s: %v", node, err)
 		return nil, fmt.Errorf("failed requesting KeyPiece from %s: %w", node, err)
 	}
+	piece := res.Key
 
 	log.Printf("Received KeyPiece from %s", node)
 	var fingerprintArray [32]byte
-	copy(fingerprintArray[:], pieceProto.ParentFingerprint)
+	copy(fingerprintArray[:], piece.ParentFingerprint)
 	var primeBig big.Int
-	primeBig.SetBytes(pieceProto.Prime)
-	piece := &keyman.KeyPiece{
-		Data:              pieceProto.Data,
+	primeBig.SetBytes(piece.Prime)
+	return &keyman.KeyPiece{
+		Data:              piece.Data,
 		ParentFingerprint: fingerprintArray,
 		Prime:             &primeBig,
-		Seq:               pieceProto.Seq,
-	}
-	return piece, nil
+		Seq:               piece.Seq,
+	}, nil
 }

@@ -26,7 +26,7 @@ func SendKeyPiece(uuid string, generation int64, piece *keyman.KeyPiece, addElem
 	}
 	defer conn.Close()
 
-	client := pb.NewParanoidNetworkClient(conn)
+	client := pb.NewParanoidNetworkServiceClient(conn)
 
 	thisNodeProto := &pb.Node{
 		Ip:         globals.ThisNode.IP,
@@ -43,7 +43,7 @@ func SendKeyPiece(uuid string, generation int64, piece *keyman.KeyPiece, addElem
 		OwnerNode:         thisNodeProto,
 	}
 
-	resp, err := client.SendKeyPiece(context.Background(), &pb.KeyPieceSend{
+	resp, err := client.SendKeyPiece(context.Background(), &pb.SendKeyPieceRequest{
 		Key:        keyProto,
 		AddElement: addElement,
 	})

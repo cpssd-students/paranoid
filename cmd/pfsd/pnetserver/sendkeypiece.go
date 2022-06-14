@@ -17,7 +17,7 @@ import (
 
 // SendKeyPiece implements the SendKeyPiece RPC
 func (s *ParanoidServer) SendKeyPiece(
-	ctx context.Context, req *pb.KeyPieceSend,
+	ctx context.Context, req *pb.SendKeyPieceRequest,
 ) (*pb.SendKeyPieceResponse, error) {
 	var prime big.Int
 	prime.SetBytes(req.Key.Prime)

@@ -22,7 +22,7 @@ func JoinCluster(password string) error {
 		}
 		defer conn.Close()
 
-		client := pb.NewParanoidNetworkClient(conn)
+		client := pb.NewParanoidNetworkServiceClient(conn)
 
 		_, err = client.JoinCluster(context.Background(), &pb.JoinClusterRequest{
 			Ip:           globals.ThisNode.IP,

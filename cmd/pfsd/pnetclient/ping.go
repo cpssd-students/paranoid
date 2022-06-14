@@ -24,15 +24,16 @@ func Ping() {
 		}
 		defer conn.Close()
 
-		client := pb.NewParanoidNetworkClient(conn)
+		client := pb.NewParanoidNetworkServiceClient(conn)
 
-		_, err = client.Ping(context.Background(), &pb.Node{
-			Ip:         ip,
-			Port:       globals.ThisNode.Port,
-			CommonName: globals.ThisNode.CommonName,
-			Uuid:       globals.ThisNode.UUID,
-		})
-		if err != nil {
+		if _, err := client.Ping(context.Background(), &pb.PingRequest{
+			Node: &pb.Node{
+				Ip:         ip,
+				Port:       globals.ThisNode.Port,
+				CommonName: globals.ThisNode.CommonName,
+				Uuid:       globals.ThisNode.UUID,
+			},
+		}); err != nil {
 			log.Printf("Can't ping %s: %v", node, err)
 		}
 	}

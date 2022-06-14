@@ -18,240 +18,241 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// ParanoidNetworkClient is the client API for ParanoidNetwork service.
+// ParanoidNetworkServiceClient is the client API for ParanoidNetworkService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type ParanoidNetworkClient interface {
+type ParanoidNetworkServiceClient interface {
 	// Used for health checking and discovery. Sends the IP and port of the
 	// PFSD instance running on the client.
-	Ping(ctx context.Context, in *Node, opts ...grpc.CallOption) (*EmptyMessage, error)
+	Ping(ctx context.Context, in *PingRequest, opts ...grpc.CallOption) (*PingResponse, error)
 	// Used by a new node to let other nodes it is available to join the cluster.
-	JoinCluster(ctx context.Context, in *JoinClusterRequest, opts ...grpc.CallOption) (*EmptyMessage, error)
+	JoinCluster(ctx context.Context, in *JoinClusterRequest, opts ...grpc.CallOption) (*JoinClusterResponse, error)
 	// Used by a new node to create a new key generation before joining the cluster.
 	NewGeneration(ctx context.Context, in *NewGenerationRequest, opts ...grpc.CallOption) (*NewGenerationResponse, error)
 	// Cryptography calls
-	SendKeyPiece(ctx context.Context, in *KeyPieceSend, opts ...grpc.CallOption) (*SendKeyPieceResponse, error)
-	RequestKeyPiece(ctx context.Context, in *KeyPieceRequest, opts ...grpc.CallOption) (*KeyPiece, error)
+	SendKeyPiece(ctx context.Context, in *SendKeyPieceRequest, opts ...grpc.CallOption) (*SendKeyPieceResponse, error)
+	RequestKeyPiece(ctx context.Context, in *RequestKeyPieceRequest, opts ...grpc.CallOption) (*RequestKeyPieceResponse, error)
 }
 
-type paranoidNetworkClient struct {
+type paranoidNetworkServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewParanoidNetworkClient(cc grpc.ClientConnInterface) ParanoidNetworkClient {
-	return &paranoidNetworkClient{cc}
+func NewParanoidNetworkServiceClient(cc grpc.ClientConnInterface) ParanoidNetworkServiceClient {
+	return &paranoidNetworkServiceClient{cc}
 }
 
-func (c *paranoidNetworkClient) Ping(ctx context.Context, in *Node, opts ...grpc.CallOption) (*EmptyMessage, error) {
-	out := new(EmptyMessage)
-	err := c.cc.Invoke(ctx, "/paranoid.paranoidnetwork.v1.ParanoidNetwork/Ping", in, out, opts...)
+func (c *paranoidNetworkServiceClient) Ping(ctx context.Context, in *PingRequest, opts ...grpc.CallOption) (*PingResponse, error) {
+	out := new(PingResponse)
+	err := c.cc.Invoke(ctx, "/paranoid.paranoidnetwork.v1.ParanoidNetworkService/Ping", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *paranoidNetworkClient) JoinCluster(ctx context.Context, in *JoinClusterRequest, opts ...grpc.CallOption) (*EmptyMessage, error) {
-	out := new(EmptyMessage)
-	err := c.cc.Invoke(ctx, "/paranoid.paranoidnetwork.v1.ParanoidNetwork/JoinCluster", in, out, opts...)
+func (c *paranoidNetworkServiceClient) JoinCluster(ctx context.Context, in *JoinClusterRequest, opts ...grpc.CallOption) (*JoinClusterResponse, error) {
+	out := new(JoinClusterResponse)
+	err := c.cc.Invoke(ctx, "/paranoid.paranoidnetwork.v1.ParanoidNetworkService/JoinCluster", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *paranoidNetworkClient) NewGeneration(ctx context.Context, in *NewGenerationRequest, opts ...grpc.CallOption) (*NewGenerationResponse, error) {
+func (c *paranoidNetworkServiceClient) NewGeneration(ctx context.Context, in *NewGenerationRequest, opts ...grpc.CallOption) (*NewGenerationResponse, error) {
 	out := new(NewGenerationResponse)
-	err := c.cc.Invoke(ctx, "/paranoid.paranoidnetwork.v1.ParanoidNetwork/NewGeneration", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/paranoid.paranoidnetwork.v1.ParanoidNetworkService/NewGeneration", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *paranoidNetworkClient) SendKeyPiece(ctx context.Context, in *KeyPieceSend, opts ...grpc.CallOption) (*SendKeyPieceResponse, error) {
+func (c *paranoidNetworkServiceClient) SendKeyPiece(ctx context.Context, in *SendKeyPieceRequest, opts ...grpc.CallOption) (*SendKeyPieceResponse, error) {
 	out := new(SendKeyPieceResponse)
-	err := c.cc.Invoke(ctx, "/paranoid.paranoidnetwork.v1.ParanoidNetwork/SendKeyPiece", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/paranoid.paranoidnetwork.v1.ParanoidNetworkService/SendKeyPiece", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *paranoidNetworkClient) RequestKeyPiece(ctx context.Context, in *KeyPieceRequest, opts ...grpc.CallOption) (*KeyPiece, error) {
-	out := new(KeyPiece)
-	err := c.cc.Invoke(ctx, "/paranoid.paranoidnetwork.v1.ParanoidNetwork/RequestKeyPiece", in, out, opts...)
+func (c *paranoidNetworkServiceClient) RequestKeyPiece(ctx context.Context, in *RequestKeyPieceRequest, opts ...grpc.CallOption) (*RequestKeyPieceResponse, error) {
+	out := new(RequestKeyPieceResponse)
+	err := c.cc.Invoke(ctx, "/paranoid.paranoidnetwork.v1.ParanoidNetworkService/RequestKeyPiece", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// ParanoidNetworkServer is the server API for ParanoidNetwork service.
-// All implementations must embed UnimplementedParanoidNetworkServer
+// ParanoidNetworkServiceServer is the server API for ParanoidNetworkService service.
+// All implementations must embed UnimplementedParanoidNetworkServiceServer
 // for forward compatibility
-type ParanoidNetworkServer interface {
+type ParanoidNetworkServiceServer interface {
 	// Used for health checking and discovery. Sends the IP and port of the
 	// PFSD instance running on the client.
-	Ping(context.Context, *Node) (*EmptyMessage, error)
+	Ping(context.Context, *PingRequest) (*PingResponse, error)
 	// Used by a new node to let other nodes it is available to join the cluster.
-	JoinCluster(context.Context, *JoinClusterRequest) (*EmptyMessage, error)
+	JoinCluster(context.Context, *JoinClusterRequest) (*JoinClusterResponse, error)
 	// Used by a new node to create a new key generation before joining the cluster.
 	NewGeneration(context.Context, *NewGenerationRequest) (*NewGenerationResponse, error)
 	// Cryptography calls
-	SendKeyPiece(context.Context, *KeyPieceSend) (*SendKeyPieceResponse, error)
-	RequestKeyPiece(context.Context, *KeyPieceRequest) (*KeyPiece, error)
-	mustEmbedUnimplementedParanoidNetworkServer()
+	SendKeyPiece(context.Context, *SendKeyPieceRequest) (*SendKeyPieceResponse, error)
+	RequestKeyPiece(context.Context, *RequestKeyPieceRequest) (*RequestKeyPieceResponse, error)
+	mustEmbedUnimplementedParanoidNetworkServiceServer()
 }
 
-// UnimplementedParanoidNetworkServer must be embedded to have forward compatible implementations.
-type UnimplementedParanoidNetworkServer struct {
+// UnimplementedParanoidNetworkServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedParanoidNetworkServiceServer struct {
 }
 
-func (UnimplementedParanoidNetworkServer) Ping(context.Context, *Node) (*EmptyMessage, error) {
+func (UnimplementedParanoidNetworkServiceServer) Ping(context.Context, *PingRequest) (*PingResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Ping not implemented")
 }
-func (UnimplementedParanoidNetworkServer) JoinCluster(context.Context, *JoinClusterRequest) (*EmptyMessage, error) {
+func (UnimplementedParanoidNetworkServiceServer) JoinCluster(context.Context, *JoinClusterRequest) (*JoinClusterResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method JoinCluster not implemented")
 }
-func (UnimplementedParanoidNetworkServer) NewGeneration(context.Context, *NewGenerationRequest) (*NewGenerationResponse, error) {
+func (UnimplementedParanoidNetworkServiceServer) NewGeneration(context.Context, *NewGenerationRequest) (*NewGenerationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method NewGeneration not implemented")
 }
-func (UnimplementedParanoidNetworkServer) SendKeyPiece(context.Context, *KeyPieceSend) (*SendKeyPieceResponse, error) {
+func (UnimplementedParanoidNetworkServiceServer) SendKeyPiece(context.Context, *SendKeyPieceRequest) (*SendKeyPieceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendKeyPiece not implemented")
 }
-func (UnimplementedParanoidNetworkServer) RequestKeyPiece(context.Context, *KeyPieceRequest) (*KeyPiece, error) {
+func (UnimplementedParanoidNetworkServiceServer) RequestKeyPiece(context.Context, *RequestKeyPieceRequest) (*RequestKeyPieceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RequestKeyPiece not implemented")
 }
-func (UnimplementedParanoidNetworkServer) mustEmbedUnimplementedParanoidNetworkServer() {}
+func (UnimplementedParanoidNetworkServiceServer) mustEmbedUnimplementedParanoidNetworkServiceServer() {
+}
 
-// UnsafeParanoidNetworkServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to ParanoidNetworkServer will
+// UnsafeParanoidNetworkServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to ParanoidNetworkServiceServer will
 // result in compilation errors.
-type UnsafeParanoidNetworkServer interface {
-	mustEmbedUnimplementedParanoidNetworkServer()
+type UnsafeParanoidNetworkServiceServer interface {
+	mustEmbedUnimplementedParanoidNetworkServiceServer()
 }
 
-func RegisterParanoidNetworkServer(s grpc.ServiceRegistrar, srv ParanoidNetworkServer) {
-	s.RegisterService(&ParanoidNetwork_ServiceDesc, srv)
+func RegisterParanoidNetworkServiceServer(s grpc.ServiceRegistrar, srv ParanoidNetworkServiceServer) {
+	s.RegisterService(&ParanoidNetworkService_ServiceDesc, srv)
 }
 
-func _ParanoidNetwork_Ping_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Node)
+func _ParanoidNetworkService_Ping_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PingRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ParanoidNetworkServer).Ping(ctx, in)
+		return srv.(ParanoidNetworkServiceServer).Ping(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/paranoid.paranoidnetwork.v1.ParanoidNetwork/Ping",
+		FullMethod: "/paranoid.paranoidnetwork.v1.ParanoidNetworkService/Ping",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ParanoidNetworkServer).Ping(ctx, req.(*Node))
+		return srv.(ParanoidNetworkServiceServer).Ping(ctx, req.(*PingRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ParanoidNetwork_JoinCluster_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ParanoidNetworkService_JoinCluster_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(JoinClusterRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ParanoidNetworkServer).JoinCluster(ctx, in)
+		return srv.(ParanoidNetworkServiceServer).JoinCluster(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/paranoid.paranoidnetwork.v1.ParanoidNetwork/JoinCluster",
+		FullMethod: "/paranoid.paranoidnetwork.v1.ParanoidNetworkService/JoinCluster",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ParanoidNetworkServer).JoinCluster(ctx, req.(*JoinClusterRequest))
+		return srv.(ParanoidNetworkServiceServer).JoinCluster(ctx, req.(*JoinClusterRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ParanoidNetwork_NewGeneration_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ParanoidNetworkService_NewGeneration_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(NewGenerationRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ParanoidNetworkServer).NewGeneration(ctx, in)
+		return srv.(ParanoidNetworkServiceServer).NewGeneration(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/paranoid.paranoidnetwork.v1.ParanoidNetwork/NewGeneration",
+		FullMethod: "/paranoid.paranoidnetwork.v1.ParanoidNetworkService/NewGeneration",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ParanoidNetworkServer).NewGeneration(ctx, req.(*NewGenerationRequest))
+		return srv.(ParanoidNetworkServiceServer).NewGeneration(ctx, req.(*NewGenerationRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ParanoidNetwork_SendKeyPiece_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(KeyPieceSend)
+func _ParanoidNetworkService_SendKeyPiece_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendKeyPieceRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ParanoidNetworkServer).SendKeyPiece(ctx, in)
+		return srv.(ParanoidNetworkServiceServer).SendKeyPiece(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/paranoid.paranoidnetwork.v1.ParanoidNetwork/SendKeyPiece",
+		FullMethod: "/paranoid.paranoidnetwork.v1.ParanoidNetworkService/SendKeyPiece",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ParanoidNetworkServer).SendKeyPiece(ctx, req.(*KeyPieceSend))
+		return srv.(ParanoidNetworkServiceServer).SendKeyPiece(ctx, req.(*SendKeyPieceRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ParanoidNetwork_RequestKeyPiece_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(KeyPieceRequest)
+func _ParanoidNetworkService_RequestKeyPiece_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RequestKeyPieceRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ParanoidNetworkServer).RequestKeyPiece(ctx, in)
+		return srv.(ParanoidNetworkServiceServer).RequestKeyPiece(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/paranoid.paranoidnetwork.v1.ParanoidNetwork/RequestKeyPiece",
+		FullMethod: "/paranoid.paranoidnetwork.v1.ParanoidNetworkService/RequestKeyPiece",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ParanoidNetworkServer).RequestKeyPiece(ctx, req.(*KeyPieceRequest))
+		return srv.(ParanoidNetworkServiceServer).RequestKeyPiece(ctx, req.(*RequestKeyPieceRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// ParanoidNetwork_ServiceDesc is the grpc.ServiceDesc for ParanoidNetwork service.
+// ParanoidNetworkService_ServiceDesc is the grpc.ServiceDesc for ParanoidNetworkService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var ParanoidNetwork_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "paranoid.paranoidnetwork.v1.ParanoidNetwork",
-	HandlerType: (*ParanoidNetworkServer)(nil),
+var ParanoidNetworkService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "paranoid.paranoidnetwork.v1.ParanoidNetworkService",
+	HandlerType: (*ParanoidNetworkServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "Ping",
-			Handler:    _ParanoidNetwork_Ping_Handler,
+			Handler:    _ParanoidNetworkService_Ping_Handler,
 		},
 		{
 			MethodName: "JoinCluster",
-			Handler:    _ParanoidNetwork_JoinCluster_Handler,
+			Handler:    _ParanoidNetworkService_JoinCluster_Handler,
 		},
 		{
 			MethodName: "NewGeneration",
-			Handler:    _ParanoidNetwork_NewGeneration_Handler,
+			Handler:    _ParanoidNetworkService_NewGeneration_Handler,
 		},
 		{
 			MethodName: "SendKeyPiece",
-			Handler:    _ParanoidNetwork_SendKeyPiece_Handler,
+			Handler:    _ParanoidNetworkService_SendKeyPiece_Handler,
 		},
 		{
 			MethodName: "RequestKeyPiece",
-			Handler:    _ParanoidNetwork_RequestKeyPiece_Handler,
+			Handler:    _ParanoidNetworkService_RequestKeyPiece_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
